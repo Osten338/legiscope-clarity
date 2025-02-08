@@ -8,7 +8,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -16,15 +15,13 @@ serve(async (req) => {
   try {
     const { description } = await req.json()
 
-    // Get secrets
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
     if (!OPENAI_API_KEY) {
       throw new Error('Missing OpenAI API Key')
     }
 
-    console.log('Making OpenAI API request...');
+    console.log('Making OpenAI API request...')
 
-    // Make the OpenAI API call directly
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -32,11 +29,29 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4",
         messages: [
           {
             role: "system",
-            content: "You are a business analyst specialized in compliance and risk assessment. Analyze the business description and provide insights about potential compliance requirements and risks."
+            content: `You are a business compliance analyst. Analyze the business description and identify applicable regulations. For each regulation, provide:
+            1. The name and brief description of the regulation
+            2. Why it applies to this business (motivation)
+            3. Key requirements
+            4. A checklist of specific compliance measures
+
+            Format the response as a JSON object with this structure:
+            {
+              "analysis": "Brief overall analysis",
+              "regulations": [
+                {
+                  "name": "Regulation name",
+                  "description": "Brief description",
+                  "motivation": "Why it applies",
+                  "requirements": "Key requirements",
+                  "checklist_items": ["measure 1", "measure 2", ...]
+                }
+              ]
+            }`
           },
           {
             role: "user",
@@ -53,7 +68,7 @@ serve(async (req) => {
     }
 
     const openAIData = await openAIResponse.json();
-    const analysis = openAIData.choices[0]?.message?.content || "Unable to generate analysis";
+    const analysisResult = JSON.parse(openAIData.choices[0]?.message?.content || "{}");
 
     // Store the analysis in the database
     const supabaseClient = createClient(
@@ -61,18 +76,57 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { data, error } = await supabaseClient
+    // Start a transaction
+    const { data: analysis, error: analysisError } = await supabaseClient
       .from('business_analyses')
       .insert([
-        { description, analysis }
+        { description, analysis: analysisResult.analysis }
       ])
       .select()
-      .single()
+      .single();
 
-    if (error) throw error
+    if (analysisError) throw analysisError;
+
+    // Store regulations and their checklist items
+    for (const reg of analysisResult.regulations) {
+      const { data: regulation, error: regError } = await supabaseClient
+        .from('regulations')
+        .insert([
+          {
+            name: reg.name,
+            description: reg.description,
+            motivation: reg.motivation,
+            requirements: reg.requirements
+          }
+        ])
+        .select()
+        .single();
+
+      if (regError) throw regError;
+
+      // Link regulation to business analysis
+      await supabaseClient
+        .from('business_regulations')
+        .insert([
+          {
+            business_analysis_id: analysis.id,
+            regulation_id: regulation.id
+          }
+        ]);
+
+      // Store checklist items
+      const checklistItems = reg.checklist_items.map((item: string) => ({
+        regulation_id: regulation.id,
+        description: item
+      }));
+
+      await supabaseClient
+        .from('checklist_items')
+        .insert(checklistItems);
+    }
 
     return new Response(
-      JSON.stringify({ analysis: data.analysis }),
+      JSON.stringify({ analysis: analysis.id }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

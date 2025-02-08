@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Assessment from "./pages/Assessment";
+import Analysis from "./pages/Analysis";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -18,13 +19,11 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -35,7 +34,7 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return null; // Or a loading spinner
+    return null;
   }
 
   return (
@@ -51,6 +50,16 @@ const App = () => {
               element={
                 session ? (
                   <Assessment />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
+              path="/analysis/:id"
+              element={
+                session ? (
+                  <Analysis />
                 ) : (
                   <Navigate to="/auth" replace={true} />
                 )

@@ -33,6 +33,74 @@ export type Database = {
         }
         Relationships: []
       }
+      business_regulations: {
+        Row: {
+          business_analysis_id: string | null
+          created_at: string
+          id: string
+          regulation_id: string | null
+        }
+        Insert: {
+          business_analysis_id?: string | null
+          created_at?: string
+          id?: string
+          regulation_id?: string | null
+        }
+        Update: {
+          business_analysis_id?: string | null
+          created_at?: string
+          id?: string
+          regulation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_regulations_business_analysis_id_fkey"
+            columns: ["business_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "business_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_regulations_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          regulation_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          regulation_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          regulation_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -50,6 +118,36 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      regulations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          motivation: string
+          name: string
+          requirements: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          motivation: string
+          name: string
+          requirements: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          motivation?: string
+          name?: string
+          requirements?: string
           updated_at?: string
         }
         Relationships: []

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { Textarea } from "./ui/textarea";
@@ -60,11 +59,11 @@ export const BusinessDescription = () => {
       }
 
       const data = await response.json();
-      setAnalysis(data.analysis);
       toast({
         title: "Analysis Complete",
         description: "Your business description has been analyzed successfully.",
       });
+      navigate(`/analysis/${data.analysis}`);
     } catch (error: any) {
       console.error('Error:', error);
       toast({
