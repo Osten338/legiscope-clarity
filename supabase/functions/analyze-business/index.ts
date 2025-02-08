@@ -22,6 +22,8 @@ serve(async (req) => {
       throw new Error('Missing OpenAI API Key')
     }
 
+    console.log('Making OpenAI API request...');
+
     // Make the OpenAI API call directly
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -30,7 +32,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4-mini",
         messages: [
           {
             role: "system",
@@ -46,6 +48,7 @@ serve(async (req) => {
 
     if (!openAIResponse.ok) {
       const error = await openAIResponse.json();
+      console.error('OpenAI API error:', error);
       throw new Error(`OpenAI API error: ${JSON.stringify(error)}`);
     }
 
