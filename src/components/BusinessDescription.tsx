@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { Textarea } from "./ui/textarea";
@@ -9,6 +10,7 @@ import { motion } from "framer-motion";
 import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Progress } from "./ui/progress";
 
 export const BusinessDescription = () => {
   const [description, setDescription] = useState("");
@@ -141,12 +143,22 @@ export const BusinessDescription = () => {
               </div>
             </div>
 
+            {isAnalyzing && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Analyzing your business...</span>
+                  <span className="text-sm text-slate-600">Please wait</span>
+                </div>
+                <Progress value={100} className="w-full" />
+              </div>
+            )}
+
             <Button 
               className="w-full bg-sage-600 hover:bg-sage-700 text-white"
               onClick={handleSubmit}
               disabled={isAnalyzing}
             >
-              {isAnalyzing ? "Analyzing..." : "Analyze Business Information"}
+              {isAnalyzing ? "Analyzing..." : "Compliance Check"}
             </Button>
 
             {analysis && (
