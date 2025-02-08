@@ -1,9 +1,8 @@
 
-import { Hero } from "@/components/Hero";
-import { Features } from "@/components/Features";
 import { motion } from "framer-motion";
+import { BusinessDescription } from "@/components/BusinessDescription";
 
-const Index = () => {
+const Assessment = () => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -11,10 +10,9 @@ const Index = () => {
       transition={{ duration: 0.5 }}
       className="min-h-screen bg-gradient-to-b from-white to-sage-50"
     >
-      <Hero />
-      <Features />
+      <BusinessDescription />
     </motion.div>
   );
 };
 
-export default Index;
+export default Assessment;
