@@ -7,10 +7,61 @@ import { Label } from "./ui/label";
 import { Upload } from "lucide-react";
 import { Input } from "./ui/input";
 import { motion } from "framer-motion";
+import { useToast } from "./ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const BusinessDescription = () => {
   const [description, setDescription] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState("");
+  const { toast } = useToast();
   
+  const handleSubmit = async () => {
+    if (!description.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a business description",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch(
+        'https://vmyzceyvkkcgdbgmbbqf.supabase.co/functions/v1/analyze-business',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabase.auth.getSession()?.access_token}`,
+          },
+          body: JSON.stringify({ description }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze business description');
+      }
+
+      const data = await response.json();
+      setAnalysis(data.analysis);
+      toast({
+        title: "Analysis Complete",
+        description: "Your business description has been analyzed successfully.",
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to analyze business description. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
     <section className="py-16 px-4">
       <motion.div
@@ -78,13 +129,22 @@ export const BusinessDescription = () => {
 
             <Button 
               className="w-full bg-sage-600 hover:bg-sage-700 text-white"
-              onClick={() => {
-                // TODO: Handle submission logic
-                console.log("Business description:", description);
-              }}
+              onClick={handleSubmit}
+              disabled={isAnalyzing}
             >
-              Submit Business Information
+              {isAnalyzing ? "Analyzing..." : "Analyze Business Information"}
             </Button>
+
+            {analysis && (
+              <div className="mt-6">
+                <Label className="text-lg font-semibold text-slate-900">
+                  Analysis Results
+                </Label>
+                <Card className="p-4 mt-2 bg-slate-50">
+                  <p className="text-slate-700 whitespace-pre-wrap">{analysis}</p>
+                </Card>
+              </div>
+            )}
           </div>
         </Card>
       </motion.div>
