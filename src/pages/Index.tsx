@@ -1,6 +1,7 @@
 
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
+import { BusinessDescription } from "@/components/BusinessDescription";
 import { motion } from "framer-motion";
 
 const Index = () => {
@@ -12,6 +13,7 @@ const Index = () => {
       className="min-h-screen bg-gradient-to-b from-white to-sage-50"
     >
       <Hero />
+      <BusinessDescription />
       <Features />
     </motion.div>
   );
