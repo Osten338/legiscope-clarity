@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Configuration, OpenAIApi } from 'https://esm.sh/openai@3.3.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,26 +22,35 @@ serve(async (req) => {
       throw new Error('Missing OpenAI API Key')
     }
 
-    // Initialize OpenAI
-    const configuration = new Configuration({ apiKey: OPENAI_API_KEY })
-    const openai = new OpenAIApi(configuration)
+    // Make the OpenAI API call directly
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a business analyst specialized in compliance and risk assessment. Analyze the business description and provide insights about potential compliance requirements and risks."
+          },
+          {
+            role: "user",
+            content: description
+          }
+        ],
+      })
+    });
 
-    // Analyze the business description
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "You are a business analyst specialized in compliance and risk assessment. Analyze the business description and provide insights about potential compliance requirements and risks."
-        },
-        {
-          role: "user",
-          content: description
-        }
-      ],
-    })
+    if (!openAIResponse.ok) {
+      const error = await openAIResponse.json();
+      throw new Error(`OpenAI API error: ${JSON.stringify(error)}`);
+    }
 
-    const analysis = completion.data.choices[0]?.message?.content || "Unable to generate analysis"
+    const openAIData = await openAIResponse.json();
+    const analysis = openAIData.choices[0]?.message?.content || "Unable to generate analysis";
 
     // Store the analysis in the database
     const supabaseClient = createClient(
