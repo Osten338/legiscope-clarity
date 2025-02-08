@@ -13,6 +13,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Check, Info, Presentation } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const Analysis = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,8 @@ const Analysis = () => {
   const { data: analysisData, isLoading: isLoadingAnalysis } = useQuery({
     queryKey: ["analysis", id],
     queryFn: async () => {
+      console.log("Fetching analysis data for ID:", id);
+      
       // First fetch the business analysis
       const { data: analysis, error: analysisError } = await supabase
         .from("business_analyses")
@@ -30,11 +33,14 @@ const Analysis = () => {
 
       if (analysisError) {
         console.error("Analysis error:", analysisError);
+        toast.error("Failed to load analysis");
         throw analysisError;
       }
 
+      console.log("Analysis data:", analysis);
+
       // Then fetch all related regulations through the junction table
-      const { data: regulations, error: regulationsError } = await supabase
+      const { data: businessRegulations, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
           regulation_id,
@@ -54,20 +60,23 @@ const Analysis = () => {
 
       if (regulationsError) {
         console.error("Regulations error:", regulationsError);
+        toast.error("Failed to load regulations");
         throw regulationsError;
       }
 
-      console.log("Analysis data:", analysis);
-      console.log("Regulations data:", regulations);
+      console.log("Regulations data:", businessRegulations);
+
+      // Extract and clean up the regulations data
+      const regulations = businessRegulations
+        .filter((br) => br.regulations) // Filter out any null regulations
+        .map((br) => ({
+          ...br.regulations,
+          checklist_items: br.regulations?.checklist_items || []
+        }));
 
       return {
         analysis,
-        regulations: regulations
-          .filter(r => r.regulations) // Filter out any null regulations
-          .map(r => ({
-            ...r.regulations,
-            checklist_items: r.regulations?.checklist_items || []
-          }))
+        regulations
       };
     },
   });
@@ -75,6 +84,7 @@ const Analysis = () => {
   const handleDownloadSlides = () => {
     // TODO: Implement slide deck generation and download
     console.log("Downloading slides...");
+    toast.info("Slide download feature coming soon!");
   };
 
   if (isLoadingAnalysis) {
