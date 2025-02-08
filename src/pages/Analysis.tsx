@@ -21,14 +21,19 @@ const Analysis = () => {
   const { data: analysisData, isLoading: isLoadingAnalysis } = useQuery({
     queryKey: ["analysis", id],
     queryFn: async () => {
+      // First fetch the business analysis
       const { data: analysis, error: analysisError } = await supabase
         .from("business_analyses")
         .select("*")
         .eq("id", id)
         .single();
 
-      if (analysisError) throw analysisError;
+      if (analysisError) {
+        console.error("Analysis error:", analysisError);
+        throw analysisError;
+      }
 
+      // Then fetch all related regulations through the junction table
       const { data: regulations, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
@@ -47,14 +52,22 @@ const Analysis = () => {
         `)
         .eq("business_analysis_id", id);
 
-      if (regulationsError) throw regulationsError;
+      if (regulationsError) {
+        console.error("Regulations error:", regulationsError);
+        throw regulationsError;
+      }
+
+      console.log("Analysis data:", analysis);
+      console.log("Regulations data:", regulations);
 
       return {
         analysis,
-        regulations: regulations.map(r => ({
-          ...r.regulations,
-          checklist_items: r.regulations?.checklist_items || []
-        }))
+        regulations: regulations
+          .filter(r => r.regulations) // Filter out any null regulations
+          .map(r => ({
+            ...r.regulations,
+            checklist_items: r.regulations?.checklist_items || []
+          }))
       };
     },
   });
@@ -108,6 +121,17 @@ const Analysis = () => {
             {analysisData.analysis.description}
           </p>
         </Card>
+
+        {analysisData.analysis.analysis && (
+          <Card className="p-6 mb-8">
+            <Label className="text-lg font-semibold text-slate-900 mb-4 block">
+              Overview
+            </Label>
+            <p className="text-slate-600 whitespace-pre-wrap">
+              {analysisData.analysis.analysis}
+            </p>
+          </Card>
+        )}
 
         <div className="space-y-6">
           {analysisData.regulations.map((regulation) => (
