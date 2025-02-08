@@ -29,12 +29,17 @@ const Analysis = () => {
         .from("business_analyses")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (analysisError) {
         console.error("Analysis error:", analysisError);
         toast.error("Failed to load analysis");
         throw analysisError;
+      }
+
+      if (!analysis) {
+        toast.error("Analysis not found");
+        throw new Error("Analysis not found");
       }
 
       console.log("Analysis data:", analysis);
@@ -43,7 +48,6 @@ const Analysis = () => {
       const { data: businessRegulations, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
-          regulation_id,
           regulations (
             id,
             name,
@@ -64,15 +68,12 @@ const Analysis = () => {
         throw regulationsError;
       }
 
-      console.log("Regulations data:", businessRegulations);
+      console.log("Business regulations data:", businessRegulations);
 
       // Extract and clean up the regulations data
       const regulations = businessRegulations
-        .filter((br) => br.regulations) // Filter out any null regulations
-        .map((br) => ({
-          ...br.regulations,
-          checklist_items: br.regulations?.checklist_items || []
-        }));
+        .map(br => br.regulations)
+        .filter((reg): reg is NonNullable<typeof reg> => reg !== null);
 
       return {
         analysis,

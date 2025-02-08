@@ -67,6 +67,20 @@ export type Database = {
             referencedRelation: "regulations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_business_analysis"
+            columns: ["business_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "business_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_regulation"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       checklist_items: {
@@ -94,6 +108,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "checklist_items_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_regulation_checklist"
             columns: ["regulation_id"]
             isOneToOne: false
             referencedRelation: "regulations"
