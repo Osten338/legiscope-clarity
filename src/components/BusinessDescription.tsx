@@ -28,13 +28,15 @@ export const BusinessDescription = () => {
 
     setIsAnalyzing(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const response = await fetch(
         'https://vmyzceyvkkcgdbgmbbqf.supabase.co/functions/v1/analyze-business',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabase.auth.getSession()?.access_token}`,
+            'Authorization': `Bearer ${session?.access_token}`,
           },
           body: JSON.stringify({ description }),
         }
