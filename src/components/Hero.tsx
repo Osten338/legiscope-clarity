@@ -2,8 +2,11 @@
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
       <motion.div
@@ -22,6 +25,7 @@ export const Hero = () => {
           Discover which laws and regulations apply to your business and get clear, actionable compliance requirements.
         </p>
         <Button
+          onClick={() => navigate("/assessment")}
           className="group bg-sage-600 hover:bg-sage-700 text-white px-6 py-3 rounded-lg text-lg transition-all duration-200"
         >
           Start Assessment
