@@ -69,6 +69,8 @@ serve(async (req) => {
 
     const openAIData = await openAIResponse.json();
     const analysisResult = JSON.parse(openAIData.choices[0]?.message?.content || "{}");
+    
+    console.log('Analysis result:', JSON.stringify(analysisResult, null, 2));
 
     // Store the analysis in the database
     const supabaseClient = createClient(
@@ -76,19 +78,26 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Start a transaction
+    // Create the business analysis record
     const { data: analysis, error: analysisError } = await supabaseClient
       .from('business_analyses')
       .insert([
-        { description, analysis: analysisResult.analysis }
+        { 
+          description, 
+          analysis: analysisResult.analysis 
+        }
       ])
       .select()
       .single();
 
-    if (analysisError) throw analysisError;
+    if (analysisError) {
+      console.error('Error inserting business analysis:', analysisError);
+      throw analysisError;
+    }
 
     // Store regulations and their checklist items
     for (const reg of analysisResult.regulations) {
+      // Insert regulation
       const { data: regulation, error: regError } = await supabaseClient
         .from('regulations')
         .insert([
@@ -102,10 +111,13 @@ serve(async (req) => {
         .select()
         .single();
 
-      if (regError) throw regError;
+      if (regError) {
+        console.error('Error inserting regulation:', regError);
+        throw regError;
+      }
 
       // Link regulation to business analysis
-      await supabaseClient
+      const { error: linkError } = await supabaseClient
         .from('business_regulations')
         .insert([
           {
@@ -114,15 +126,25 @@ serve(async (req) => {
           }
         ]);
 
+      if (linkError) {
+        console.error('Error linking regulation to analysis:', linkError);
+        throw linkError;
+      }
+
       // Store checklist items
       const checklistItems = reg.checklist_items.map((item: string) => ({
         regulation_id: regulation.id,
         description: item
       }));
 
-      await supabaseClient
+      const { error: checklistError } = await supabaseClient
         .from('checklist_items')
         .insert(checklistItems);
+
+      if (checklistError) {
+        console.error('Error inserting checklist items:', checklistError);
+        throw checklistError;
+      }
     }
 
     return new Response(

@@ -11,7 +11,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
-import { Check, Download, Info, Presentation } from "lucide-react";
+import { Check, Info, Presentation } from "lucide-react";
 import { useState } from "react";
 
 const Analysis = () => {
