@@ -20,7 +20,7 @@ serve(async (req) => {
       throw new Error('Missing OpenAI API Key')
     }
 
-    console.log('Making OpenAI API request...')
+    console.log('Making OpenAI API request with business description:', description)
 
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -39,9 +39,14 @@ serve(async (req) => {
             3. Key requirements
             4. A checklist of specific compliance measures
 
+            Focus on the most relevant regulations for this business. Order them by importance.
+            Consider GDPR and data protection if personal data is involved.
+            Consider industry-specific regulations based on the business type.
+            Consider local regulations based on the business location.
+
             Format the response as a JSON object with this structure:
             {
-              "analysis": "Brief overall analysis",
+              "analysis": "Brief high-level analysis of key compliance needs",
               "regulations": [
                 {
                   "name": "Regulation name",
@@ -58,6 +63,8 @@ serve(async (req) => {
             content: description
           }
         ],
+        temperature: 0.7,
+        max_tokens: 2000,
       })
     });
 
@@ -68,9 +75,10 @@ serve(async (req) => {
     }
 
     const openAIData = await openAIResponse.json();
+    console.log('OpenAI response:', openAIData);
+
     const analysisResult = JSON.parse(openAIData.choices[0]?.message?.content || "{}");
-    
-    console.log('Analysis result:', JSON.stringify(analysisResult, null, 2));
+    console.log('Parsed analysis result:', analysisResult);
 
     // Store the analysis in the database
     const supabaseClient = createClient(
@@ -95,8 +103,12 @@ serve(async (req) => {
       throw analysisError;
     }
 
+    console.log('Inserted business analysis:', analysis);
+
     // Store regulations and their checklist items
     for (const reg of analysisResult.regulations) {
+      console.log('Processing regulation:', reg.name);
+
       // Insert regulation
       const { data: regulation, error: regError } = await supabaseClient
         .from('regulations')
@@ -115,6 +127,8 @@ serve(async (req) => {
         console.error('Error inserting regulation:', regError);
         throw regError;
       }
+
+      console.log('Inserted regulation:', regulation);
 
       // Link regulation to business analysis
       const { error: linkError } = await supabaseClient
@@ -145,6 +159,8 @@ serve(async (req) => {
         console.error('Error inserting checklist items:', checklistError);
         throw checklistError;
       }
+
+      console.log('Inserted checklist items for regulation:', reg.name);
     }
 
     return new Response(
