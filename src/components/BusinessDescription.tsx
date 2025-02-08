@@ -30,15 +30,15 @@ export const BusinessDescription = () => {
 
     setIsAnalyzing(true);
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (sessionError || !session) {
+      if (!session) {
         toast({
           title: "Authentication Required",
           description: "Please log in to analyze business descriptions",
           variant: "destructive",
         });
-        navigate("/auth"); // Redirect to auth page
+        navigate("/auth");
         return;
       }
 
@@ -65,7 +65,7 @@ export const BusinessDescription = () => {
         title: "Analysis Complete",
         description: "Your business description has been analyzed successfully.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
       toast({
         title: "Error",
