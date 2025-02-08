@@ -9,12 +9,14 @@ import { Input } from "./ui/input";
 import { motion } from "framer-motion";
 import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export const BusinessDescription = () => {
   const [description, setDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const handleSubmit = async () => {
     if (!description.trim()) {
@@ -28,22 +30,33 @@ export const BusinessDescription = () => {
 
     setIsAnalyzing(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
+      if (sessionError || !session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to analyze business descriptions",
+          variant: "destructive",
+        });
+        navigate("/auth"); // Redirect to auth page
+        return;
+      }
+
       const response = await fetch(
         'https://vmyzceyvkkcgdbgmbbqf.supabase.co/functions/v1/analyze-business',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
+            'Authorization': `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ description }),
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to analyze business description');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to analyze business description');
       }
 
       const data = await response.json();
@@ -56,7 +69,7 @@ export const BusinessDescription = () => {
       console.error('Error:', error);
       toast({
         title: "Error",
-        description: "Failed to analyze business description. Please try again.",
+        description: error.message || "Failed to analyze business description. Please try again.",
         variant: "destructive",
       });
     } finally {
