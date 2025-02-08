@@ -48,7 +48,7 @@ const Analysis = () => {
       const { data: businessRegulations, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
-          regulations (
+          regulations!business_regulations_regulation_id_fkey (
             id,
             name,
             description,
