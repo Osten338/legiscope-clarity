@@ -122,6 +122,39 @@ export type Database = {
           },
         ]
       }
+      custom_regulations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          motivation: string
+          name: string
+          requirements: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          motivation: string
+          name: string
+          requirements: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          motivation?: string
+          name?: string
+          requirements?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -172,6 +205,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      saved_regulations: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          regulation_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          regulation_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          regulation_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_regulations_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
