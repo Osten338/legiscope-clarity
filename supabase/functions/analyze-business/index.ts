@@ -123,7 +123,7 @@ serve(async (req) => {
           analysis: analysisResult.analysis 
         }
       ])
-      .select('*')
+      .select()
       .single();
 
     if (analysisError) {
@@ -133,66 +133,21 @@ serve(async (req) => {
 
     console.log('Successfully inserted business analysis:', analysis);
 
-    // Create an array to store all the regulation inserts
-    const regulationInserts = analysisResult.regulations.map(reg => ({
-      name: reg.name,
-      description: reg.description,
-      motivation: reg.motivation,
-      requirements: reg.requirements
-    }));
-
-    // Insert all regulations at once
-    console.log('Inserting regulations...');
-    const { data: insertedRegulations, error: regError } = await supabaseClient
-      .from('regulations')
-      .insert(regulationInserts)
-      .select('*');
-
-    if (regError) {
-      console.error('Error inserting regulations:', regError);
-      throw regError;
-    }
-
-    console.log('Successfully inserted regulations:', insertedRegulations);
-
-    // Create business_regulations links
-    const businessRegulationsLinks = insertedRegulations.map(reg => ({
-      business_analysis_id: analysis.id,
-      regulation_id: reg.id
-    }));
-
-    console.log('Creating business_regulations links...');
-    const { error: linkError } = await supabaseClient
-      .from('business_regulations')
-      .insert(businessRegulationsLinks);
-
-    if (linkError) {
-      console.error('Error creating business_regulations links:', linkError);
-      throw linkError;
-    }
-
-    console.log('Successfully created business_regulations links');
-
-    // Insert checklist items for each regulation
-    for (let i = 0; i < insertedRegulations.length; i++) {
-      const regulation = insertedRegulations[i];
-      const checklistItems = analysisResult.regulations[i].checklist_items.map(item => ({
-        regulation_id: regulation.id,
-        description: item
-      }));
-
-      console.log(`Inserting checklist items for regulation ${regulation.name}...`);
-      const { error: checklistError } = await supabaseClient
-        .from('checklist_items')
-        .insert(checklistItems);
-
-      if (checklistError) {
-        console.error('Error inserting checklist items:', checklistError);
-        throw checklistError;
+    // Insert regulations and create links in a transaction
+    const { data: transaction, error: transactionError } = await supabaseClient.rpc(
+      'process_analysis_regulations',
+      { 
+        p_analysis_id: analysis.id,
+        p_regulations: analysisResult.regulations
       }
+    );
 
-      console.log(`Successfully inserted checklist items for regulation ${regulation.name}`);
+    if (transactionError) {
+      console.error('Transaction error:', transactionError);
+      throw transactionError;
     }
+
+    console.log('Transaction completed successfully:', transaction);
 
     return new Response(
       JSON.stringify({ analysis: analysis.id }),
