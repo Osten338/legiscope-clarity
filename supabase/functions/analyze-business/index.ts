@@ -33,18 +33,8 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a business compliance analyst. Analyze the business description and identify applicable regulations. For each regulation, provide:
-            1. The name and brief description of the regulation
-            2. Why it applies to this business (motivation)
-            3. Key requirements
-            4. A checklist of specific compliance measures
-
-            Focus on the most relevant regulations for this business. Order them by importance.
-            Consider GDPR and data protection if personal data is involved.
-            Consider industry-specific regulations based on the business type.
-            Consider local regulations based on the business location.
-
-            Format the response as a JSON object with this structure:
+            content: `You are a business compliance analyst. Analyze the business description and identify applicable regulations. 
+            Respond with a JSON object with this structure, and ONLY this structure (no markdown, no explanation):
             {
               "analysis": "Brief high-level analysis of key compliance needs",
               "regulations": [
@@ -53,7 +43,7 @@ serve(async (req) => {
                   "description": "Brief description",
                   "motivation": "Why it applies",
                   "requirements": "Key requirements",
-                  "checklist_items": ["measure 1", "measure 2", ...]
+                  "checklist_items": ["measure 1", "measure 2"]
                 }
               ]
             }`
@@ -75,10 +65,23 @@ serve(async (req) => {
     }
 
     const openAIData = await openAIResponse.json();
-    console.log('OpenAI response:', openAIData);
+    console.log('OpenAI raw response:', openAIData);
 
-    const analysisResult = JSON.parse(openAIData.choices[0]?.message?.content || "{}");
-    console.log('Parsed analysis result:', analysisResult);
+    let analysisResult;
+    try {
+      const content = openAIData.choices[0]?.message?.content;
+      console.log('Raw content from OpenAI:', content);
+      
+      // Try to clean the content if it contains markdown
+      const cleanedContent = content.replace(/```json\n|\n```/g, '');
+      console.log('Cleaned content:', cleanedContent);
+      
+      analysisResult = JSON.parse(cleanedContent);
+      console.log('Parsed analysis result:', analysisResult);
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      throw new Error('Failed to parse OpenAI response: ' + parseError.message);
+    }
 
     if (!analysisResult.regulations || !Array.isArray(analysisResult.regulations) || analysisResult.regulations.length === 0) {
       console.error('No regulations found in analysis result');
