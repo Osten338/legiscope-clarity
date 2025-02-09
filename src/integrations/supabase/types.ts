@@ -113,6 +113,13 @@ export type Database = {
             referencedRelation: "regulations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_regulation_checklist"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       custom_regulations: {
