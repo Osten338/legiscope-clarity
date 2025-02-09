@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Presentation, Save } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Presentation } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAnalysis } from "@/hooks/useAnalysis";
@@ -15,43 +15,50 @@ const Analysis = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [openRegulation, setOpenRegulation] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [savingRegulations, setSavingRegulations] = useState<Set<string>>(new Set());
+  const [rejectedRegulations, setRejectedRegulations] = useState<Set<string>>(new Set());
   
   const { data: analysisData, isLoading: isLoadingAnalysis } = useAnalysis(id!);
 
-  const handleSaveToDashboard = async () => {
-    if (!analysisData) return;
-    
-    setIsSaving(true);
+  const handleAddRegulation = async (regulationId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
-
-      // Save each regulation to saved_regulations
-      for (const regulation of analysisData.regulations) {
-        const { error } = await supabase
-          .from('saved_regulations')
-          .insert({
-            regulation_id: regulation.id,
-            user_id: user.id
-          });
-          
-        if (error) throw error;
+      if (!user) {
+        toast.error("Please sign in to save regulations");
+        return;
       }
+
+      setSavingRegulations(prev => new Set([...prev, regulationId]));
       
-      toast.success("Regulations saved to dashboard!");
-      navigate('/dashboard');
+      const { error } = await supabase
+        .from('saved_regulations')
+        .insert({
+          regulation_id: regulationId,
+          user_id: user.id
+        });
+        
+      if (error) throw error;
+      
+      toast.success("Regulation added to dashboard!");
     } catch (error) {
-      console.error('Error saving regulations:', error);
-      toast.error("Failed to save regulations");
+      console.error('Error saving regulation:', error);
+      toast.error("Failed to save regulation");
     } finally {
-      setIsSaving(false);
+      setSavingRegulations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(regulationId);
+        return newSet;
+      });
     }
   };
 
-  const handleDownloadSlides = () => {
-    console.log("Downloading slides...");
-    toast.info("Slide download feature coming soon!");
+  const handleRejectRegulation = (regulationId: string) => {
+    setRejectedRegulations(prev => new Set([...prev, regulationId]));
+    toast.success("Regulation removed from list");
+  };
+
+  const handleViewDashboard = () => {
+    navigate('/dashboard');
   };
 
   if (isLoadingAnalysis) {
@@ -70,6 +77,10 @@ const Analysis = () => {
     );
   }
 
+  const activeRegulations = analysisData.regulations.filter(
+    reg => !rejectedRegulations.has(reg.id)
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -84,23 +95,15 @@ const Analysis = () => {
             <Button
               variant="outline"
               className="flex items-center gap-2"
-              onClick={handleDownloadSlides}
+              onClick={handleViewDashboard}
             >
               <Presentation className="h-4 w-4" />
-              Download Slides
-            </Button>
-            <Button
-              onClick={handleSaveToDashboard}
-              disabled={isSaving}
-              className="flex items-center gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? "Saving..." : "Save to Dashboard"}
+              View Dashboard
             </Button>
           </div>
         </div>
 
-        <Card className="p-6 mb-8">
+        <Card className="p-6 mb-8 bg-white/50 backdrop-blur-sm">
           <Label className="text-lg font-semibold text-slate-900 mb-4 block">
             Business Description
           </Label>
@@ -110,7 +113,7 @@ const Analysis = () => {
         </Card>
 
         {analysisData.analysis.analysis && (
-          <Card className="p-6 mb-8">
+          <Card className="p-6 mb-8 bg-white/50 backdrop-blur-sm">
             <Label className="text-lg font-semibold text-slate-900 mb-4 block">
               Overview
             </Label>
@@ -121,17 +124,57 @@ const Analysis = () => {
         )}
 
         <div className="space-y-6">
-          {analysisData.regulations.map((regulation) => (
-            <RegulationCard
+          <h2 className="text-2xl font-semibold text-slate-900 mb-6">
+            Applicable Regulations
+          </h2>
+          {activeRegulations.map((regulation) => (
+            <motion.div
               key={regulation.id}
-              regulation={regulation}
-              isOpen={openRegulation === regulation.id}
-              onOpenChange={() =>
-                setOpenRegulation(
-                  openRegulation === regulation.id ? null : regulation.id
-                )
-              }
-            />
+              initial={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="p-6 bg-white/50 backdrop-blur-sm">
+                <div className="flex items-start gap-4">
+                  <div className="flex-grow">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                      {regulation.name}
+                    </h3>
+                    <p className="text-slate-600 mb-4">{regulation.description}</p>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-slate-900 mb-2">Why This Applies</h4>
+                        <p className="text-slate-600">{regulation.motivation}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 mb-2">Key Requirements</h4>
+                        <p className="text-slate-600">{regulation.requirements}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-green-100 text-green-600"
+                      onClick={() => handleAddRegulation(regulation.id)}
+                      disabled={savingRegulations.has(regulation.id)}
+                    >
+                      <ThumbsUp className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-red-100 text-red-600"
+                      onClick={() => handleRejectRegulation(regulation.id)}
+                    >
+                      <ThumbsDown className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </div>
