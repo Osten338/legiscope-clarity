@@ -29,12 +29,12 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations with the correct foreign key reference
+      // Then fetch the regulations
       const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
           regulation_id,
-          regulations!business_regulations_regulation_id_fkey (
+          regulations:regulation_id (
             id,
             name,
             description,
