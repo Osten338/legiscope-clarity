@@ -33,10 +33,14 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a business compliance analyst. Analyze the business description and identify applicable regulations. 
-            Respond with a JSON object with this structure, and ONLY this structure (no markdown, no explanation):
+            content: `You are a business compliance analyst specializing in identifying regulatory requirements. 
+            Given a business description, you MUST identify at least 2-3 relevant regulations, even for brief descriptions.
+            Always consider basic business regulations that apply broadly (e.g., data protection, business licensing).
+            If the description is vague, make reasonable assumptions and explain them in the analysis.
+
+            Respond with a JSON object with this structure ONLY (no markdown, no explanation):
             {
-              "analysis": "Brief high-level analysis of key compliance needs",
+              "analysis": "Brief high-level analysis of key compliance needs and assumptions made",
               "regulations": [
                 {
                   "name": "Regulation name",
@@ -70,6 +74,9 @@ serve(async (req) => {
     let analysisResult;
     try {
       const content = openAIData.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No content in OpenAI response');
+      }
       console.log('Raw content from OpenAI:', content);
       
       // Try to clean the content if it contains markdown
@@ -83,10 +90,24 @@ serve(async (req) => {
       throw new Error('Failed to parse OpenAI response: ' + parseError.message);
     }
 
-    if (!analysisResult.regulations || !Array.isArray(analysisResult.regulations) || analysisResult.regulations.length === 0) {
-      console.error('No regulations found in analysis result');
+    if (!analysisResult || typeof analysisResult !== 'object') {
+      throw new Error('Invalid analysis result structure');
+    }
+
+    if (!analysisResult.regulations || !Array.isArray(analysisResult.regulations)) {
+      throw new Error('No regulations array in analysis result');
+    }
+
+    if (analysisResult.regulations.length === 0) {
       throw new Error('No regulations found in analysis');
     }
+
+    // Validate each regulation
+    analysisResult.regulations.forEach((reg, index) => {
+      if (!reg.name || !reg.description || !reg.motivation || !reg.requirements || !Array.isArray(reg.checklist_items)) {
+        throw new Error(`Invalid regulation structure at index ${index}`);
+      }
+    });
 
     // Create Supabase client
     const supabaseClient = createClient(
