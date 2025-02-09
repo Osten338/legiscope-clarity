@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ThumbsUp, ThumbsDown, Presentation } from "lucide-react";
+import { PlusCircle, XCircle, Presentation } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAnalysis } from "@/hooks/useAnalysis";
@@ -39,10 +39,10 @@ const Analysis = () => {
         
       if (error) throw error;
       
-      toast.success("Regulation added to dashboard!");
+      toast.success("Added to dashboard!");
     } catch (error) {
       console.error('Error saving regulation:', error);
-      toast.error("Failed to save regulation");
+      toast.error("Failed to add to dashboard");
     } finally {
       setSavingRegulations(prev => {
         const newSet = new Set(prev);
@@ -156,20 +156,22 @@ const Analysis = () => {
                   <div className="flex flex-col gap-2">
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="hover:bg-green-100 text-green-600"
+                      size="sm"
+                      className="hover:bg-green-100 text-green-600 flex items-center gap-2"
                       onClick={() => handleAddRegulation(regulation.id)}
                       disabled={savingRegulations.has(regulation.id)}
                     >
-                      <ThumbsUp className="h-5 w-5" />
+                      <PlusCircle className="h-4 w-4" />
+                      <span className="text-sm">Add to Dashboard</span>
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="hover:bg-red-100 text-red-600"
+                      size="sm"
+                      className="hover:bg-red-100 text-red-600 flex items-center gap-2"
                       onClick={() => handleRejectRegulation(regulation.id)}
                     >
-                      <ThumbsDown className="h-5 w-5" />
+                      <XCircle className="h-4 w-4" />
+                      <span className="text-sm">Remove</span>
                     </Button>
                   </div>
                 </div>
