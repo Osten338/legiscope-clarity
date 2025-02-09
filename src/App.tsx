@@ -11,6 +11,7 @@ import Assessment from "./pages/Assessment";
 import Analysis from "./pages/Analysis";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,16 @@ const App = () => {
               element={
                 session ? (
                   <Analysis />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                session ? (
+                  <Dashboard />
                 ) : (
                   <Navigate to="/auth" replace={true} />
                 )
