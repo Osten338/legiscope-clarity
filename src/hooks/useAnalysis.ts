@@ -36,12 +36,12 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations with their checklist items
+      // Then fetch the regulations with their checklist items using the specific foreign key relationship
       const { data: regulations, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
           regulation_id,
-          regulation:regulations (
+          regulation:regulations!fk_regulation (
             id,
             name,
             description,
