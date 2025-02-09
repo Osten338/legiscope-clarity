@@ -50,7 +50,7 @@ export const useAnalysis = (id: string) => {
         throw businessRegsError;
       }
 
-      // Then fetch the regulations with their details
+      // Then fetch the regulations with their details, specifying the correct relationship
       const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
@@ -61,7 +61,7 @@ export const useAnalysis = (id: string) => {
             description,
             motivation,
             requirements,
-            checklist_items (
+            checklist_items!checklist_items_regulation_id_fkey (
               id,
               description
             )
