@@ -7,6 +7,13 @@ export const useAnalysis = (id: string) => {
   return useQuery({
     queryKey: ["analysis", id],
     queryFn: async () => {
+      // Validate the ID parameter
+      if (!id || id === ':id') {
+        console.error("Invalid ID parameter:", id);
+        toast.error("Invalid analysis ID");
+        throw new Error("Invalid analysis ID");
+      }
+
       console.log("Fetching analysis data for ID:", id);
       
       // First fetch the analysis
@@ -68,5 +75,6 @@ export const useAnalysis = (id: string) => {
         regulations
       };
     },
+    enabled: Boolean(id) && id !== ':id', // Only run the query if we have a valid ID
   });
 };
