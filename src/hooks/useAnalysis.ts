@@ -40,7 +40,7 @@ export const useAnalysis = (id: string) => {
             description,
             motivation,
             requirements,
-            checklist_items (
+            checklist_items!checklist_items_regulation_id_fkey (
               id,
               description
             )
