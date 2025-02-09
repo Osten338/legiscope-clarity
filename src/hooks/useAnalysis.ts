@@ -9,6 +9,7 @@ export const useAnalysis = (id: string) => {
     queryFn: async () => {
       console.log("Fetching analysis data for ID:", id);
       
+      // First fetch the analysis
       const { data: analysis, error: analysisError } = await supabase
         .from("business_analyses")
         .select("*")
@@ -28,16 +29,18 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      const { data: businessRegulations, error: regulationsError } = await supabase
+      // Then fetch the regulations linked to this analysis
+      const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
-          regulations!business_regulations_regulation_id_fkey (
+          regulation_id,
+          regulations (
             id,
             name,
             description,
             motivation,
             requirements,
-            checklist_items!checklist_items_regulation_id_fkey (
+            checklist_items (
               id,
               description
             )
@@ -51,9 +54,10 @@ export const useAnalysis = (id: string) => {
         throw regulationsError;
       }
 
-      console.log("Business regulations data:", businessRegulations);
+      console.log("Regulations data:", regulationsData);
 
-      const regulations = businessRegulations
+      // Extract and format the regulations data
+      const regulations = regulationsData
         .map(br => br.regulations)
         .filter((reg): reg is NonNullable<typeof reg> => reg !== null);
 
@@ -64,4 +68,3 @@ export const useAnalysis = (id: string) => {
     },
   });
 };
-
