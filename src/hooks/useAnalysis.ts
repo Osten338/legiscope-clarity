@@ -36,11 +36,11 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations using a proper join
-      const { data: regulationsData, error: regulationsError } = await supabase
+      // Then fetch the regulations with their checklist items
+      const { data: regulations, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
-          id,
+          regulation_id,
           regulation:regulations (
             id,
             name,
@@ -61,18 +61,18 @@ export const useAnalysis = (id: string) => {
         throw regulationsError;
       }
 
-      console.log("Raw regulations data:", regulationsData);
+      console.log("Raw regulations data:", regulations);
 
       // Extract and format the regulations data
-      const regulations = regulationsData
+      const formattedRegulations = regulations
         .map(br => br.regulation)
         .filter((reg): reg is NonNullable<typeof reg> => reg !== null);
 
-      console.log("Processed regulations:", regulations);
+      console.log("Processed regulations:", formattedRegulations);
 
       return {
         analysis,
-        regulations
+        regulations: formattedRegulations
       };
     },
     enabled: Boolean(id) && id !== ':id', // Only run the query if we have a valid ID
