@@ -74,13 +74,6 @@ export type Database = {
             referencedRelation: "business_analyses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_regulation"
-            columns: ["regulation_id"]
-            isOneToOne: false
-            referencedRelation: "regulations"
-            referencedColumns: ["id"]
-          },
         ]
       }
       checklist_items: {
