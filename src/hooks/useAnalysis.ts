@@ -29,18 +29,18 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations linked to this analysis
+      // Then fetch the regulations linked to this analysis with proper relationship handling
       const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
           regulation_id,
-          regulations (
+          regulations!business_regulations_regulation_id_fkey (
             id,
             name,
             description,
             motivation,
             requirements,
-            checklist_items (
+            checklist_items!checklist_items_regulation_id_fkey (
               id,
               description
             )
