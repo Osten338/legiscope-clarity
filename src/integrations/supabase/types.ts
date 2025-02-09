@@ -239,7 +239,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      process_analysis_regulations: {
+        Args: {
+          p_analysis_id: string
+          p_regulations: Json
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
