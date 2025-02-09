@@ -208,26 +208,38 @@ export type Database = {
       }
       saved_regulations: {
         Row: {
+          completion_date: string | null
           created_at: string
           id: string
+          next_review_date: string | null
           notes: string | null
+          progress: number
           regulation_id: string
+          status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          completion_date?: string | null
           created_at?: string
           id?: string
+          next_review_date?: string | null
           notes?: string | null
+          progress?: number
           regulation_id: string
+          status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          completion_date?: string | null
           created_at?: string
           id?: string
+          next_review_date?: string | null
           notes?: string | null
+          progress?: number
           regulation_id?: string
+          status?: string
           updated_at?: string
           user_id?: string
         }
