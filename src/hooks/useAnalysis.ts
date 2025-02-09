@@ -36,12 +36,12 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations
+      // Then fetch the regulations using a proper join
       const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
-          regulation_id,
-          regulations:regulation_id (
+          id,
+          regulation:regulations (
             id,
             name,
             description,
@@ -65,7 +65,7 @@ export const useAnalysis = (id: string) => {
 
       // Extract and format the regulations data
       const regulations = regulationsData
-        .map(br => br.regulations)
+        .map(br => br.regulation)
         .filter((reg): reg is NonNullable<typeof reg> => reg !== null);
 
       console.log("Processed regulations:", regulations);
