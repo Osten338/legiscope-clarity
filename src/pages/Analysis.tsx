@@ -24,12 +24,16 @@ const Analysis = () => {
     
     setIsSaving(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user found");
+
       // Save each regulation to saved_regulations
       for (const regulation of analysisData.regulations) {
         const { error } = await supabase
           .from('saved_regulations')
           .insert({
-            regulation_id: regulation.id
+            regulation_id: regulation.id,
+            user_id: user.id
           });
           
         if (error) throw error;
