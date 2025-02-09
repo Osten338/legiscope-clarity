@@ -29,21 +29,14 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations linked to this analysis with proper relationship handling
+      // Then fetch the regulations with a simpler join to debug
       const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
           regulation_id,
-          regulations!business_regulations_regulation_id_fkey (
-            id,
-            name,
-            description,
-            motivation,
-            requirements,
-            checklist_items!checklist_items_regulation_id_fkey (
-              id,
-              description
-            )
+          regulations (
+            *,
+            checklist_items (*)
           )
         `)
         .eq("business_analysis_id", id);
@@ -54,12 +47,14 @@ export const useAnalysis = (id: string) => {
         throw regulationsError;
       }
 
-      console.log("Regulations data:", regulationsData);
+      console.log("Raw regulations data:", regulationsData);
 
       // Extract and format the regulations data
       const regulations = regulationsData
         .map(br => br.regulations)
         .filter((reg): reg is NonNullable<typeof reg> => reg !== null);
+
+      console.log("Processed regulations:", regulations);
 
       return {
         analysis,
