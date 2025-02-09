@@ -36,7 +36,21 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations using the proper foreign key relationship
+      // First, check if there are any business_regulations entries
+      const { data: businessRegs, error: businessRegsError } = await supabase
+        .from("business_regulations")
+        .select("*")
+        .eq("business_analysis_id", id);
+
+      console.log("Business regulations entries:", businessRegs);
+
+      if (businessRegsError) {
+        console.error("Business regulations error:", businessRegsError);
+        toast.error("Failed to load business regulations");
+        throw businessRegsError;
+      }
+
+      // Then fetch the regulations with their details
       const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
@@ -55,13 +69,13 @@ export const useAnalysis = (id: string) => {
         `)
         .eq("business_analysis_id", id);
 
+      console.log("Raw regulations data:", regulationsData);
+
       if (regulationsError) {
         console.error("Regulations error:", regulationsError);
         toast.error("Failed to load regulations");
         throw regulationsError;
       }
-
-      console.log("Raw regulations data:", regulationsData);
 
       // Extract and format the regulations data
       const formattedRegulations = regulationsData
@@ -78,4 +92,3 @@ export const useAnalysis = (id: string) => {
     enabled: Boolean(id) && id !== ':id', // Only run the query if we have a valid ID
   });
 };
-
