@@ -36,12 +36,12 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations using the newly established relationship
+      // Then fetch the regulations using the proper foreign key relationship
       const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
           regulation_id,
-          regulations (
+          regulations!business_regulations_regulation_id_fkey (
             id,
             name,
             description,
@@ -78,3 +78,4 @@ export const useAnalysis = (id: string) => {
     enabled: Boolean(id) && id !== ':id', // Only run the query if we have a valid ID
   });
 };
+
