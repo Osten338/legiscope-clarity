@@ -36,12 +36,12 @@ export const useAnalysis = (id: string) => {
 
       console.log("Analysis data:", analysis);
 
-      // Then fetch the regulations with their checklist items using the specific foreign key relationship
-      const { data: regulations, error: regulationsError } = await supabase
+      // Then fetch the regulations using the newly established relationship
+      const { data: regulationsData, error: regulationsError } = await supabase
         .from("business_regulations")
         .select(`
           regulation_id,
-          regulation:regulations!fk_regulation (
+          regulations (
             id,
             name,
             description,
@@ -61,11 +61,11 @@ export const useAnalysis = (id: string) => {
         throw regulationsError;
       }
 
-      console.log("Raw regulations data:", regulations);
+      console.log("Raw regulations data:", regulationsData);
 
       // Extract and format the regulations data
-      const formattedRegulations = regulations
-        .map(br => br.regulation)
+      const formattedRegulations = regulationsData
+        .map(br => br.regulations)
         .filter((reg): reg is NonNullable<typeof reg> => reg !== null);
 
       console.log("Processed regulations:", formattedRegulations);
