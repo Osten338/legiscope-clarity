@@ -80,13 +80,19 @@ serve(async (req) => {
     const analysisResult = JSON.parse(openAIData.choices[0]?.message?.content || "{}");
     console.log('Parsed analysis result:', analysisResult);
 
+    if (!analysisResult.regulations || !Array.isArray(analysisResult.regulations) || analysisResult.regulations.length === 0) {
+      console.error('No regulations found in analysis result');
+      throw new Error('No regulations found in analysis');
+    }
+
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Start a transaction by using RPC
+    // First insert the business analysis
+    console.log('Inserting business analysis...');
     const { data: analysis, error: analysisError } = await supabaseClient
       .from('business_analyses')
       .insert([
@@ -103,13 +109,13 @@ serve(async (req) => {
       throw analysisError;
     }
 
-    console.log('Inserted business analysis:', analysis);
+    console.log('Successfully inserted business analysis:', analysis);
 
-    // Process each regulation
+    // Now process each regulation
     for (const reg of analysisResult.regulations) {
-      console.log('Processing regulation:', reg.name);
+      console.log('Processing regulation:', reg);
 
-      // Insert regulation
+      // First insert the regulation
       const { data: regulation, error: regError } = await supabaseClient
         .from('regulations')
         .insert([
@@ -128,9 +134,9 @@ serve(async (req) => {
         throw regError;
       }
 
-      console.log('Inserted regulation:', regulation);
+      console.log('Successfully inserted regulation:', regulation);
 
-      // Link regulation to business analysis
+      // Then link it to the business analysis
       const { error: linkError } = await supabaseClient
         .from('business_regulations')
         .insert([
@@ -145,12 +151,12 @@ serve(async (req) => {
         throw linkError;
       }
 
-      console.log('Linked regulation to analysis:', {
+      console.log('Successfully linked regulation to analysis:', {
         business_analysis_id: analysis.id,
         regulation_id: regulation.id
       });
 
-      // Insert checklist items
+      // Finally, insert checklist items if any
       if (reg.checklist_items && reg.checklist_items.length > 0) {
         const checklistItems = reg.checklist_items.map((item: string) => ({
           regulation_id: regulation.id,
@@ -166,7 +172,7 @@ serve(async (req) => {
           throw checklistError;
         }
 
-        console.log('Inserted checklist items for regulation:', reg.name);
+        console.log('Successfully inserted checklist items for regulation:', reg.name);
       }
     }
 
