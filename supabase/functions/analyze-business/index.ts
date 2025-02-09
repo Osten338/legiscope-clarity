@@ -80,13 +80,13 @@ serve(async (req) => {
     const analysisResult = JSON.parse(openAIData.choices[0]?.message?.content || "{}");
     console.log('Parsed analysis result:', analysisResult);
 
-    // Store the analysis in the database
+    // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Create the business analysis record
+    // Start a transaction by using RPC
     const { data: analysis, error: analysisError } = await supabaseClient
       .from('business_analyses')
       .insert([
@@ -105,7 +105,7 @@ serve(async (req) => {
 
     console.log('Inserted business analysis:', analysis);
 
-    // Store regulations and their checklist items
+    // Process each regulation
     for (const reg of analysisResult.regulations) {
       console.log('Processing regulation:', reg.name);
 
@@ -145,22 +145,29 @@ serve(async (req) => {
         throw linkError;
       }
 
-      // Store checklist items
-      const checklistItems = reg.checklist_items.map((item: string) => ({
-        regulation_id: regulation.id,
-        description: item
-      }));
+      console.log('Linked regulation to analysis:', {
+        business_analysis_id: analysis.id,
+        regulation_id: regulation.id
+      });
 
-      const { error: checklistError } = await supabaseClient
-        .from('checklist_items')
-        .insert(checklistItems);
+      // Insert checklist items
+      if (reg.checklist_items && reg.checklist_items.length > 0) {
+        const checklistItems = reg.checklist_items.map((item: string) => ({
+          regulation_id: regulation.id,
+          description: item
+        }));
 
-      if (checklistError) {
-        console.error('Error inserting checklist items:', checklistError);
-        throw checklistError;
+        const { error: checklistError } = await supabaseClient
+          .from('checklist_items')
+          .insert(checklistItems);
+
+        if (checklistError) {
+          console.error('Error inserting checklist items:', checklistError);
+          throw checklistError;
+        }
+
+        console.log('Inserted checklist items for regulation:', reg.name);
       }
-
-      console.log('Inserted checklist items for regulation:', reg.name);
     }
 
     return new Response(
