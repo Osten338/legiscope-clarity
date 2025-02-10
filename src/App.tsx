@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Legislation from "./pages/Legislation";
 import ComplianceChecklist from "./pages/ComplianceChecklist";
+import RiskAssessment from "./pages/RiskAssessment";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +94,16 @@ const App = () => {
               element={
                 session ? (
                   <ComplianceChecklist />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
+              path="/risk-assessment"
+              element={
+                session ? (
+                  <RiskAssessment />
                 ) : (
                   <Navigate to="/auth" replace={true} />
                 )

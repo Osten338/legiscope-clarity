@@ -24,7 +24,7 @@ export const Sidebar = () => {
   const sidebarItems: SidebarItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: CheckSquare, label: "Compliance Checklist", path: "/compliance-checklist" },
-    { icon: Shield, label: "Risk Assessment", path: "/assessment" },
+    { icon: Shield, label: "Risk Assessment", path: "/risk-assessment" },
     { icon: BookOpen, label: "Documentation", path: "/documentation" },
     { icon: AlertCircle, label: "Alerts", path: "/alerts" },
     { icon: Settings, label: "Settings", path: "/settings" },
