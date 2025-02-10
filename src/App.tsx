@@ -12,6 +12,7 @@ import Analysis from "./pages/Analysis";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Documentation from "./pages/Documentation";
 import Legislation from "./pages/Legislation";
 import ComplianceChecklist from "./pages/ComplianceChecklist";
 import RiskAssessment from "./pages/RiskAssessment";
@@ -75,6 +76,16 @@ const App = () => {
               element={
                 session ? (
                   <Dashboard />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
+              path="/documentation"
+              element={
+                session ? (
+                  <Documentation />
                 ) : (
                   <Navigate to="/auth" replace={true} />
                 )
