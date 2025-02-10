@@ -37,7 +37,7 @@ const ComplianceChecklist = () => {
             id,
             name,
             description,
-            checklist_items (
+            checklist_items!checklist_items_regulation_id_fkey (
               id,
               description
             )
@@ -221,4 +221,3 @@ const ComplianceChecklist = () => {
 };
 
 export default ComplianceChecklist;
-
