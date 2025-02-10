@@ -64,7 +64,7 @@ export function ComplianceBuddyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col">
+      <DialogContent className="fixed bottom-4 right-4 max-w-[400px] h-[500px] flex flex-col !rounded-lg border border-sage-200 shadow-lg bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-sage-600" />
@@ -96,7 +96,7 @@ export function ComplianceBuddyDialog({
                   <div
                     className={`rounded-lg px-4 py-2 max-w-[80%] ${
                       message.role === "assistant"
-                        ? "bg-sage-50 text-sage-900"
+                        ? "bg-sage-50 text-sage-900 prose prose-sm max-w-none"
                         : "bg-sage-600 text-white"
                     }`}
                   >
