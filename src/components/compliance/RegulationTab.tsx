@@ -2,6 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChecklistItem } from "./ChecklistItem";
+import { ClipboardCheck } from "lucide-react";
 
 interface RegulationTabProps {
   regulation: {
@@ -22,12 +23,19 @@ interface RegulationTabProps {
 
 export const RegulationTab = ({ regulation, responses }: RegulationTabProps) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{regulation.name}</CardTitle>
-        <CardDescription>{regulation.description}</CardDescription>
+    <Card className="border-sage-200 shadow-sm">
+      <CardHeader className="border-b border-sage-100 bg-sage-50/50">
+        <div className="flex items-center gap-3">
+          <ClipboardCheck className="h-5 w-5 text-sage-600" />
+          <div>
+            <CardTitle className="text-xl text-sage-900">{regulation.name}</CardTitle>
+            <CardDescription className="text-sage-600 mt-1">
+              {regulation.description}
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <ScrollArea className="h-[60vh]">
           <div className="space-y-6">
             {regulation.checklist_items?.map((item) => {
