@@ -168,23 +168,32 @@ export type Database = {
       }
       checklist_items: {
         Row: {
+          category: string | null
           created_at: string
           description: string
+          estimated_effort: string | null
           id: string
+          importance: number | null
           regulation_id: string | null
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description: string
+          estimated_effort?: string | null
           id?: string
+          importance?: number | null
           regulation_id?: string | null
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string
+          estimated_effort?: string | null
           id?: string
+          importance?: number | null
           regulation_id?: string | null
           updated_at?: string
         }

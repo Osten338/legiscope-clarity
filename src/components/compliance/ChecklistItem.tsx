@@ -4,17 +4,29 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { Info } from "lucide-react";
 
 interface ChecklistItemProps {
   id: string;
   description: string;
+  importance?: number;
+  category?: string;
+  estimatedEffort?: string;
   response?: {
     status: "completed" | "will_do" | "will_not_do";
     justification?: string | null;
   };
 }
 
-export const ChecklistItem = ({ id, description, response }: ChecklistItemProps) => {
+export const ChecklistItem = ({ 
+  id, 
+  description, 
+  importance, 
+  category, 
+  estimatedEffort, 
+  response 
+}: ChecklistItemProps) => {
   const { toast } = useToast();
 
   const handleChecklistResponse = async (
@@ -72,6 +84,22 @@ export const ChecklistItem = ({ id, description, response }: ChecklistItemProps)
     }
   };
 
+  const getImportanceBadge = (importance?: number) => {
+    if (!importance) return null;
+    const colors = {
+      1: "bg-slate-100 text-slate-600",
+      2: "bg-blue-100 text-blue-600",
+      3: "bg-yellow-100 text-yellow-600",
+      4: "bg-orange-100 text-orange-600",
+      5: "bg-red-100 text-red-600",
+    };
+    return (
+      <Badge className={colors[importance as keyof typeof colors]}>
+        Priority {importance}
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-4">
@@ -82,8 +110,22 @@ export const ChecklistItem = ({ id, description, response }: ChecklistItemProps)
           }
         />
         <div className="space-y-2 flex-1">
-          <div className="flex justify-between items-start gap-4">
+          <div className="flex flex-col gap-2">
             <p className="text-sm text-slate-900">{description}</p>
+            <div className="flex flex-wrap gap-2 items-center">
+              {importance && getImportanceBadge(importance)}
+              {category && (
+                <Badge variant="outline" className="text-sage-600">
+                  {category}
+                </Badge>
+              )}
+              {estimatedEffort && (
+                <div className="flex items-center gap-1 text-xs text-slate-500">
+                  <Info className="h-3 w-3" />
+                  Estimated effort: {estimatedEffort}
+                </div>
+              )}
+            </div>
           </div>
           {response?.status === "will_not_do" && (
             <div className="pl-4 border-l-2 border-red-500">
