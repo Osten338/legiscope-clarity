@@ -32,7 +32,7 @@ const ComplianceChecklist = () => {
             id,
             name,
             description,
-            checklist_items!checklist_items_regulation_id_fkey (
+            checklist_items (
               id,
               description,
               importance,
