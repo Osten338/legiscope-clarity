@@ -13,7 +13,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sidebar } from "@/components/dashboard/Sidebar";
@@ -77,15 +77,40 @@ const ComplianceChecklist = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not found");
 
-      const { error } = await supabase
+      // First, check if a response already exists
+      const { data: existingResponse } = await supabase
         .from("checklist_item_responses")
-        .upsert({
-          checklist_item_id: itemId,
-          user_id: user.id,
-          status,
-          justification: status === "will_not_do" ? justification : null,
-          completion_date: status === "completed" ? new Date().toISOString() : null,
-        });
+        .select("id")
+        .eq("checklist_item_id", itemId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      let error;
+      
+      if (existingResponse) {
+        // Update existing response
+        const { error: updateError } = await supabase
+          .from("checklist_item_responses")
+          .update({
+            status,
+            justification: status === "will_not_do" ? justification : null,
+            completion_date: status === "completed" ? new Date().toISOString() : null,
+          })
+          .eq("id", existingResponse.id);
+        error = updateError;
+      } else {
+        // Insert new response
+        const { error: insertError } = await supabase
+          .from("checklist_item_responses")
+          .insert({
+            checklist_item_id: itemId,
+            user_id: user.id,
+            status,
+            justification: status === "will_not_do" ? justification : null,
+            completion_date: status === "completed" ? new Date().toISOString() : null,
+          });
+        error = insertError;
+      }
 
       if (error) throw error;
 
