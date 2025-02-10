@@ -1,4 +1,4 @@
-import { Clock } from "lucide-react";
+import { Clock, X } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,6 +16,21 @@ import { RegulationCard } from "@/components/RegulationCard";
 import { cn } from "@/lib/utils";
 import { statusIcons, getStatusText } from "./utils";
 import { Link } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface RegulationsListProps {
   savedRegulations: any[];
@@ -28,6 +43,34 @@ export const RegulationsList = ({
   openRegulation,
   setOpenRegulation,
 }: RegulationsListProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleRemoveRegulation = async (savedRegulationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('saved_regulations')
+        .delete()
+        .eq('id', savedRegulationId);
+
+      if (error) throw error;
+
+      // Invalidate and refetch the savedRegulations query
+      queryClient.invalidateQueries({ queryKey: ['savedRegulations'] });
+
+      toast({
+        title: "Regulation removed",
+        description: "The regulation has been removed from your dashboard",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to remove regulation. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Filter out duplicates by keeping only the latest entry for each regulation
   const uniqueRegulations = savedRegulations?.reduce((acc, current) => {
     if (!current.regulations) return acc;
@@ -65,23 +108,52 @@ export const RegulationsList = ({
             return (
               <div key={saved.id} className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <StatusIcon className={cn("w-5 h-5", statusColor)} />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{getStatusText(saved.status)}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <div className="h-2 flex-1 bg-slate-100 rounded-full">
-                    <div
-                      className="h-2 bg-sage-500 rounded-full transition-all duration-500"
-                      style={{ width: `${saved.progress}%` }}
-                    />
+                  <div className="flex items-center gap-2 flex-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <StatusIcon className={cn("w-5 h-5", statusColor)} />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getStatusText(saved.status)}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <div className="h-2 flex-1 bg-slate-100 rounded-full">
+                      <div
+                        className="h-2 bg-sage-500 rounded-full transition-all duration-500"
+                        style={{ width: `${saved.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-slate-600">{saved.progress}%</span>
                   </div>
-                  <span className="text-sm text-slate-600">{saved.progress}%</span>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                      >
+                        <X className="h-4 w-4 text-slate-500 hover:text-slate-900" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Regulation</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove this regulation from your dashboard? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleRemoveRegulation(saved.id)}
+                        >
+                          Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
                 <Link 
                   to={`/legislation/${saved.regulations.id}`}
