@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Settings2 } from "lucide-react";
 
 export const DisplaySettings = () => {
   return (
