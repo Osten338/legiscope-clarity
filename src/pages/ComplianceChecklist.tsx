@@ -9,6 +9,7 @@ import { ClipboardList, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
@@ -130,19 +131,21 @@ const ComplianceChecklist = () => {
                 onValueChange={setSelectedRegulation}
                 className="w-full"
               >
-                <TabsList className="flex w-full border-b border-slate-200 bg-transparent p-0 h-auto">
-                  {savedRegulations?.map((saved) => (
-                    <TabsTrigger
-                      key={saved.regulation.id}
-                      value={saved.regulation.id}
-                      className="min-w-0 flex-1 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
-                    >
-                      <span className="truncate block max-w-full">
-                        {saved.regulation.name}
-                      </span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                <ScrollArea className="w-full" orientation="horizontal">
+                  <TabsList className="flex w-full border-b border-slate-200 bg-transparent p-0 h-auto">
+                    {savedRegulations?.map((saved) => (
+                      <TabsTrigger
+                        key={saved.regulation.id}
+                        value={saved.regulation.id}
+                        className="min-w-0 flex-1 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                      >
+                        <span className="truncate block max-w-full">
+                          {saved.regulation.name}
+                        </span>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </ScrollArea>
                 {savedRegulations?.map((saved) => (
                   <TabsContent
                     key={saved.regulation.id}
