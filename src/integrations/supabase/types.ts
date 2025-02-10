@@ -268,7 +268,7 @@ export type Database = {
           due_date: string | null
           id: string
           impact: number
-          level: Database["public"]["Enums"]["risk_level"]
+          level: Database["public"]["Enums"]["risk_level"] | null
           likelihood: number
           mitigation_measures: string | null
           regulation_id: string | null
@@ -285,7 +285,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           impact: number
-          level: Database["public"]["Enums"]["risk_level"]
+          level?: Database["public"]["Enums"]["risk_level"] | null
           likelihood: number
           mitigation_measures?: string | null
           regulation_id?: string | null
@@ -302,7 +302,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           impact?: number
-          level?: Database["public"]["Enums"]["risk_level"]
+          level?: Database["public"]["Enums"]["risk_level"] | null
           likelihood?: number
           mitigation_measures?: string | null
           regulation_id?: string | null
