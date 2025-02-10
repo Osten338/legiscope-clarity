@@ -20,6 +20,26 @@ serve(async (req) => {
       throw new Error('Missing OpenAI API Key')
     }
 
+    // Get the user ID from the JWT token
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('Missing Authorization header')
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Verify the JWT and get the user
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    )
+
+    if (userError || !user) {
+      throw new Error('Invalid authorization token')
+    }
+
     console.log('Making OpenAI API request with business description:', description)
 
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -107,12 +127,6 @@ serve(async (req) => {
       }
     });
 
-    // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
     // First insert the business analysis
     console.log('Inserting business analysis...');
     const { data: analysis, error: analysisError } = await supabaseClient
@@ -120,7 +134,8 @@ serve(async (req) => {
       .insert([
         { 
           description, 
-          analysis: analysisResult.analysis 
+          analysis: analysisResult.analysis,
+          user_id: user.id
         }
       ])
       .select()

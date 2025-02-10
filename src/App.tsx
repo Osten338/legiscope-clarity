@@ -12,6 +12,7 @@ import Analysis from "./pages/Analysis";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Legislation from "./pages/Legislation";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,16 @@ const App = () => {
               element={
                 session ? (
                   <Dashboard />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
+              path="/legislation/:id"
+              element={
+                session ? (
+                  <Legislation />
                 ) : (
                   <Navigate to="/auth" replace={true} />
                 )

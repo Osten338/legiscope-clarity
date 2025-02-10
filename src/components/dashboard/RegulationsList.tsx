@@ -66,7 +66,7 @@ export const RegulationsList = ({
                   <span className="text-sm text-slate-600">{saved.progress}%</span>
                 </div>
                 <Link 
-                  to={`/legislation/${saved.regulations.id}`}
+                  to={`/legislation/${saved.regulation_id}`}
                   className="block hover:no-underline"
                 >
                   <RegulationCard
