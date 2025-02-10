@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import {
   BellRing,
@@ -21,15 +20,37 @@ const Alerts = () => {
   const [alertsEnabled, setAlertsEnabled] = useState(true);
 
   // Fetch alert settings
-  const { data: alertSettings } = useQuery({
+  const { data: alertSettings, refetch } = useQuery({
     queryKey: ["alertSettings"],
     queryFn: async () => {
+      const user = await supabase.auth.getUser();
+      const userId = user.data.user?.id;
+      
+      if (!userId) {
+        throw new Error("No user found");
+      }
+
+      // Try to get existing settings
       const { data, error } = await supabase
         .from("alert_settings")
         .select("*")
-        .single();
+        .eq("user_id", userId)
+        .maybeSingle();
 
       if (error) throw error;
+
+      // If no settings exist, create them
+      if (!data) {
+        const { data: newData, error: insertError } = await supabase
+          .from("alert_settings")
+          .insert([{ user_id: userId }])
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        return newData;
+      }
+
       return data;
     },
   });
@@ -37,10 +58,17 @@ const Alerts = () => {
   // Update alert settings mutation
   const updateAlertSettings = useMutation({
     mutationFn: async (enabled: boolean) => {
+      const user = await supabase.auth.getUser();
+      const userId = user.data.user?.id;
+
+      if (!userId) {
+        throw new Error("No user found");
+      }
+
       const { error } = await supabase
         .from("alert_settings")
         .update({ alerts_enabled: enabled })
-        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+        .eq("user_id", userId);
 
       if (error) throw error;
     },
@@ -49,6 +77,7 @@ const Alerts = () => {
         title: "Alert preferences updated",
         description: `Alerts have been ${alertsEnabled ? "enabled" : "disabled"}`,
       });
+      refetch(); // Refresh the settings after update
     },
     onError: (error) => {
       toast({
