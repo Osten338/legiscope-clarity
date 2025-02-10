@@ -30,7 +30,7 @@ serve(async (req) => {
 
 For the requirement: "${checklistItem}"
 
-Structure your responses using these clear sections:
+You MUST structure your responses using these clear sections and keep them concise:
 
 ## Summary
 Provide a brief overview of the requirement and its importance (2-3 sentences)
