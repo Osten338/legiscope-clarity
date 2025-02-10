@@ -12,22 +12,34 @@ export type Database = {
       alert_settings: {
         Row: {
           alerts_enabled: boolean | null
+          compliance_alerts_enabled: boolean | null
           created_at: string
+          deadline_alerts_enabled: boolean | null
           id: string
+          risk_alerts_enabled: boolean | null
+          system_alerts_enabled: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
           alerts_enabled?: boolean | null
+          compliance_alerts_enabled?: boolean | null
           created_at?: string
+          deadline_alerts_enabled?: boolean | null
           id?: string
+          risk_alerts_enabled?: boolean | null
+          system_alerts_enabled?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
           alerts_enabled?: boolean | null
+          compliance_alerts_enabled?: boolean | null
           created_at?: string
+          deadline_alerts_enabled?: boolean | null
           id?: string
+          risk_alerts_enabled?: boolean | null
+          system_alerts_enabled?: boolean | null
           updated_at?: string
           user_id?: string
         }

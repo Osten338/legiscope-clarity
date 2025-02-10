@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import {
   BellRing,
@@ -18,6 +19,10 @@ import { useState, useEffect } from "react";
 const Alerts = () => {
   const { toast } = useToast();
   const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const [deadlineAlertsEnabled, setDeadlineAlertsEnabled] = useState(true);
+  const [riskAlertsEnabled, setRiskAlertsEnabled] = useState(true);
+  const [complianceAlertsEnabled, setComplianceAlertsEnabled] = useState(true);
+  const [systemAlertsEnabled, setSystemAlertsEnabled] = useState(true);
 
   // Fetch alert settings
   const { data: alertSettings, refetch } = useQuery({
@@ -57,7 +62,13 @@ const Alerts = () => {
 
   // Update alert settings mutation
   const updateAlertSettings = useMutation({
-    mutationFn: async (enabled: boolean) => {
+    mutationFn: async (settings: {
+      alerts_enabled?: boolean;
+      deadline_alerts_enabled?: boolean;
+      risk_alerts_enabled?: boolean;
+      compliance_alerts_enabled?: boolean;
+      system_alerts_enabled?: boolean;
+    }) => {
       const user = await supabase.auth.getUser();
       const userId = user.data.user?.id;
 
@@ -67,7 +78,7 @@ const Alerts = () => {
 
       const { error } = await supabase
         .from("alert_settings")
-        .update({ alerts_enabled: enabled })
+        .update(settings)
         .eq("user_id", userId);
 
       if (error) throw error;
@@ -75,9 +86,9 @@ const Alerts = () => {
     onSuccess: () => {
       toast({
         title: "Alert preferences updated",
-        description: `Alerts have been ${alertsEnabled ? "enabled" : "disabled"}`,
+        description: "Your alert preferences have been saved",
       });
-      refetch(); // Refresh the settings after update
+      refetch();
     },
     onError: (error) => {
       toast({
@@ -92,6 +103,10 @@ const Alerts = () => {
   useEffect(() => {
     if (alertSettings) {
       setAlertsEnabled(alertSettings.alerts_enabled);
+      setDeadlineAlertsEnabled(alertSettings.deadline_alerts_enabled);
+      setRiskAlertsEnabled(alertSettings.risk_alerts_enabled);
+      setComplianceAlertsEnabled(alertSettings.compliance_alerts_enabled);
+      setSystemAlertsEnabled(alertSettings.system_alerts_enabled);
     }
   }, [alertSettings]);
 
@@ -154,7 +169,28 @@ const Alerts = () => {
 
   const handleAlertToggle = async (checked: boolean) => {
     setAlertsEnabled(checked);
-    updateAlertSettings.mutate(checked);
+    updateAlertSettings.mutate({ alerts_enabled: checked });
+  };
+
+  const handleCategoryToggle = async (category: string, checked: boolean) => {
+    switch (category) {
+      case 'deadline':
+        setDeadlineAlertsEnabled(checked);
+        updateAlertSettings.mutate({ deadline_alerts_enabled: checked });
+        break;
+      case 'risk':
+        setRiskAlertsEnabled(checked);
+        updateAlertSettings.mutate({ risk_alerts_enabled: checked });
+        break;
+      case 'compliance':
+        setComplianceAlertsEnabled(checked);
+        updateAlertSettings.mutate({ compliance_alerts_enabled: checked });
+        break;
+      case 'system':
+        setSystemAlertsEnabled(checked);
+        updateAlertSettings.mutate({ system_alerts_enabled: checked });
+        break;
+    }
   };
 
   return (
@@ -176,7 +212,7 @@ const Alerts = () => {
                   checked={alertsEnabled}
                   onCheckedChange={handleAlertToggle}
                 />
-                <Label htmlFor="alerts-enabled">Enable Alerts</Label>
+                <Label htmlFor="alerts-enabled">Enable All Alerts</Label>
               </div>
             </div>
           </div>
@@ -185,66 +221,114 @@ const Alerts = () => {
             <div className="grid gap-6 md:grid-cols-2">
               {/* Upcoming Deadlines */}
               <Card className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Clock className="h-5 w-5 text-orange-500" />
-                  <h2 className="text-xl font-semibold text-sage-900">Upcoming Deadlines</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-orange-500" />
+                    <h2 className="text-xl font-semibold text-sage-900">Upcoming Deadlines</h2>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="deadline-alerts"
+                      checked={deadlineAlertsEnabled}
+                      onCheckedChange={(checked) => handleCategoryToggle('deadline', checked)}
+                    />
+                    <Label htmlFor="deadline-alerts">Enable</Label>
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  {alerts.upcomingDeadlines.map((alert) => (
-                    <Alert key={alert.id}>
-                      <AlertTitle>{alert.title}</AlertTitle>
-                      <AlertDescription>{alert.description}</AlertDescription>
-                    </Alert>
-                  ))}
-                </div>
+                {deadlineAlertsEnabled && (
+                  <div className="space-y-4">
+                    {alerts.upcomingDeadlines.map((alert) => (
+                      <Alert key={alert.id}>
+                        <AlertTitle>{alert.title}</AlertTitle>
+                        <AlertDescription>{alert.description}</AlertDescription>
+                      </Alert>
+                    ))}
+                  </div>
+                )}
               </Card>
 
               {/* Risk Status Changes */}
               <Card className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                  <h2 className="text-xl font-semibold text-sage-900">Risk Status Changes</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-red-500" />
+                    <h2 className="text-xl font-semibold text-sage-900">Risk Status Changes</h2>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="risk-alerts"
+                      checked={riskAlertsEnabled}
+                      onCheckedChange={(checked) => handleCategoryToggle('risk', checked)}
+                    />
+                    <Label htmlFor="risk-alerts">Enable</Label>
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  {alerts.riskStatus.map((alert) => (
-                    <Alert key={alert.id} variant="destructive">
-                      <AlertTitle>{alert.title}</AlertTitle>
-                      <AlertDescription>{alert.description}</AlertDescription>
-                    </Alert>
-                  ))}
-                </div>
+                {riskAlertsEnabled && (
+                  <div className="space-y-4">
+                    {alerts.riskStatus.map((alert) => (
+                      <Alert key={alert.id} variant="destructive">
+                        <AlertTitle>{alert.title}</AlertTitle>
+                        <AlertDescription>{alert.description}</AlertDescription>
+                      </Alert>
+                    ))}
+                  </div>
+                )}
               </Card>
 
               {/* Compliance Updates */}
               <Card className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Scale className="h-5 w-5 text-blue-500" />
-                  <h2 className="text-xl font-semibold text-sage-900">Compliance Updates</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Scale className="h-5 w-5 text-blue-500" />
+                    <h2 className="text-xl font-semibold text-sage-900">Compliance Updates</h2>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="compliance-alerts"
+                      checked={complianceAlertsEnabled}
+                      onCheckedChange={(checked) => handleCategoryToggle('compliance', checked)}
+                    />
+                    <Label htmlFor="compliance-alerts">Enable</Label>
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  {alerts.complianceUpdates.map((alert) => (
-                    <Alert key={alert.id}>
-                      <AlertTitle>{alert.title}</AlertTitle>
-                      <AlertDescription>{alert.description}</AlertDescription>
-                    </Alert>
-                  ))}
-                </div>
+                {complianceAlertsEnabled && (
+                  <div className="space-y-4">
+                    {alerts.complianceUpdates.map((alert) => (
+                      <Alert key={alert.id}>
+                        <AlertTitle>{alert.title}</AlertTitle>
+                        <AlertDescription>{alert.description}</AlertDescription>
+                      </Alert>
+                    ))}
+                  </div>
+                )}
               </Card>
 
               {/* System Notifications */}
               <Card className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Bell className="h-5 w-5 text-green-500" />
-                  <h2 className="text-xl font-semibold text-sage-900">System Notifications</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-green-500" />
+                    <h2 className="text-xl font-semibold text-sage-900">System Notifications</h2>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="system-alerts"
+                      checked={systemAlertsEnabled}
+                      onCheckedChange={(checked) => handleCategoryToggle('system', checked)}
+                    />
+                    <Label htmlFor="system-alerts">Enable</Label>
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  {alerts.systemNotifications.map((alert) => (
-                    <Alert key={alert.id}>
-                      <AlertTitle>{alert.title}</AlertTitle>
-                      <AlertDescription>{alert.description}</AlertDescription>
-                    </Alert>
-                  ))}
-                </div>
+                {systemAlertsEnabled && (
+                  <div className="space-y-4">
+                    {alerts.systemNotifications.map((alert) => (
+                      <Alert key={alert.id}>
+                        <AlertTitle>{alert.title}</AlertTitle>
+                        <AlertDescription>{alert.description}</AlertDescription>
+                      </Alert>
+                    ))}
+                  </div>
+                )}
               </Card>
             </div>
           ) : (
