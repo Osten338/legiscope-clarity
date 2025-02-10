@@ -1,4 +1,3 @@
-
 import { Clock } from "lucide-react";
 import {
   Card,
@@ -29,6 +28,25 @@ export const RegulationsList = ({
   openRegulation,
   setOpenRegulation,
 }: RegulationsListProps) => {
+  // Filter out duplicates by keeping only the latest entry for each regulation
+  const uniqueRegulations = savedRegulations?.reduce((acc, current) => {
+    if (!current.regulations) return acc;
+    
+    const existingEntry = acc.find(
+      (item) => item.regulations?.id === current.regulations.id
+    );
+    
+    if (!existingEntry || new Date(current.created_at) > new Date(existingEntry.created_at)) {
+      // Remove existing entry if it exists
+      const filtered = acc.filter(
+        (item) => item.regulations?.id !== current.regulations?.id
+      );
+      return [...filtered, current];
+    }
+    
+    return acc;
+  }, [] as typeof savedRegulations);
+
   return (
     <Card>
       <CardHeader>
@@ -39,7 +57,7 @@ export const RegulationsList = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {savedRegulations?.map((saved) => {
+          {uniqueRegulations?.map((saved) => {
             if (!saved.regulations) return null;
             const StatusIcon = statusIcons[saved.status as keyof typeof statusIcons]?.icon || Clock;
             const statusColor = statusIcons[saved.status as keyof typeof statusIcons]?.class || "text-slate-400";
