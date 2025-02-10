@@ -131,7 +131,7 @@ const ComplianceChecklist = () => {
                 onValueChange={setSelectedRegulation}
                 className="w-full"
               >
-                <ScrollArea className="w-full" orientation="horizontal">
+                <ScrollArea className="w-full">
                   <TabsList className="flex w-full border-b border-slate-200 bg-transparent p-0 h-auto">
                     {savedRegulations?.map((saved) => (
                       <TabsTrigger
