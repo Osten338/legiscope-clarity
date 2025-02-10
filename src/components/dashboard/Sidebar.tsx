@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   LayoutDashboard,
-  FileText,
   CheckSquare,
   Settings,
   BookOpen,
@@ -21,7 +20,6 @@ interface SidebarItem {
 export const Sidebar = () => {
   const sidebarItems: SidebarItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", active: true },
-    { icon: FileText, label: "Legislation" },
     { icon: CheckSquare, label: "Compliance Checklist" },
     { icon: Shield, label: "Risk Assessment" },
     { icon: BookOpen, label: "Documentation" },
