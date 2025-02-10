@@ -64,7 +64,7 @@ export function ComplianceBuddyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed bottom-4 right-4 max-w-[400px] h-[500px] flex flex-col !rounded-lg border border-sage-200 shadow-lg bg-white">
+      <DialogContent className="fixed bottom-4 right-4 max-w-[400px] h-[500px] flex flex-col !rounded-lg border border-sage-200 shadow-lg bg-white data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-sage-600" />
