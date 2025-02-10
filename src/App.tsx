@@ -47,127 +47,134 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route
-                path="/assessment"
-                element={
-                  session ? (
-                    <Assessment />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/analysis/:id"
-                element={
-                  session ? (
-                    <Analysis />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  session ? (
-                    <Dashboard />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/documentation"
-                element={
-                  session ? (
-                    <Documentation />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/legislation/:id"
-                element={
-                  session ? (
-                    <Legislation />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/compliance-checklist"
-                element={
-                  session ? (
-                    <ComplianceChecklist />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/risk-assessment"
-                element={
-                  session ? (
-                    <RiskAssessmentLanding />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/risk-assessment/:view"
-                element={
-                  session ? (
-                    <RiskAssessment />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/alerts"
-                element={
-                  session ? (
-                    <Alerts />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  session ? (
-                    <Settings />
-                  ) : (
-                    <Navigate to="/auth" replace={true} />
-                  )
-                }
-              />
-              <Route
-                path="/auth"
-                element={
-                  !session ? (
-                    <Auth />
-                  ) : (
-                    <Navigate to="/dashboard" replace={true} />
-                  )
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50">
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route
+                  path="/assessment"
+                  element={
+                    session ? (
+                      <Assessment />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/analysis/:id"
+                  element={
+                    session ? (
+                      <Analysis />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    session ? (
+                      <Dashboard />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/documentation"
+                  element={
+                    session ? (
+                      <Documentation />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/legislation/:id"
+                  element={
+                    session ? (
+                      <Legislation />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/compliance-checklist"
+                  element={
+                    session ? (
+                      <ComplianceChecklist />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/risk-assessment"
+                  element={
+                    session ? (
+                      <RiskAssessmentLanding />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/risk-assessment/:view"
+                  element={
+                    session ? (
+                      <RiskAssessment />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/alerts"
+                  element={
+                    session ? (
+                      <Alerts />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    session ? (
+                      <Settings />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/auth"
+                  element={
+                    !session ? (
+                      <Auth />
+                    ) : (
+                      <Navigate to="/dashboard" replace={true} />
+                    )
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </div>
       </ThemeProvider>
     </QueryClientProvider>
   );
