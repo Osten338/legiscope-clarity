@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
@@ -14,8 +15,9 @@ import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDi
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Fetch saved regulations for the current user
+  // Fetch saved regulations for the current user with expanded checklist items
   const { data: savedRegulations, isLoading: isLoadingSaved } = useQuery({
     queryKey: ["saved-regulations"],
     queryFn: async () => {
@@ -32,7 +34,10 @@ const ComplianceChecklist = () => {
             description,
             checklist_items!checklist_items_regulation_id_fkey (
               id,
-              description
+              description,
+              importance,
+              category,
+              estimated_effort
             )
           )
         `)
