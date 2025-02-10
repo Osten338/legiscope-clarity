@@ -47,7 +47,7 @@ const RiskAssessment = () => {
       </div>
 
       <Tabs defaultValue="matrix" className="space-y-4">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
           <TabsTrigger value="matrix">Risk Matrix</TabsTrigger>
           <TabsTrigger value="list">Risk List</TabsTrigger>
         </TabsList>
