@@ -27,7 +27,7 @@ const Legislation = () => {
           motivation,
           requirements,
           sanctions,
-          checklist_items (
+          checklist_items!checklist_items_regulation_id_fkey (
             id,
             description
           )
