@@ -104,7 +104,7 @@ const App = () => {
                 !session ? (
                   <Auth />
                 ) : (
-                  <Navigate to="/assessment" replace={true} />
+                  <Navigate to="/dashboard" replace={true} />
                 )
               }
             />
@@ -117,4 +117,3 @@ const App = () => {
 };
 
 export default App;
-

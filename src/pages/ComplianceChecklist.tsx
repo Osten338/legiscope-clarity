@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
@@ -62,7 +61,7 @@ const ComplianceChecklist = () => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
-      <div className="flex-1 p-8 max-w-[calc(100vw-256px)]">
+      <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             {selectedRegulation && (
@@ -124,7 +123,7 @@ const ComplianceChecklist = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-slate-200">
               <Tabs
                 value={selectedRegulation}
                 onValueChange={setSelectedRegulation}
@@ -141,7 +140,6 @@ const ComplianceChecklist = () => {
                     </TabsTrigger>
                   ))}
                 </TabsList>
-
                 {savedRegulations?.map((saved) => (
                   <TabsContent
                     key={saved.regulation.id}
