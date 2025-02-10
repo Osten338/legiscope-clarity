@@ -135,9 +135,11 @@ const ComplianceChecklist = () => {
                     <TabsTrigger
                       key={saved.regulation.id}
                       value={saved.regulation.id}
-                      className="flex-1 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors truncate"
+                      className="min-w-0 flex-1 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
                     >
-                      {saved.regulation.name}
+                      <span className="truncate block max-w-full">
+                        {saved.regulation.name}
+                      </span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
