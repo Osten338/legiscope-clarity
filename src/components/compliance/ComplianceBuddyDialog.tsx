@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Send, Bot } from "lucide-react";
@@ -64,12 +64,15 @@ export function ComplianceBuddyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed bottom-4 right-4 max-w-[400px] h-[500px] flex flex-col !rounded-lg border border-sage-200 shadow-lg bg-white data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom">
+      <DialogContent className="!fixed !bottom-4 !right-4 !translate-x-0 !translate-y-0 !top-auto !left-auto max-w-[400px] h-[500px] flex flex-col !rounded-lg border border-sage-200 shadow-lg bg-white data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:slide-out-to-bottom">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-sage-600" />
             Compliance Buddy
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Chat with Compliance Buddy about compliance requirements
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 pr-4">
@@ -139,3 +142,4 @@ export function ComplianceBuddyDialog({
     </Dialog>
   );
 }
+
