@@ -259,6 +259,68 @@ export type Database = {
         }
         Relationships: []
       }
+      risks: {
+        Row: {
+          action_items: string | null
+          category: Database["public"]["Enums"]["risk_category"]
+          created_at: string
+          description: string
+          due_date: string | null
+          id: string
+          impact: number
+          level: Database["public"]["Enums"]["risk_level"]
+          likelihood: number
+          mitigation_measures: string | null
+          regulation_id: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_items?: string | null
+          category: Database["public"]["Enums"]["risk_category"]
+          created_at?: string
+          description: string
+          due_date?: string | null
+          id?: string
+          impact: number
+          level: Database["public"]["Enums"]["risk_level"]
+          likelihood: number
+          mitigation_measures?: string | null
+          regulation_id?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_items?: string | null
+          category?: Database["public"]["Enums"]["risk_category"]
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          impact?: number
+          level?: Database["public"]["Enums"]["risk_level"]
+          likelihood?: number
+          mitigation_measures?: string | null
+          regulation_id?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risks_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_regulations: {
         Row: {
           completion_date: string | null
@@ -318,6 +380,13 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_risk_level: {
+        Args: {
+          likelihood: number
+          impact: number
+        }
+        Returns: Database["public"]["Enums"]["risk_level"]
+      }
       process_analysis_regulations: {
         Args: {
           p_analysis_id: string
@@ -328,6 +397,8 @@ export type Database = {
     }
     Enums: {
       checklist_item_status: "completed" | "will_do" | "will_not_do"
+      risk_category: "compliance" | "operational" | "financial" | "reputational"
+      risk_level: "low" | "medium" | "high"
     }
     CompositeTypes: {
       [_ in never]: never
