@@ -7,6 +7,7 @@ import { RiskList } from "@/components/risk-assessment/RiskList";
 import { AddRiskDialog } from "@/components/risk-assessment/AddRiskDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 
 const RiskAssessment = () => {
   const [isAddRiskOpen, setIsAddRiskOpen] = useState(false);
@@ -34,37 +35,43 @@ const RiskAssessment = () => {
   if (isLoading) {
     return (
       <div className="flex h-screen">
-        <div className="text-sage-600 m-auto">Loading risk assessment data...</div>
+        <Sidebar />
+        <div className="flex-1">
+          <div className="text-sage-600 m-auto">Loading risk assessment data...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-sage-900">Risk Assessment</h1>
-        <Button onClick={() => setIsAddRiskOpen(true)}>Add New Risk</Button>
+    <div className="flex h-screen">
+      <Sidebar />
+      <div className="flex-1 p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-sage-900">Risk Assessment</h1>
+          <Button onClick={() => setIsAddRiskOpen(true)}>Add New Risk</Button>
+        </div>
+
+        <Tabs defaultValue="matrix" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+            <TabsTrigger value="matrix">Risk Matrix</TabsTrigger>
+            <TabsTrigger value="list">Risk List</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="matrix" className="space-y-4">
+            <RiskMatrix risks={risks || []} />
+          </TabsContent>
+
+          <TabsContent value="list" className="space-y-4">
+            <RiskList risks={risks || []} />
+          </TabsContent>
+        </Tabs>
+
+        <AddRiskDialog 
+          open={isAddRiskOpen} 
+          onOpenChange={setIsAddRiskOpen}
+        />
       </div>
-
-      <Tabs defaultValue="matrix" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
-          <TabsTrigger value="matrix">Risk Matrix</TabsTrigger>
-          <TabsTrigger value="list">Risk List</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="matrix" className="space-y-4">
-          <RiskMatrix risks={risks || []} />
-        </TabsContent>
-
-        <TabsContent value="list" className="space-y-4">
-          <RiskList risks={risks || []} />
-        </TabsContent>
-      </Tabs>
-
-      <AddRiskDialog 
-        open={isAddRiskOpen} 
-        onOpenChange={setIsAddRiskOpen}
-      />
     </div>
   );
 };
