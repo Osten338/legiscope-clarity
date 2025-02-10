@@ -33,7 +33,7 @@ export function ComplianceBuddyDialog({
   const sendMessage = async (content: string) => {
     try {
       setIsLoading(true);
-      const newMessages = [...messages, { role: "user", content }];
+      const newMessages = [...messages, { role: "user" as const, content }];
       setMessages(newMessages);
       setInput("");
 
@@ -49,7 +49,7 @@ export function ComplianceBuddyDialog({
 
       if (error) throw error;
 
-      setMessages([...newMessages, { role: "assistant", content: data.reply }]);
+      setMessages([...newMessages, { role: "assistant" as const, content: data.reply }]);
     } catch (error) {
       toast({
         title: "Error",
