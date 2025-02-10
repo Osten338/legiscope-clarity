@@ -5,7 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
@@ -59,9 +62,19 @@ const ComplianceChecklist = () => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
-      <div className="flex-1 p-8">
-        <div className="max-w-5xl mx-auto">
+      <div className="flex-1 p-8 max-w-[calc(100vw-256px)]">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
+            {selectedRegulation && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedRegulation(null)}
+                className="mr-2"
+              >
+                <ArrowLeft className="h-5 w-5 text-sage-600" />
+              </Button>
+            )}
             <ClipboardList className="h-8 w-8 text-sage-600" />
             <h1 className="text-2xl font-bold text-slate-900">
               Compliance Checklist
@@ -83,9 +96,36 @@ const ComplianceChecklist = () => {
                 You haven't added any regulations to your checklist yet. Visit the regulations page to add some to your checklist.
               </p>
             </div>
+          ) : !selectedRegulation ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savedRegulations.map((saved) => (
+                <Card
+                  key={saved.regulation.id}
+                  className={cn(
+                    "cursor-pointer transition-all hover:shadow-md border-sage-200",
+                    "hover:border-sage-300"
+                  )}
+                  onClick={() => setSelectedRegulation(saved.regulation.id)}
+                >
+                  <CardHeader className="border-b border-sage-100 bg-sage-50/50">
+                    <CardTitle className="text-lg text-sage-900">
+                      {saved.regulation.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <p className="text-slate-600 text-sm">
+                      {saved.regulation.description}
+                    </p>
+                    <div className="mt-4 text-sm text-sage-600">
+                      {saved.regulation.checklist_items.length} checklist items
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
             <Tabs
-              value={selectedRegulation || savedRegulations[0]?.regulation.id}
+              value={selectedRegulation}
               onValueChange={setSelectedRegulation}
               className="w-full"
             >
