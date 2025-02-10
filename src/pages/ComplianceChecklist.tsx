@@ -1,18 +1,19 @@
-
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
-import { ClipboardList, ArrowLeft } from "lucide-react";
+import { ClipboardList, ArrowLeft, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
 
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
 
   // Fetch saved regulations for the current user
   const { data: savedRegulations, isLoading: isLoadingSaved } = useQuery({
@@ -61,7 +62,7 @@ const ComplianceChecklist = () => {
   });
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 relative">
       <Sidebar />
       <div className="flex-1 p-4 md:p-8 overflow-hidden">
         <div className="max-w-7xl mx-auto">
@@ -163,6 +164,19 @@ const ComplianceChecklist = () => {
           )}
         </div>
       </div>
+
+      <Button
+        className="fixed bottom-8 right-8 h-12 w-12 rounded-full shadow-lg"
+        onClick={() => setShowChat(true)}
+      >
+        <Bot className="h-6 w-6" />
+      </Button>
+
+      <ComplianceBuddyDialog
+        open={showChat}
+        onOpenChange={setShowChat}
+        checklistItem={{ description: "How can I improve my compliance?" }}
+      />
     </div>
   );
 };
