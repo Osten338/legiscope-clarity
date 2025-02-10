@@ -130,6 +130,7 @@ export type Database = {
           motivation: string
           name: string
           requirements: string
+          sanctions: string
           updated_at: string
           user_id: string
         }
@@ -140,6 +141,7 @@ export type Database = {
           motivation: string
           name: string
           requirements: string
+          sanctions?: string
           updated_at?: string
           user_id: string
         }
@@ -150,6 +152,7 @@ export type Database = {
           motivation?: string
           name?: string
           requirements?: string
+          sanctions?: string
           updated_at?: string
           user_id?: string
         }
@@ -184,6 +187,7 @@ export type Database = {
           motivation: string
           name: string
           requirements: string
+          sanctions: string
           updated_at: string
         }
         Insert: {
@@ -193,6 +197,7 @@ export type Database = {
           motivation: string
           name: string
           requirements: string
+          sanctions?: string
           updated_at?: string
         }
         Update: {
@@ -202,6 +207,7 @@ export type Database = {
           motivation?: string
           name?: string
           requirements?: string
+          sanctions?: string
           updated_at?: string
         }
         Relationships: []

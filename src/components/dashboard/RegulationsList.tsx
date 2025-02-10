@@ -16,6 +16,7 @@ import {
 import { RegulationCard } from "@/components/RegulationCard";
 import { cn } from "@/lib/utils";
 import { statusIcons, getStatusText } from "./utils";
+import { Link } from "react-router-dom";
 
 interface RegulationsListProps {
   savedRegulations: any[];
@@ -64,19 +65,24 @@ export const RegulationsList = ({
                   </div>
                   <span className="text-sm text-slate-600">{saved.progress}%</span>
                 </div>
-                <RegulationCard
-                  regulation={{
-                    ...saved.regulations,
-                    checklist_items: saved.regulations.checklist_items || []
-                  }}
-                  isOpen={openRegulation === saved.regulations.id}
-                  onOpenChange={() =>
-                    setOpenRegulation(
-                      openRegulation === saved.regulations.id ? null : saved.regulations.id
-                    )
-                  }
-                  isSaved={true}
-                />
+                <Link 
+                  to={`/legislation/${saved.regulations.id}`}
+                  className="block hover:no-underline"
+                >
+                  <RegulationCard
+                    regulation={{
+                      ...saved.regulations,
+                      checklist_items: saved.regulations.checklist_items || []
+                    }}
+                    isOpen={openRegulation === saved.regulations.id}
+                    onOpenChange={() =>
+                      setOpenRegulation(
+                        openRegulation === saved.regulations.id ? null : saved.regulations.id
+                      )
+                    }
+                    isSaved={true}
+                  />
+                </Link>
               </div>
             );
           })}
