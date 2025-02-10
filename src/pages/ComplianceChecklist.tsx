@@ -124,36 +124,38 @@ const ComplianceChecklist = () => {
               ))}
             </div>
           ) : (
-            <Tabs
-              value={selectedRegulation}
-              onValueChange={setSelectedRegulation}
-              className="w-full"
-            >
-              <TabsList className="mb-4 w-full bg-white p-1 border border-slate-200 rounded-lg">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+              <Tabs
+                value={selectedRegulation}
+                onValueChange={setSelectedRegulation}
+                className="w-full"
+              >
+                <TabsList className="flex w-full border-b border-slate-200 bg-transparent p-0 h-auto">
+                  {savedRegulations?.map((saved) => (
+                    <TabsTrigger
+                      key={saved.regulation.id}
+                      value={saved.regulation.id}
+                      className="flex-1 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                    >
+                      {saved.regulation.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
                 {savedRegulations?.map((saved) => (
-                  <TabsTrigger
+                  <TabsContent
                     key={saved.regulation.id}
                     value={saved.regulation.id}
-                    className="flex-1 px-4 py-2 data-[state=active]:bg-sage-50 data-[state=active]:text-sage-900 border-r last:border-r-0 border-slate-200"
+                    className="focus-visible:outline-none focus-visible:ring-0"
                   >
-                    {saved.regulation.name}
-                  </TabsTrigger>
+                    <RegulationTab
+                      regulation={saved.regulation}
+                      responses={responses}
+                    />
+                  </TabsContent>
                 ))}
-              </TabsList>
-
-              {savedRegulations?.map((saved) => (
-                <TabsContent
-                  key={saved.regulation.id}
-                  value={saved.regulation.id}
-                  className="mt-4 focus-visible:outline-none focus-visible:ring-0"
-                >
-                  <RegulationTab
-                    regulation={saved.regulation}
-                    responses={responses}
-                  />
-                </TabsContent>
-              ))}
-            </Tabs>
+              </Tabs>
+            </div>
           )}
         </div>
       </div>
