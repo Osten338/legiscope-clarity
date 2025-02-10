@@ -63,7 +63,7 @@ const ComplianceChecklist = () => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 md:p-8 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             {selectedRegulation && (
@@ -132,14 +132,14 @@ const ComplianceChecklist = () => {
                 className="w-full"
               >
                 <ScrollArea className="w-full">
-                  <TabsList className="flex w-full border-b border-slate-200 bg-transparent p-0 h-auto">
+                  <TabsList className="inline-flex min-w-full border-b border-slate-200 bg-transparent p-0 h-auto">
                     {savedRegulations?.map((saved) => (
                       <TabsTrigger
                         key={saved.regulation.id}
                         value={saved.regulation.id}
-                        className="min-w-0 flex-1 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                        className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
                       >
-                        <span className="truncate block max-w-full">
+                        <span className="truncate block">
                           {saved.regulation.name}
                         </span>
                       </TabsTrigger>
