@@ -17,6 +17,7 @@ import Legislation from "./pages/Legislation";
 import ComplianceChecklist from "./pages/ComplianceChecklist";
 import RiskAssessment from "./pages/RiskAssessment";
 import RiskAssessmentLanding from "./pages/RiskAssessmentLanding";
+import Alerts from "./pages/Alerts";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,16 @@ const App = () => {
               element={
                 session ? (
                   <RiskAssessment />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
+              path="/alerts"
+              element={
+                session ? (
+                  <Alerts />
                 ) : (
                   <Navigate to="/auth" replace={true} />
                 )
