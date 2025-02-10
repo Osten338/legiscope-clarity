@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +31,7 @@ const ComplianceChecklist = () => {
             id,
             name,
             description,
-            checklist_items (
+            checklist_items!checklist_items_regulation_id_fkey (
               id,
               description,
               importance,
