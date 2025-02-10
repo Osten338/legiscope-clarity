@@ -85,16 +85,16 @@ const ComplianceChecklist = () => {
             </div>
           ) : (
             <Tabs
-              value={selectedRegulation || undefined}
+              value={selectedRegulation || savedRegulations[0]?.regulation.id}
               onValueChange={setSelectedRegulation}
               className="w-full"
             >
-              <TabsList className="mb-4 bg-white p-1 border border-slate-200 rounded-lg">
+              <TabsList className="mb-4 w-full bg-white p-1 border border-slate-200 rounded-lg">
                 {savedRegulations?.map((saved) => (
                   <TabsTrigger
                     key={saved.regulation.id}
                     value={saved.regulation.id}
-                    className="px-4 py-2 data-[state=active]:bg-sage-50 data-[state=active]:text-sage-900"
+                    className="flex-1 px-4 py-2 data-[state=active]:bg-sage-50 data-[state=active]:text-sage-900 border-r last:border-r-0 border-slate-200"
                   >
                     {saved.regulation.name}
                   </TabsTrigger>

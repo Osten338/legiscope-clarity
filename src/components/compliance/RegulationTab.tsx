@@ -36,7 +36,7 @@ export const RegulationTab = ({ regulation, responses }: RegulationTabProps) => 
         </div>
       </CardHeader>
       <CardContent className="p-6">
-        <ScrollArea className="h-[60vh]">
+        <ScrollArea className="h-[60vh] pr-4">
           <div className="space-y-6">
             {regulation.checklist_items?.map((item) => {
               const response = responses?.find(
