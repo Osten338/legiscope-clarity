@@ -20,6 +20,7 @@ interface Risk {
   status: string;
   due_date: string | null;
   regulations?: { name: string } | null;
+  is_generated?: boolean;
 }
 
 interface RiskListProps {
@@ -51,6 +52,7 @@ export const RiskList = ({ risks }: RiskListProps) => {
             <TableHead>Related Regulation</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Due Date</TableHead>
+            <TableHead>Type</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,6 +71,11 @@ export const RiskList = ({ risks }: RiskListProps) => {
                 {risk.due_date 
                   ? new Date(risk.due_date).toLocaleDateString() 
                   : 'No due date'}
+              </TableCell>
+              <TableCell>
+                <Badge variant={risk.is_generated ? "secondary" : "default"}>
+                  {risk.is_generated ? 'Generated' : 'Custom'}
+                </Badge>
               </TableCell>
             </TableRow>
           ))}

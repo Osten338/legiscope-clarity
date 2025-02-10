@@ -268,6 +268,7 @@ export type Database = {
           due_date: string | null
           id: string
           impact: number
+          is_generated: boolean | null
           level: Database["public"]["Enums"]["risk_level"] | null
           likelihood: number
           mitigation_measures: string | null
@@ -285,6 +286,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           impact: number
+          is_generated?: boolean | null
           level?: Database["public"]["Enums"]["risk_level"] | null
           likelihood: number
           mitigation_measures?: string | null
@@ -302,6 +304,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           impact?: number
+          is_generated?: boolean | null
           level?: Database["public"]["Enums"]["risk_level"] | null
           likelihood?: number
           mitigation_measures?: string | null
@@ -386,6 +389,20 @@ export type Database = {
           impact: number
         }
         Returns: Database["public"]["Enums"]["risk_level"]
+      }
+      generate_default_risks_for_analysis: {
+        Args: {
+          p_analysis_id: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      generate_default_risks_for_regulation: {
+        Args: {
+          p_regulation_id: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
       process_analysis_regulations: {
         Args: {

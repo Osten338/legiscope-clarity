@@ -2,11 +2,61 @@
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Grid, List, Plus } from "lucide-react";
+import { Grid, List, Plus, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const RiskAssessmentLanding = () => {
   const navigate = useNavigate();
+
+  // Fetch the latest business analysis to generate risks from
+  const { data: latestAnalysis } = useQuery({
+    queryKey: ['latest-analysis'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('business_analyses')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const generateDefaultRisks = async () => {
+    try {
+      if (!latestAnalysis?.id) {
+        toast.error("No business analysis found. Please complete a business analysis first.");
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("User not authenticated");
+        return;
+      }
+
+      const { data, error } = await supabase.rpc(
+        'generate_default_risks_for_analysis',
+        {
+          p_analysis_id: latestAnalysis.id,
+          p_user_id: user.id
+        }
+      );
+
+      if (error) throw error;
+
+      toast.success("Default risks have been generated successfully!");
+      navigate("/risk-assessment/list");
+    } catch (error) {
+      console.error('Error generating default risks:', error);
+      toast.error("Failed to generate default risks");
+    }
+  };
 
   const options = [
     {
@@ -27,6 +77,12 @@ const RiskAssessmentLanding = () => {
       icon: Plus,
       action: () => navigate("/risk-assessment/matrix?new=true"),
     },
+    {
+      title: "Generate Default Risks",
+      description: "Generate standard risks based on your applicable regulations",
+      icon: RefreshCw,
+      action: generateDefaultRisks,
+    },
   ];
 
   return (
@@ -38,7 +94,7 @@ const RiskAssessmentLanding = () => {
           <p className="text-slate-600 mt-2">Choose how you would like to view or manage your risks</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl">
           {options.map((option) => (
             <Card
               key={option.title}
