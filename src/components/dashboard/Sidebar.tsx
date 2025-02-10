@@ -10,21 +10,24 @@ import {
   AlertCircle,
   LucideIcon,
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface SidebarItem {
   icon: LucideIcon;
   label: string;
-  active?: boolean;
+  path: string;
 }
 
 export const Sidebar = () => {
+  const location = useLocation();
+  
   const sidebarItems: SidebarItem[] = [
-    { icon: LayoutDashboard, label: "Dashboard", active: true },
-    { icon: CheckSquare, label: "Compliance Checklist" },
-    { icon: Shield, label: "Risk Assessment" },
-    { icon: BookOpen, label: "Documentation" },
-    { icon: AlertCircle, label: "Alerts" },
-    { icon: Settings, label: "Settings" },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: CheckSquare, label: "Compliance Checklist", path: "/compliance-checklist" },
+    { icon: Shield, label: "Risk Assessment", path: "/assessment" },
+    { icon: BookOpen, label: "Documentation", path: "/documentation" },
+    { icon: AlertCircle, label: "Alerts", path: "/alerts" },
+    { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
   return (
@@ -35,18 +38,19 @@ export const Sidebar = () => {
       <ScrollArea className="h-[calc(100vh-5rem)]">
         <div className="space-y-1 p-2">
           {sidebarItems.map((item) => (
-            <button
+            <Link
               key={item.label}
+              to={item.path}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                item.active
+                location.pathname === item.path
                   ? "bg-sage-100 text-sage-900"
                   : "text-slate-600 hover:bg-slate-100"
               )}
             >
               <item.icon className="w-5 h-5" />
               {item.label}
-            </button>
+            </Link>
           ))}
         </div>
       </ScrollArea>
