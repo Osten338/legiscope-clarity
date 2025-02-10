@@ -3,8 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Moon, Sun, Settings2 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export const DisplaySettings = () => {
+  const { theme, setTheme } = useTheme();
+
   return (
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-6">
@@ -15,7 +18,7 @@ export const DisplaySettings = () => {
       <div className="space-y-6">
         <div>
           <Label className="text-base mb-4 block">Theme</Label>
-          <RadioGroup defaultValue="light" className="grid grid-cols-3 gap-4">
+          <RadioGroup value={theme} onValueChange={setTheme} className="grid grid-cols-3 gap-4">
             <div>
               <RadioGroupItem value="light" id="light" className="peer sr-only" />
               <Label
