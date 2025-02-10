@@ -86,6 +86,50 @@ export type Database = {
           },
         ]
       }
+      checklist_item_responses: {
+        Row: {
+          checklist_item_id: string
+          completion_date: string | null
+          created_at: string
+          id: string
+          justification: string | null
+          notes: string | null
+          status: Database["public"]["Enums"]["checklist_item_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checklist_item_id: string
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          justification?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["checklist_item_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checklist_item_id?: string
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          justification?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["checklist_item_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_item_responses_checklist_item_id_fkey"
+            columns: ["checklist_item_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checklist_items: {
         Row: {
           created_at: string
@@ -267,6 +311,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_regulation_progress: {
+        Args: {
+          p_regulation_id: string
+          p_user_id: string
+        }
+        Returns: number
+      }
       process_analysis_regulations: {
         Args: {
           p_analysis_id: string
@@ -276,7 +327,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      checklist_item_status: "completed" | "will_do" | "will_not_do"
     }
     CompositeTypes: {
       [_ in never]: never

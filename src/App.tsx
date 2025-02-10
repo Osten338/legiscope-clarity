@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Legislation from "./pages/Legislation";
+import ComplianceChecklist from "./pages/ComplianceChecklist";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,16 @@ const App = () => {
               }
             />
             <Route
+              path="/compliance-checklist"
+              element={
+                session ? (
+                  <ComplianceChecklist />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
               path="/auth"
               element={
                 !session ? (
@@ -106,3 +117,4 @@ const App = () => {
 };
 
 export default App;
+
