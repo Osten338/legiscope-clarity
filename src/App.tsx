@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import ComplianceChecklist from "./pages/ComplianceChecklist";
 import RiskAssessment from "./pages/RiskAssessment";
 import RiskAssessmentLanding from "./pages/RiskAssessmentLanding";
 import Alerts from "./pages/Alerts";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -137,6 +137,16 @@ const App = () => {
               element={
                 session ? (
                   <Alerts />
+                ) : (
+                  <Navigate to="/auth" replace={true} />
+                )
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                session ? (
+                  <Settings />
                 ) : (
                   <Navigate to="/auth" replace={true} />
                 )
