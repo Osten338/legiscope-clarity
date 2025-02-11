@@ -86,30 +86,32 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
   return (
     <Card className="overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 p-2.5 bg-slate-100 rounded-lg">
-            <FileText className="h-6 w-6 text-slate-600" />
-          </div>
-          <div className="flex-1 min-w-0 space-y-1">
-            <h3 className="font-medium text-slate-900 truncate pr-4">
-              {document.file_name}
-            </h3>
-            <div className="space-y-1">
-              {document.document_type && (
-                <p className="text-sm text-slate-500 truncate">
-                  {document.document_type}
-                </p>
-              )}
-              {document.regulations && (
-                <p className="text-sm text-slate-500 truncate">
-                  Related to: {document.regulations.name}
-                </p>
-              )}
-              {document.description && (
-                <p className="text-sm text-slate-600 line-clamp-2 break-words">
-                  {document.description}
-                </p>
-              )}
+        <div className="flex items-center justify-center gap-4">
+          <div className="flex items-start gap-4 max-w-lg w-full">
+            <div className="flex-shrink-0 p-2.5 bg-slate-100 rounded-lg">
+              <FileText className="h-6 w-6 text-slate-600" />
+            </div>
+            <div className="flex-1 min-w-0 space-y-1">
+              <h3 className="font-medium text-slate-900 truncate pr-4">
+                {document.file_name}
+              </h3>
+              <div className="space-y-1">
+                {document.document_type && (
+                  <p className="text-sm text-slate-500 truncate">
+                    {document.document_type}
+                  </p>
+                )}
+                {document.regulations && (
+                  <p className="text-sm text-slate-500 truncate">
+                    Related to: {document.regulations.name}
+                  </p>
+                )}
+                {document.description && (
+                  <p className="text-sm text-slate-600 line-clamp-2 break-words">
+                    {document.description}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
