@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +20,7 @@ import RiskAssessment from "./pages/RiskAssessment";
 import RiskAssessmentLanding from "./pages/RiskAssessmentLanding";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +97,16 @@ const App = () => {
                   element={
                     session ? (
                       <Documentation />
+                    ) : (
+                      <Navigate to="/auth" replace={true} />
+                    )
+                  }
+                />
+                <Route
+                  path="/documents"
+                  element={
+                    session ? (
+                      <Documents />
                     ) : (
                       <Navigate to="/auth" replace={true} />
                     )

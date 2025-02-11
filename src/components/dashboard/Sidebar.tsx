@@ -8,6 +8,7 @@ import {
   BookOpen,
   Shield,
   AlertCircle,
+  FileText,
   LucideIcon,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -25,6 +26,7 @@ export const Sidebar = () => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: CheckSquare, label: "Compliance Checklist", path: "/compliance-checklist" },
     { icon: Shield, label: "Risk Assessment", path: "/risk-assessment" },
+    { icon: FileText, label: "Documents", path: "/documents" },
     { icon: BookOpen, label: "Documentation", path: "/documentation" },
     { icon: AlertCircle, label: "Alerts", path: "/alerts" },
     { icon: Settings, label: "Settings", path: "/settings" },

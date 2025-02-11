@@ -214,6 +214,50 @@ export type Database = {
           },
         ]
       }
+      compliance_documents: {
+        Row: {
+          description: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          id: string
+          regulation_id: string | null
+          updated_at: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          description?: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          id?: string
+          regulation_id?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          description?: string | null
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          regulation_id?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_documents_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_regulations: {
         Row: {
           created_at: string
