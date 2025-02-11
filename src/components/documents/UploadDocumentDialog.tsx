@@ -73,8 +73,15 @@ export const UploadDocumentDialog = ({
 
     setIsUploading(true);
     try {
+      // First, get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No authenticated user found");
+      }
+
       const fileExt = values.file.name.split('.').pop();
-      const filePath = `${supabase.auth.getUser().then(({ data }) => data.user?.id)}/${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('compliance_documents')
@@ -90,6 +97,7 @@ export const UploadDocumentDialog = ({
           document_type: values.documentType,
           regulation_id: values.regulationId || null,
           description: values.description,
+          user_id: user.id // Add the user_id here
         });
 
       if (dbError) throw dbError;
