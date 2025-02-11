@@ -84,36 +84,41 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
   };
 
   return (
-    <Card>
-      <CardContent className="p-6">
+    <Card className="overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
         <div className="flex items-start gap-4">
-          <div className="p-2 bg-slate-100 rounded">
-            <FileText className="h-8 w-8 text-slate-600" />
+          <div className="flex-shrink-0 p-2.5 bg-slate-100 rounded-lg">
+            <FileText className="h-6 w-6 text-slate-600" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-slate-900 truncate">
+          <div className="flex-1 min-w-0 space-y-1">
+            <h3 className="font-medium text-slate-900 truncate pr-4">
               {document.file_name}
             </h3>
-            <p className="text-sm text-slate-500 mt-1">
-              {document.document_type}
-            </p>
-            {document.regulations && (
-              <p className="text-sm text-slate-500 mt-1">
-                Related to: {document.regulations.name}
-              </p>
-            )}
-            {document.description && (
-              <p className="text-sm text-slate-600 mt-2 line-clamp-2">
-                {document.description}
-              </p>
-            )}
+            <div className="space-y-1">
+              {document.document_type && (
+                <p className="text-sm text-slate-500 truncate">
+                  {document.document_type}
+                </p>
+              )}
+              {document.regulations && (
+                <p className="text-sm text-slate-500 truncate">
+                  Related to: {document.regulations.name}
+                </p>
+              )}
+              {document.description && (
+                <p className="text-sm text-slate-600 line-clamp-2 break-words">
+                  {document.description}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 mt-4">
+
+        <div className="mt-4 pt-4 border-t border-slate-200 flex flex-wrap gap-2 justify-end">
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 bg-white hover:bg-slate-50"
             onClick={() => setReviewDialogOpen(true)}
           >
             <Bot className="h-4 w-4" />
@@ -122,7 +127,7 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 bg-white hover:bg-slate-50"
             onClick={handleDownload}
           >
             <Download className="h-4 w-4" />
@@ -133,7 +138,7 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 text-red-600 hover:text-red-600"
+                className="gap-2 text-red-600 hover:text-red-600 hover:bg-red-50 bg-white"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete
@@ -148,7 +153,10 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
+                <AlertDialogAction 
+                  onClick={handleDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                >
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>
