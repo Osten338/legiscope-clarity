@@ -7,14 +7,19 @@ import { UploadDocumentDialog } from "@/components/documents/UploadDocumentDialo
 
 const Documents = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [selectedRegulation, setSelectedRegulation] = useState<string | undefined>("all");
 
   return (
     <div className="flex h-screen bg-slate-50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
         <div className="p-8">
-          <DocumentsHeader onUpload={() => setUploadDialogOpen(true)} />
-          <DocumentsList />
+          <DocumentsHeader 
+            onUpload={() => setUploadDialogOpen(true)} 
+            selectedRegulation={selectedRegulation}
+            onRegulationChange={setSelectedRegulation}
+          />
+          <DocumentsList selectedRegulation={selectedRegulation} />
           <UploadDocumentDialog
             open={uploadDialogOpen}
             onOpenChange={setUploadDialogOpen}

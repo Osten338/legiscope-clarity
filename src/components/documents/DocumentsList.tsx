@@ -4,11 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { DocumentCard } from "./DocumentCard";
 
-export const DocumentsList = () => {
+interface DocumentsListProps {
+  selectedRegulation?: string;
+}
+
+export const DocumentsList = ({ selectedRegulation }: DocumentsListProps) => {
   const { data: documents, isLoading } = useQuery({
-    queryKey: ['compliance-documents'],
+    queryKey: ['compliance-documents', selectedRegulation],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('compliance_documents')
         .select(`
           *,
@@ -19,6 +23,11 @@ export const DocumentsList = () => {
         `)
         .order('uploaded_at', { ascending: false });
 
+      if (selectedRegulation && selectedRegulation !== 'all') {
+        query = query.eq('regulation_id', selectedRegulation);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -35,7 +44,7 @@ export const DocumentsList = () => {
   if (!documents?.length) {
     return (
       <Card className="p-8 text-center text-slate-500">
-        No documents uploaded yet. Click the upload button to add your first document.
+        No documents found. {selectedRegulation !== 'all' ? "Try selecting a different regulation or " : ""}Click the upload button to add your first document.
       </Card>
     );
   }
