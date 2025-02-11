@@ -1,10 +1,12 @@
 
-import { FileText, Download, Trash2 } from "lucide-react";
+import { FileText, Download, Trash2, Bot } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { ReviewDocumentDialog } from "./ReviewDocumentDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +26,7 @@ interface DocumentCardProps {
 export const DocumentCard = ({ document }: DocumentCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   const handleDownload = async () => {
     try {
@@ -111,6 +114,15 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
             variant="outline"
             size="sm"
             className="gap-2"
+            onClick={() => setReviewDialogOpen(true)}
+          >
+            <Bot className="h-4 w-4" />
+            Review for Compliance
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
             onClick={handleDownload}
           >
             <Download className="h-4 w-4" />
@@ -144,6 +156,11 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
           </AlertDialog>
         </div>
       </CardContent>
+      <ReviewDocumentDialog 
+        open={reviewDialogOpen}
+        onOpenChange={setReviewDialogOpen}
+        document={document}
+      />
     </Card>
   );
 };
