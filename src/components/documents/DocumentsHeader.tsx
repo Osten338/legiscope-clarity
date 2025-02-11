@@ -1,9 +1,10 @@
 
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface DocumentsHeaderProps {
   onUpload: () => void;
@@ -43,25 +44,32 @@ export const DocumentsHeader = ({
       </div>
       
       {regulations && regulations.length > 0 && (
-        <div className="border-t pt-6">
-          <label className="text-sm font-medium text-slate-700 mb-2 block">
-            Filter by Regulation
-          </label>
-          <ToggleGroup
-            type="single"
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-slate-200">
+          <Tabs
             value={selectedRegulation}
-            onValueChange={(value) => onRegulationChange(value || undefined)}
-            className="justify-start"
+            onValueChange={(value) => onRegulationChange(value)}
+            className="w-full"
           >
-            <ToggleGroupItem value="all" className="gap-2">
-              All Documents
-            </ToggleGroupItem>
-            {regulations.map((reg) => (
-              <ToggleGroupItem key={reg.id} value={reg.id} className="gap-2">
-                {reg.name}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+            <ScrollArea className="w-full">
+              <TabsList className="inline-flex min-w-full border-b border-slate-200 bg-transparent p-0 h-auto">
+                <TabsTrigger
+                  value="all"
+                  className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                >
+                  <span className="truncate block">All Documents</span>
+                </TabsTrigger>
+                {regulations.map((reg) => (
+                  <TabsTrigger
+                    key={reg.id}
+                    value={reg.id}
+                    className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                  >
+                    <span className="truncate block">{reg.name}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </ScrollArea>
+          </Tabs>
         </div>
       )}
     </div>
