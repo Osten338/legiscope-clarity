@@ -75,7 +75,8 @@ Generated on: ${new Date().toLocaleDateString()}
           title: documentTitle,
           content: documentContent,
           regulation_id: regulation.id,
-          status: 'draft'
+          status: 'draft',
+          user_id: user.id // Add the required user_id field
         });
 
       if (error) throw error;
