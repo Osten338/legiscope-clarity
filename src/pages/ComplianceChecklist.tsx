@@ -4,16 +4,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
-import { ClipboardList, ArrowLeft, Bot } from "lucide-react";
+import { ClipboardList, ArrowLeft, Bot, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
+import { GenerateDocumentDialog } from "@/components/compliance/GenerateDocumentDialog";
 
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch saved regulations for the current user with expanded checklist items
@@ -65,26 +67,43 @@ const ComplianceChecklist = () => {
     },
   });
 
+  // Find the selected regulation from savedRegulations
+  const currentRegulation = savedRegulations?.find(
+    saved => saved.regulation.id === selectedRegulation
+  )?.regulation;
+
   return (
     <div className="flex min-h-screen bg-slate-50 relative">
       <Sidebar />
       <div className="flex-1 p-4 md:p-8 overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            {selectedRegulation && (
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              {selectedRegulation && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedRegulation(null)}
+                  className="mr-2"
+                >
+                  <ArrowLeft className="h-5 w-5 text-sage-600" />
+                </Button>
+              )}
+              <ClipboardList className="h-8 w-8 text-sage-600" />
+              <h1 className="text-2xl font-bold text-slate-900">
+                Compliance Checklist
+              </h1>
+            </div>
+            {selectedRegulation && currentRegulation && (
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedRegulation(null)}
-                className="mr-2"
+                variant="outline"
+                className="gap-2"
+                onClick={() => setGenerateDialogOpen(true)}
               >
-                <ArrowLeft className="h-5 w-5 text-sage-600" />
+                <FileText className="h-4 w-4" />
+                Generate Documentation
               </Button>
             )}
-            <ClipboardList className="h-8 w-8 text-sage-600" />
-            <h1 className="text-2xl font-bold text-slate-900">
-              Compliance Checklist
-            </h1>
           </div>
 
           {isLoadingSaved ? (
@@ -181,6 +200,14 @@ const ComplianceChecklist = () => {
         onOpenChange={setShowChat}
         checklistItem={{ description: "How can I improve my compliance?" }}
       />
+
+      {currentRegulation && (
+        <GenerateDocumentDialog 
+          open={generateDialogOpen}
+          onOpenChange={setGenerateDialogOpen}
+          regulation={currentRegulation}
+        />
+      )}
     </div>
   );
 };
