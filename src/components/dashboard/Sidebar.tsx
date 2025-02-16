@@ -7,7 +7,6 @@ import {
   SidebarContent,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 
 interface SidebarItem {
   icon: LucideIcon;
@@ -30,14 +29,10 @@ export const Sidebar = () => {
 
   return (
     <>
-      <SidebarTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="fixed top-4 left-4 z-50 md:hidden"
-        >
+      <SidebarTrigger>
+        <div className="fixed top-4 left-4 z-50 md:hidden">
           <Menu className="h-5 w-5" />
-        </Button>
+        </div>
       </SidebarTrigger>
       
       <SidebarPrimitive className="border-r border-slate-200 bg-white shadow-sm">
