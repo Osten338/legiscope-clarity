@@ -23,7 +23,7 @@ interface UpcomingReviewsProps {
 
 export const UpcomingReviews = ({ savedRegulations }: UpcomingReviewsProps) => {
   return (
-    <Card className="mb-8 border-none shadow-sm bg-gradient-to-br from-[#FDE1D3] to-white">
+    <Card className="mb-8 border-none shadow-sm bg-gradient-to-br from-[#E5DEFF] to-white">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-[#403E43] font-serif">
           <Calendar className="w-5 h-5" />

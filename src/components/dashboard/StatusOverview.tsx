@@ -11,23 +11,23 @@ import { CheckCircle2, Clock, AlertTriangle, HelpCircle } from "lucide-react";
 const statusCards = {
   compliant: { 
     icon: CheckCircle2, 
-    class: "text-green-500",
-    gradient: "from-[#F2FCE2] to-white"
+    class: "text-[#403E43]",
+    gradient: "from-[#E5DEFF] to-white"
   },
   in_progress: { 
     icon: Clock, 
-    class: "text-amber-500",
-    gradient: "from-[#FEF7CD] to-white"
+    class: "text-[#403E43]",
+    gradient: "from-[#E5DEFF] to-white"
   },
   not_compliant: { 
     icon: AlertTriangle, 
-    class: "text-red-500",
-    gradient: "from-[#FFDEE2] to-white"
+    class: "text-[#403E43]",
+    gradient: "from-[#E5DEFF] to-white"
   },
   under_review: { 
     icon: HelpCircle, 
-    class: "text-blue-500",
-    gradient: "from-[#D3E4FD] to-white"
+    class: "text-[#403E43]",
+    gradient: "from-[#E5DEFF] to-white"
   },
 };
 

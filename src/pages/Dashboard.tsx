@@ -45,7 +45,7 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="flex h-screen bg-[#F1F0FB]">
-        <div className="text-sage-600 m-auto">Loading saved regulations...</div>
+        <div className="text-[#403E43] m-auto">Loading saved regulations...</div>
       </div>
     );
   }
