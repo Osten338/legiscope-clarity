@@ -90,7 +90,7 @@ export const BusinessDescription = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="px-4 py-1.5 text-sm font-medium bg-white/80 text-neutral-800 rounded-full inline-block mb-6 backdrop-blur, backdrop-blur-sm"
+          className="px-4 py-1.5 text-sm font-medium bg-white/80 text-neutral-800 rounded-full inline-block mb-6 backdrop-blur-sm"
         >
           Business Assessment
         </motion.span>
@@ -113,13 +113,13 @@ export const BusinessDescription = () => {
           Help us understand your business better to provide tailored compliance recommendations.
         </motion.p>
 
-        <Card className="p-6">
+        <Card className="bg-white/50 backdrop-blur-sm border-white/40 shadow-lg transition-all duration-300 hover:bg-white/80 p-8">
           <div className="space-y-6">
             <div>
-              <Label htmlFor="guidance" className="text-lg font-medium text-neutral-900">
+              <Label htmlFor="guidance" className="text-xl font-serif text-neutral-900">
                 What information should you include?
               </Label>
-              <ul className="mt-3 list-disc list-inside text-neutral-600 space-y-2">
+              <ul className="mt-4 list-disc list-inside text-neutral-600 space-y-2.5">
                 <li>Your business model and primary activities</li>
                 <li>How you interact with customers or clients</li>
                 <li>Industry sector and any relevant subsectors</li>
@@ -133,23 +133,23 @@ export const BusinessDescription = () => {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="description" className="text-lg font-medium text-neutral-900">
+                <Label htmlFor="description" className="text-xl font-serif text-neutral-900">
                   Business Description
                 </Label>
                 <Textarea
                   id="description"
                   placeholder="Describe your business here..."
-                  className="mt-2 h-48"
+                  className="mt-3 h-48 bg-white/70 border-white/40 focus:border-white/60 transition-all duration-300"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
 
               <div>
-                <Label htmlFor="document" className="text-lg font-medium text-neutral-900">
+                <Label htmlFor="document" className="text-xl font-serif text-neutral-900">
                   Or Upload a Document
                 </Label>
-                <div className="mt-2">
+                <div className="mt-3">
                   <Input
                     id="document"
                     type="file"
@@ -158,12 +158,12 @@ export const BusinessDescription = () => {
                   />
                   <Button
                     variant="outline"
-                    className="w-full border-dashed border-2 h-24 flex flex-col items-center justify-center gap-2"
+                    className="w-full border-white/40 border-dashed border-2 h-24 flex flex-col items-center justify-center gap-2 bg-white/30 hover:bg-white/50 transition-all duration-300"
                     onClick={() => document.getElementById("document")?.click()}
                   >
-                    <Upload className="h-6 w-6 text-sage-600" />
-                    <span className="text-sage-600">Upload business documentation</span>
-                    <span className="text-sm text-neutral-500">PDF, DOC, or DOCX up to 10MB</span>
+                    <Upload className="h-6 w-6 text-neutral-800" />
+                    <span className="text-neutral-800">Upload business documentation</span>
+                    <span className="text-sm text-neutral-600">PDF, DOC, or DOCX up to 10MB</span>
                   </Button>
                 </div>
               </div>
@@ -189,10 +189,10 @@ export const BusinessDescription = () => {
 
             {analysis && (
               <div className="mt-6">
-                <Label className="text-lg font-medium text-neutral-900">
+                <Label className="text-xl font-serif text-neutral-900">
                   Analysis Results
                 </Label>
-                <Card className="p-4 mt-2 bg-neutral-50">
+                <Card className="p-4 mt-3 bg-white/30 border-white/40 backdrop-blur-sm">
                   <p className="text-neutral-700 whitespace-pre-wrap">{analysis}</p>
                 </Card>
               </div>
