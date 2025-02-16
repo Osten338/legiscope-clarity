@@ -1,8 +1,8 @@
+
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
 import { ClipboardList, ArrowLeft, Bot, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
 import { GenerateDocumentDialog } from "@/components/compliance/GenerateDocumentDialog";
+import { Layout } from "@/components/dashboard/Layout";
 
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
@@ -70,9 +71,8 @@ const ComplianceChecklist = () => {
   )?.regulation;
 
   return (
-    <div className="flex min-h-screen bg-slate-50 relative">
-      <Sidebar />
-      <div className="flex-1 p-4 md:p-8 overflow-hidden">
+    <Layout>
+      <div className="p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -205,7 +205,7 @@ const ComplianceChecklist = () => {
           regulation={currentRegulation}
         />
       )}
-    </div>
+    </Layout>
   );
 };
 
