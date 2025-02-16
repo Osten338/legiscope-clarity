@@ -28,13 +28,15 @@
     --radius: 0.75rem;
   }
 
-  * {
-    @apply border-border;
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: transparent !important;
   }
 
   body {
     @apply text-foreground font-['Inter'] antialiased;
-    background: transparent;
   }
 
   .glass-panel {
