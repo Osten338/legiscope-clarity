@@ -9,7 +9,7 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultCollapsed>
       <div className="min-h-screen flex w-full bg-slate-50">
         <Sidebar />
         <div className="flex-1 overflow-auto">
