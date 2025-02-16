@@ -51,7 +51,7 @@ export const StatusOverview = ({
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
                 <Icon className={cn("w-4 h-4", colorClass)} />
-                <span className="text-[#403E43] font-medium text-base">{getStatusText(status)}</span>
+                <span className="text-[#403E43] font-medium font-serif text-base">{getStatusText(status)}</span>
               </CardDescription>
               <CardTitle className="text-2xl font-serif text-[#403E43]">{count}</CardTitle>
             </CardHeader>
