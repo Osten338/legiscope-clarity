@@ -9,13 +9,13 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   return (
-    <SidebarProvider defaultCollapsed>
-      <div className="min-h-screen flex w-full bg-slate-50">
+    <div className="min-h-screen flex w-full bg-slate-50">
+      <SidebarProvider>
         <Sidebar />
         <div className="flex-1 overflow-auto">
           {children}
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </div>
   );
 };
