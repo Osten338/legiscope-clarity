@@ -1,13 +1,12 @@
 
-import { Sidebar } from "@/components/dashboard/Sidebar";
 import { DocumentationCard } from "@/components/documentation/DocumentationCard";
 import { Separator } from "@/components/ui/separator";
+import { Layout } from "@/components/dashboard/Layout";
 
 const Documentation = () => {
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 p-8 overflow-y-auto bg-slate-50">
+    <Layout>
+      <div className="p-8 overflow-y-auto bg-slate-50">
         <div className="max-w-4xl mx-auto space-y-8">
           <div>
             <h1 className="text-3xl font-bold text-sage-900">Documentation</h1>
@@ -91,7 +90,7 @@ const Documentation = () => {
           </DocumentationCard>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
