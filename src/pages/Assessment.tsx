@@ -6,10 +6,10 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 const Assessment = () => {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen"
+      className="min-h-screen bg-transparent"
     >
       <AnimatedBackground />
       <BusinessDescription />
