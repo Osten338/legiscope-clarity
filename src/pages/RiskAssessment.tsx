@@ -8,7 +8,7 @@ import { RiskList } from "@/components/risk-assessment/RiskList";
 import { AddRiskDialog } from "@/components/risk-assessment/AddRiskDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sidebar } from "@/components/dashboard/Sidebar";
+import { Layout } from "@/components/dashboard/Layout";
 
 const RiskAssessment = () => {
   const { view } = useParams();
@@ -43,19 +43,17 @@ const RiskAssessment = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar />
+      <Layout>
         <div className="flex-1">
           <div className="text-sage-600 m-auto">Loading risk assessment data...</div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 p-8">
+    <Layout>
+      <div className="p-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-sage-900">Risk Assessment</h1>
           <Button onClick={() => setIsAddRiskOpen(true)}>Add New Risk</Button>
@@ -81,7 +79,7 @@ const RiskAssessment = () => {
           onOpenChange={setIsAddRiskOpen}
         />
       </div>
-    </div>
+    </Layout>
   );
 };
 
