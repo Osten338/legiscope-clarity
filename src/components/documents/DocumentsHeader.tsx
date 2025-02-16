@@ -32,8 +32,8 @@ export const DocumentsHeader = ({
     <div className="space-y-6 mb-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Compliance Documents</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-2xl font-serif text-slate-900">Compliance Documents</h1>
+          <p className="text-slate-600 mt-1 font-serif">
             Upload and manage your compliance-related documents
           </p>
         </div>
@@ -54,7 +54,7 @@ export const DocumentsHeader = ({
               <TabsList className="inline-flex min-w-full border-b border-slate-200 bg-transparent p-0 h-auto">
                 <TabsTrigger
                   value="all"
-                  className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                  className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-slate-900 hover:text-slate-900 transition-colors font-serif"
                 >
                   <span className="truncate block">All Documents</span>
                 </TabsTrigger>
@@ -62,7 +62,7 @@ export const DocumentsHeader = ({
                   <TabsTrigger
                     key={reg.id}
                     value={reg.id}
-                    className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                    className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-slate-900 hover:text-slate-900 transition-colors font-serif"
                   >
                     <span className="truncate block">{reg.name}</span>
                   </TabsTrigger>

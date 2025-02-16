@@ -18,7 +18,6 @@ const ComplianceChecklist = () => {
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  // Fetch saved regulations for the current user with expanded checklist items
   const { data: savedRegulations, isLoading: isLoadingSaved } = useQuery({
     queryKey: ["saved-regulations"],
     queryFn: async () => {
@@ -49,7 +48,6 @@ const ComplianceChecklist = () => {
     },
   });
 
-  // Fetch responses for checklist items
   const { data: responses, isLoading: isLoadingResponses } = useQuery({
     queryKey: ["checklist-responses", selectedRegulation],
     enabled: !!selectedRegulation,
@@ -67,7 +65,6 @@ const ComplianceChecklist = () => {
     },
   });
 
-  // Find the selected regulation from savedRegulations
   const currentRegulation = savedRegulations?.find(
     saved => saved.regulation.id === selectedRegulation
   )?.regulation;
@@ -86,11 +83,11 @@ const ComplianceChecklist = () => {
                   onClick={() => setSelectedRegulation(null)}
                   className="mr-2"
                 >
-                  <ArrowLeft className="h-5 w-5 text-sage-600" />
+                  <ArrowLeft className="h-5 w-5 text-slate-600" />
                 </Button>
               )}
-              <ClipboardList className="h-8 w-8 text-sage-600" />
-              <h1 className="text-2xl font-bold text-slate-900">
+              <ClipboardList className="h-8 w-8 text-slate-600" />
+              <h1 className="text-2xl font-serif text-slate-900">
                 Compliance Checklist
               </h1>
             </div>
@@ -108,16 +105,16 @@ const ComplianceChecklist = () => {
 
           {isLoadingSaved ? (
             <div className="text-center py-12">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-sage-600 border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4" />
-              <p className="text-sage-600">Loading your regulations...</p>
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-600 border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4" />
+              <p className="text-slate-600 font-serif">Loading your regulations...</p>
             </div>
           ) : savedRegulations?.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-slate-100">
-              <ClipboardList className="h-12 w-12 text-sage-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-900 mb-2">
+              <ClipboardList className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-slate-900 mb-2 font-serif">
                 No Regulations Added
               </h3>
-              <p className="text-slate-600 max-w-md mx-auto">
+              <p className="text-slate-600 max-w-md mx-auto font-serif">
                 You haven't added any regulations to your checklist yet. Visit the regulations page to add some to your checklist.
               </p>
             </div>
@@ -127,21 +124,21 @@ const ComplianceChecklist = () => {
                 <Card
                   key={saved.regulation.id}
                   className={cn(
-                    "cursor-pointer transition-all hover:shadow-md border-sage-200",
-                    "hover:border-sage-300"
+                    "cursor-pointer transition-all hover:shadow-md border-slate-200",
+                    "hover:border-slate-300"
                   )}
                   onClick={() => setSelectedRegulation(saved.regulation.id)}
                 >
-                  <CardHeader className="border-b border-sage-100 bg-sage-50/50">
-                    <CardTitle className="text-lg text-sage-900">
+                  <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                    <CardTitle className="text-lg text-slate-900 font-serif">
                       {saved.regulation.name}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
-                    <p className="text-slate-600 text-sm">
+                    <p className="text-slate-600 text-sm font-serif">
                       {saved.regulation.description}
                     </p>
-                    <div className="mt-4 text-sm text-sage-600">
+                    <div className="mt-4 text-sm text-slate-600 font-serif">
                       {saved.regulation.checklist_items.length} checklist items
                     </div>
                   </CardContent>
@@ -161,7 +158,7 @@ const ComplianceChecklist = () => {
                       <TabsTrigger
                         key={saved.regulation.id}
                         value={saved.regulation.id}
-                        className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-sage-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-sage-600 hover:text-sage-700 transition-colors"
+                        className="flex-shrink-0 px-6 py-3 rounded-none border-r border-slate-200 last:border-r-0 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-700 data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-b-slate-600 hover:text-slate-700 transition-colors"
                       >
                         <span className="truncate block">
                           {saved.regulation.name}
@@ -189,7 +186,7 @@ const ComplianceChecklist = () => {
       </div>
 
       <Button
-        className="fixed bottom-8 right-8 h-12 w-12 rounded-full shadow-lg"
+        className="fixed bottom-8 right-8 h-12 w-12 rounded-full shadow-lg bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50"
         onClick={() => setShowChat(true)}
       >
         <Bot className="h-6 w-6" />

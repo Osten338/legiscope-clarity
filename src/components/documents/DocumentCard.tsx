@@ -92,22 +92,22 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
               <FileText className="h-6 w-6 text-slate-600" />
             </div>
             <div className="flex-1 min-w-0 space-y-1">
-              <h3 className="font-medium text-slate-900 truncate pr-4">
+              <h3 className="font-medium text-slate-900 truncate pr-4 font-serif">
                 {document.file_name}
               </h3>
               <div className="space-y-1">
                 {document.document_type && (
-                  <p className="text-sm text-slate-500 truncate">
+                  <p className="text-sm text-slate-500 truncate font-serif">
                     {document.document_type}
                   </p>
                 )}
                 {document.regulations && (
-                  <p className="text-sm text-slate-500 truncate">
+                  <p className="text-sm text-slate-500 truncate font-serif">
                     Related to: {document.regulations.name}
                   </p>
                 )}
                 {document.description && (
-                  <p className="text-sm text-slate-600 line-clamp-2 break-words">
+                  <p className="text-sm text-slate-600 line-clamp-2 break-words font-serif">
                     {document.description}
                   </p>
                 )}
