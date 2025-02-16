@@ -15,18 +15,20 @@ export const AnimatedBackground = () => {
           }}
           animate={{
             opacity: [0.3, 0.5, 0.3],
-            scale: [1, 1.1, 1],
-            rotate: [i * 90, (i * 90) + 5, i * 90],
+            scale: [1, 1.2, 1],
+            rotate: [i * 90, (i * 90) + 15, i * 90],
+            y: [0, 50, 0],
+            x: [0, 30, 0],
           }}
           transition={{
-            duration: 12,
+            duration: 20,
             repeat: Infinity,
             repeatType: "reverse",
-            delay: i * 2,
+            delay: i * 3,
             ease: "easeInOut",
           }}
         >
-          <div className="w-full h-full bg-gradient-to-br from-[#FDE1D3] via-[#FFDEE2] to-[#FEC6A1] opacity-30 blur-3xl transform -translate-y-1/2" />
+          <div className="w-[120%] h-[120%] -ml-[10%] -mt-[10%] bg-gradient-to-br from-[#FDE1D3] via-[#FFDEE2] to-[#FEC6A1] opacity-30 blur-3xl" />
         </motion.div>
       ))}
       <div className="absolute inset-0 bg-[#f8f6f1]/70 backdrop-blur-sm" />
