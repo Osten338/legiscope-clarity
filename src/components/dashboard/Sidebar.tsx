@@ -28,13 +28,15 @@ export const Sidebar = () => {
   ];
 
   return (
-    <SidebarPrimitive className="h-full">
-      <SidebarContent className="h-screen border-r border-slate-200 bg-white shadow-sm transition-all duration-300 flex flex-col w-64 data-[collapsed=true]:w-[68px]">
+    <SidebarPrimitive>
+      <SidebarContent className="border-r border-slate-200 bg-white shadow-sm transition-all duration-300 flex flex-col w-[250px] data-[collapsed=true]:w-[70px]">
         <div className="flex justify-between items-center p-4">
-          <h2 className="text-xl font-serif text-slate-900 truncate transition-opacity duration-300 data-[collapsed=true]:opacity-0">
-            Compliance Hub
-          </h2>
-          <SidebarTrigger className="p-2 hover:bg-slate-100 rounded-lg">
+          <span className="transition-all duration-300 overflow-hidden data-[collapsed=true]:w-0">
+            <h2 className="text-xl font-serif text-slate-900 whitespace-nowrap">
+              Compliance Hub
+            </h2>
+          </span>
+          <SidebarTrigger className="p-2 hover:bg-slate-100 rounded-lg shrink-0">
             <ChevronRight className="h-5 w-5 text-slate-500 transition-transform duration-200 data-[collapsed=false]:rotate-180" />
           </SidebarTrigger>
         </div>
@@ -48,14 +50,14 @@ export const Sidebar = () => {
               className={cn(
                 "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors font-serif",
                 "hover:bg-slate-50 hover:text-slate-900",
-                "data-[collapsed=true]:justify-center data-[collapsed=true]:px-2",
+                "data-[collapsed=true]:justify-center",
                 location.pathname === item.path
                   ? "bg-slate-100 text-slate-900"
                   : "text-slate-600"
               )}
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              <span className="truncate transition-opacity duration-300 data-[collapsed=true]:hidden">
+              <item.icon className="h-5 w-5 shrink-0" />
+              <span className="transition-all duration-300 overflow-hidden whitespace-nowrap data-[collapsed=true]:w-0">
                 {item.label}
               </span>
             </Link>
