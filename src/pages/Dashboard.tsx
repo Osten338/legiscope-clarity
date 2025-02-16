@@ -6,8 +6,10 @@ import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationsList } from "@/components/dashboard/RegulationsList";
+
 const Dashboard = () => {
   const [openRegulation, setOpenRegulation] = useState<string | null>(null);
+
   const {
     data: savedRegulations,
     isLoading
@@ -41,21 +43,32 @@ const Dashboard = () => {
       return savedRegs;
     }
   });
+
   if (isLoading) {
-    return <div className="flex h-screen bg-[#F1F0FB]">
-        <div className="text-[#403E43] m-auto">Loading saved regulations...</div>
-      </div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <div className="text-slate-900 m-auto">Loading saved regulations...</div>
+      </div>
+    );
   }
-  return <div className="flex h-screen bg-[#F1F0FB]">
+
+  return (
+    <div className="flex h-screen bg-slate-50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-8 max-w-7xl bg-slate-400 hover:bg-slate-300">
+        <div className="container mx-auto p-8 max-w-7xl">
           <WelcomeCard />
           <StatusOverview savedRegulations={savedRegulations || []} />
           <UpcomingReviews savedRegulations={savedRegulations || []} />
-          <RegulationsList savedRegulations={savedRegulations || []} openRegulation={openRegulation} setOpenRegulation={setOpenRegulation} />
+          <RegulationsList
+            savedRegulations={savedRegulations || []}
+            openRegulation={openRegulation}
+            setOpenRegulation={setOpenRegulation}
+          />
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Dashboard;

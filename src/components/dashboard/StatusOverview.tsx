@@ -5,23 +5,23 @@ import { CheckCircle2, Clock, AlertTriangle, HelpCircle } from "lucide-react";
 const statusCards = {
   compliant: {
     icon: CheckCircle2,
-    class: "text-[#403E43]",
-    gradient: "from-[#FDE1D3] to-white"
+    class: "text-slate-600",
+    gradient: "bg-white"
   },
   in_progress: {
     icon: Clock,
-    class: "text-[#403E43]",
-    gradient: "from-[#FDE1D3] to-white"
+    class: "text-slate-600",
+    gradient: "bg-white"
   },
   not_compliant: {
     icon: AlertTriangle,
-    class: "text-[#403E43]",
-    gradient: "from-[#FDE1D3] to-white"
+    class: "text-slate-600",
+    gradient: "bg-white"
   },
   under_review: {
     icon: HelpCircle,
-    class: "text-[#403E43]",
-    gradient: "from-[#FDE1D3] to-white"
+    class: "text-slate-600",
+    gradient: "bg-white"
   }
 };
 
@@ -47,13 +47,13 @@ export const StatusOverview = ({ savedRegulations }: StatusOverviewProps) => {
       {Object.entries(statusCards).map(([status, { icon: Icon, class: colorClass, gradient }]) => {
         const count = savedRegulations?.filter(reg => reg.status === status).length || 0;
         return (
-          <Card key={status} className={cn("border-none shadow-sm bg-gradient-to-br", gradient)}>
+          <Card key={status} className={cn("border-slate-200 shadow-sm", gradient)}>
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
                 <Icon className={cn("w-4 h-4", colorClass)} />
-                <span className="font-medium text-[#403E43] font-serif">{getStatusText(status)}</span>
+                <span className="font-medium text-slate-600 font-serif">{getStatusText(status)}</span>
               </CardDescription>
-              <CardTitle className="text-2xl font-serif text-[#403E43]">{count}</CardTitle>
+              <CardTitle className="text-2xl font-serif text-slate-900">{count}</CardTitle>
             </CardHeader>
           </Card>
         );

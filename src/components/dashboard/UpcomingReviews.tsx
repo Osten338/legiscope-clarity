@@ -17,9 +17,9 @@ interface UpcomingReviewsProps {
 
 export const UpcomingReviews = ({ savedRegulations }: UpcomingReviewsProps) => {
   return (
-    <Card className="mb-8 border-none shadow-sm bg-gradient-to-br from-[#FDE1D3] to-white">
+    <Card className="mb-8 border-slate-200 shadow-sm bg-white">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-[#403E43] font-serif">
+        <CardTitle className="flex items-center gap-2 text-slate-900 font-serif">
           <Calendar className="w-5 h-5" />
           Upcoming Reviews
         </CardTitle>
@@ -33,18 +33,18 @@ export const UpcomingReviews = ({ savedRegulations }: UpcomingReviewsProps) => {
             .map(saved => saved.regulations && (
               <div
                 key={saved.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-white/50 hover:bg-white/80 transition-colors group"
+                className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors group"
               >
                 <div className="flex items-center gap-4">
-                  <Calendar className="w-5 h-5 text-[#8A898C]" />
+                  <Calendar className="w-5 h-5 text-slate-600" />
                   <div>
-                    <h4 className="font-medium text-[#403E43] font-serif">{saved.regulations.name}</h4>
-                    <p className="text-sm text-[#8A898C] font-serif">
+                    <h4 className="font-medium text-slate-900 font-serif">{saved.regulations.name}</h4>
+                    <p className="text-sm text-slate-600 font-serif">
                       Review due: {format(new Date(saved.next_review_date!), 'PPP')}
                     </p>
                   </div>
                 </div>
-                <ArrowUpRight className="w-5 h-5 text-[#8A898C] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ArrowUpRight className="w-5 h-5 text-slate-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
             ))}
         </div>

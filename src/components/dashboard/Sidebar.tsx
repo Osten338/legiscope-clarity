@@ -23,9 +23,9 @@ export const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gradient-to-b from-[#F6F6F7] to-white border-r border-[#FDE1D3] shadow-sm">
+    <div className="w-64 bg-white border-r border-slate-200 shadow-sm">
       <div className="p-6">
-        <h2 className="text-xl font-serif text-[#403E43]">Compliance Hub</h2>
+        <h2 className="text-xl font-serif text-slate-900">Compliance Hub</h2>
       </div>
       <ScrollArea className="h-[calc(100vh-5rem)]">
         <div className="space-y-1 p-2">
@@ -36,8 +36,8 @@ export const Sidebar = () => {
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-md transition-colors font-serif",
                 location.pathname === item.path
-                  ? "bg-[#FDE1D3] text-[#403E43]"
-                  : "text-[#8A898C] hover:bg-[#F1F0FB] hover:text-[#403E43]"
+                  ? "bg-slate-100 text-slate-900"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               )}
             >
               <item.icon className="w-5 h-5" />
