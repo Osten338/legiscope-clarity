@@ -49,7 +49,7 @@ const Dashboard = () => {
   return <div className="flex h-screen bg-[#F1F0FB]">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-8 max-w-7xl bg-orange-300 hover:bg-orange-200">
+        <div className="container mx-auto p-8 max-w-7xl bg-slate-400 hover:bg-slate-300">
           <WelcomeCard />
           <StatusOverview savedRegulations={savedRegulations || []} />
           <UpcomingReviews savedRegulations={savedRegulations || []} />
