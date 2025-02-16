@@ -1,5 +1,4 @@
 
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export const AnimatedBackground = () => {
@@ -11,7 +10,7 @@ export const AnimatedBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 -z-10">
+    <div className="fixed inset-0" style={{ zIndex: -1 }}>
       <img 
         src={imageUrl}
         alt="Wavy background pattern"
