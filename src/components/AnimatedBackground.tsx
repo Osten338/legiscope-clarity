@@ -11,30 +11,18 @@ export const AnimatedBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      <img 
-        src={imageUrl}
-        alt="Background"
-        className="absolute inset-0 w-full h-full object-cover"
-        onError={(e) => {
-          console.error("Error loading image:", e);
-          setImageError(true);
-        }}
-        onLoad={() => {
-          console.log("Image loaded successfully");
-        }}
-      />
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-rose-100 to-teal-100">
       {[...Array(4)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute inset-0"
           initial={{
-            opacity: 0.05, // Reduced opacity
+            opacity: 0.05,
             scale: 1,
             rotate: i * 90,
           }}
           animate={{
-            opacity: [0.05, 0.1, 0.05], // Reduced opacity range
+            opacity: [0.05, 0.1, 0.05],
             scale: [1, 1.2, 1],
             rotate: [i * 90, (i * 90) + 15, i * 90],
             y: [0, 50, 0],
@@ -51,8 +39,7 @@ export const AnimatedBackground = () => {
           <div className="w-[120%] h-[120%] -ml-[10%] -mt-[10%] bg-gradient-to-br from-[#FDE1D3]/10 via-[#FFDEE2]/10 to-[#FEC6A1]/10 opacity-10 blur-3xl" />
         </motion.div>
       ))}
-      {/* Reduced the opacity of the overlay */}
-      <div className="absolute inset-0 bg-[#f8f6f1]/10 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
     </div>
   );
 };
