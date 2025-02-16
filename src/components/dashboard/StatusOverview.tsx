@@ -12,22 +12,22 @@ const statusCards = {
   compliant: { 
     icon: CheckCircle2, 
     class: "text-[#403E43]",
-    gradient: "from-[#E5DEFF] to-white"
+    gradient: "from-[#FDE1D3] to-white"
   },
   in_progress: { 
     icon: Clock, 
     class: "text-[#403E43]",
-    gradient: "from-[#E5DEFF] to-white"
+    gradient: "from-[#FDE1D3] to-white"
   },
   not_compliant: { 
     icon: AlertTriangle, 
     class: "text-[#403E43]",
-    gradient: "from-[#E5DEFF] to-white"
+    gradient: "from-[#FDE1D3] to-white"
   },
   under_review: { 
     icon: HelpCircle, 
     class: "text-[#403E43]",
-    gradient: "from-[#E5DEFF] to-white"
+    gradient: "from-[#FDE1D3] to-white"
   },
 };
 

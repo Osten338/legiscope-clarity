@@ -7,9 +7,9 @@ import {
 
 export const WelcomeCard = () => {
   return (
-    <Card className="mb-8 bg-gradient-to-br from-[#E5DEFF] to-white border-none shadow-sm">
+    <Card className="mb-8 bg-gradient-to-br from-[#FDE1D3] to-white border-none shadow-sm">
       <CardContent className="flex items-center gap-6 pt-6">
-        <div className="w-16 h-16 rounded-full bg-[#D3E4FD] flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full bg-[#FDE1D3] flex items-center justify-center">
           <Shield className="w-8 h-8 text-[#403E43]" />
         </div>
         <div>
