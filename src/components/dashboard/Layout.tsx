@@ -12,9 +12,9 @@ export const Layout = ({ children }: LayoutProps) => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-slate-50">
         <Sidebar />
-        <div className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto">
           {children}
-        </div>
+        </main>
       </div>
     </SidebarProvider>
   );
