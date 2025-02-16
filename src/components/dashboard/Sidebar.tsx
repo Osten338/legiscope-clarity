@@ -1,69 +1,131 @@
 
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, CheckSquare, Settings, BookOpen, Shield, AlertCircle, FileText, LucideIcon, ChevronRight } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
 import { 
-  Sidebar as SidebarPrimitive,
-  SidebarContent,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+  LayoutDashboard, 
+  Users, 
+  Folder, 
+  Calendar, 
+  FileText, 
+  BarChart, 
+  Settings,
+  X
+} from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
-interface SidebarItem {
-  icon: LucideIcon;
-  label: string;
-  path: string;
+interface SidebarProps {
+  mobile?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar = () => {
+const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Team", href: "/team", icon: Users },
+  { name: "Projects", href: "/projects", icon: Folder },
+  { name: "Calendar", href: "/calendar", icon: Calendar },
+  { name: "Documents", href: "/documents", icon: FileText },
+  { name: "Reports", href: "/reports", icon: BarChart },
+];
+
+const teams = [
+  { id: 1, name: "Heroicons", href: "#", initial: "H" },
+  { id: 2, name: "Tailwind Labs", href: "#", initial: "T" },
+  { id: 3, name: "Workcation", href: "#", initial: "W" },
+];
+
+export const Sidebar = ({ mobile, onClose }: SidebarProps) => {
   const location = useLocation();
   
-  const sidebarItems: SidebarItem[] = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-    { icon: CheckSquare, label: "Compliance Checklist", path: "/compliance-checklist" },
-    { icon: Shield, label: "Risk Assessment", path: "/risk-assessment" },
-    { icon: FileText, label: "Documents", path: "/documents" },
-    { icon: BookOpen, label: "Documentation", path: "/documentation" },
-    { icon: AlertCircle, label: "Alerts", path: "/alerts" },
-    { icon: Settings, label: "Settings", path: "/settings" },
-  ];
-
   return (
-    <SidebarPrimitive>
-      <SidebarContent className="border-r border-slate-200 bg-white shadow-sm transition-all duration-300 flex flex-col w-[250px] data-[collapsed=true]:w-[70px]">
-        <div className="flex justify-between items-center p-4">
-          <span className="transition-all duration-300 overflow-hidden data-[collapsed=true]:w-0">
-            <h2 className="text-xl font-serif text-slate-900 whitespace-nowrap">
-              Compliance Hub
-            </h2>
-          </span>
-          <SidebarTrigger className="p-2 hover:bg-slate-100 rounded-lg shrink-0">
-            <ChevronRight className="h-5 w-5 text-slate-500 transition-transform duration-200 data-[collapsed=false]:rotate-180" />
-          </SidebarTrigger>
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-slate-200 bg-white px-6 pb-4">
+      {mobile && (
+        <div className="flex h-16 shrink-0 items-center justify-between">
+          <img
+            alt="Your Company"
+            src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
+            className="h-8 w-auto"
+          />
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-6 w-6" />
+          </Button>
         </div>
-        
-        <div className="space-y-1 p-2">
-          {sidebarItems.map((item) => (
+      )}
+      {!mobile && (
+        <div className="flex h-16 shrink-0 items-center">
+          <img
+            alt="Your Company"
+            src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
+            className="h-8 w-auto"
+          />
+        </div>
+      )}
+      <nav className="flex flex-1 flex-col">
+        <ul role="list" className="flex flex-1 flex-col gap-y-7">
+          <li>
+            <ul role="list" className="-mx-2 space-y-1">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <li key={item.name}>
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                        isActive
+                          ? "bg-slate-50 text-indigo-600"
+                          : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          "h-6 w-6 shrink-0",
+                          isActive
+                            ? "text-indigo-600"
+                            : "text-slate-400 group-hover:text-indigo-600"
+                        )}
+                      />
+                      {item.name}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+          <li>
+            <div className="text-xs font-semibold leading-6 text-slate-400">
+              Your teams
+            </div>
+            <ul role="list" className="-mx-2 mt-2 space-y-1">
+              {teams.map((team) => (
+                <li key={team.name}>
+                  <Link
+                    to={team.href}
+                    className="group flex gap-x-3 rounded-md p-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  >
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-[0.625rem] font-medium text-slate-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
+                    >
+                      {team.initial}
+                    </span>
+                    <span className="truncate">{team.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li className="mt-auto">
             <Link
-              key={item.label}
-              to={item.path}
-              title={item.label}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors font-serif",
-                "hover:bg-slate-50 hover:text-slate-900",
-                "data-[collapsed=true]:justify-center",
-                location.pathname === item.path
-                  ? "bg-slate-100 text-slate-900"
-                  : "text-slate-600"
-              )}
+              to="/settings"
+              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
             >
-              <item.icon className="h-5 w-5 shrink-0" />
-              <span className="transition-all duration-300 overflow-hidden whitespace-nowrap data-[collapsed=true]:w-0">
-                {item.label}
-              </span>
+              <Settings
+                className="h-6 w-6 shrink-0 text-slate-400 group-hover:text-indigo-600"
+              />
+              Settings
             </Link>
-          ))}
-        </div>
-      </SidebarContent>
-    </SidebarPrimitive>
+          </li>
+        </ul>
+      </nav>
+    </div>
   );
 };
