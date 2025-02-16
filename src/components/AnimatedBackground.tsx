@@ -4,6 +4,12 @@ import { motion } from "framer-motion";
 export const AnimatedBackground = () => {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/lovable-uploads/95ceb460-c104-460c-98b5-fe36fc57a4d7.png')"
+        }}
+      />
       {[...Array(4)].map((_, i) => (
         <motion.div
           key={i}
