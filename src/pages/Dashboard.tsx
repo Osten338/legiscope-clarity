@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { WelcomeCard } from "@/components/dashboard/WelcomeCard";
 import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
-import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationsList } from "@/components/dashboard/RegulationsList";
 import { Layout } from "@/components/dashboard/Layout";
 
@@ -49,25 +48,24 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="text-slate-900 m-auto">Loading saved regulations...</div>
+        <div className="container mx-auto p-8">
+          <div className="text-slate-900 text-center">Loading saved regulations...</div>
+        </div>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-8 max-w-7xl">
-          <WelcomeCard />
-          <StatusOverview savedRegulations={savedRegulations || []} />
-          <UpcomingReviews savedRegulations={savedRegulations || []} />
-          <RegulationsList
-            savedRegulations={savedRegulations || []}
-            openRegulation={openRegulation}
-            setOpenRegulation={setOpenRegulation}
-          />
-        </div>
+      <div className="container mx-auto p-8 max-w-7xl">
+        <WelcomeCard />
+        <StatusOverview savedRegulations={savedRegulations || []} />
+        <UpcomingReviews savedRegulations={savedRegulations || []} />
+        <RegulationsList
+          savedRegulations={savedRegulations || []}
+          openRegulation={openRegulation}
+          setOpenRegulation={setOpenRegulation}
+        />
       </div>
     </Layout>
   );

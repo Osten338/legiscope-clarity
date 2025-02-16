@@ -5,8 +5,9 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   Sidebar as SidebarPrimitive,
   SidebarContent,
-  SidebarTrigger
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 
 interface SidebarItem {
   icon: LucideIcon;
@@ -29,14 +30,14 @@ export const Sidebar = () => {
 
   return (
     <>
-      <SidebarTrigger>
-        <div className="fixed top-4 left-4 z-50 md:hidden">
+      <SidebarTrigger className="fixed top-4 left-4 z-50">
+        <Button variant="ghost" size="icon">
           <Menu className="h-5 w-5" />
-        </div>
+        </Button>
       </SidebarTrigger>
       
-      <SidebarPrimitive className="border-r border-slate-200 bg-white shadow-sm">
-        <SidebarContent>
+      <SidebarPrimitive>
+        <SidebarContent className="border-r border-slate-200 bg-white shadow-sm h-full">
           <div className="p-6">
             <h2 className="text-xl font-serif text-slate-900">Compliance Hub</h2>
           </div>
