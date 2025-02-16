@@ -31,9 +31,9 @@ export const Features = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
-              className="group"
+              className="group h-full"
             >
-              <div className="p-8 bg-white/50 backdrop-blur-sm rounded-2xl transition-all duration-300 hover:bg-white/80">
+              <div className="p-8 bg-white/50 backdrop-blur-sm rounded-2xl transition-all duration-300 hover:bg-white/80 h-full flex flex-col">
                 <div className="mb-6">{feature.icon}</div>
                 <h3 className="text-xl font-serif mb-4 text-neutral-900">
                   {feature.title}
