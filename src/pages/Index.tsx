@@ -10,7 +10,7 @@ const Index = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen relative"
+      className="min-h-screen"
     >
       <AnimatedBackground />
       <Hero />

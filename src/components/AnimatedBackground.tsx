@@ -11,7 +11,7 @@ export const AnimatedBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
+    <div className="fixed inset-0 -z-10">
       <img 
         src={imageUrl}
         alt="Wavy background pattern"
