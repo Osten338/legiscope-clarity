@@ -19,17 +19,17 @@ export const AnimatedBackground = () => {
   }, []);
 
   return (
-    <div 
-      className="fixed inset-0 w-full h-full bg-[#f8f6f1]"
-      style={{
-        backgroundImage: `url(${imageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        opacity: loaded ? 1 : 0,
-        transition: 'opacity 0.3s ease-in-out',
-        zIndex: -1
-      }}
-    />
+    <div className="fixed inset-0 w-full h-full overflow-hidden bg-[#f8f6f1]">
+      <img
+        src={imageUrl}
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          opacity: loaded ? 1 : 0,
+          transition: 'opacity 0.3s ease-in-out',
+          zIndex: -1
+        }}
+      />
+    </div>
   );
 };
