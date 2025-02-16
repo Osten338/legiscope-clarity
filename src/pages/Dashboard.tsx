@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -7,16 +6,18 @@ import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RegulationsList } from "@/components/dashboard/RegulationsList";
-
 const Dashboard = () => {
   const [openRegulation, setOpenRegulation] = useState<string | null>(null);
-
-  const { data: savedRegulations, isLoading } = useQuery({
+  const {
+    data: savedRegulations,
+    isLoading
+  } = useQuery({
     queryKey: ['savedRegulations'],
     queryFn: async () => {
-      const { data: savedRegs, error } = await supabase
-        .from('saved_regulations')
-        .select(`
+      const {
+        data: savedRegs,
+        error
+      } = await supabase.from('saved_regulations').select(`
           id,
           regulation_id,
           status,
@@ -36,37 +37,25 @@ const Dashboard = () => {
             )
           )
         `);
-
       if (error) throw error;
       return savedRegs;
     }
   });
-
   if (isLoading) {
-    return (
-      <div className="flex h-screen bg-[#F1F0FB]">
+    return <div className="flex h-screen bg-[#F1F0FB]">
         <div className="text-[#403E43] m-auto">Loading saved regulations...</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="flex h-screen bg-[#F1F0FB]">
+  return <div className="flex h-screen bg-[#F1F0FB]">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-8 max-w-7xl">
+        <div className="container mx-auto p-8 max-w-7xl bg-orange-300 hover:bg-orange-200">
           <WelcomeCard />
           <StatusOverview savedRegulations={savedRegulations || []} />
           <UpcomingReviews savedRegulations={savedRegulations || []} />
-          <RegulationsList
-            savedRegulations={savedRegulations || []}
-            openRegulation={openRegulation}
-            setOpenRegulation={setOpenRegulation}
-          />
+          <RegulationsList savedRegulations={savedRegulations || []} openRegulation={openRegulation} setOpenRegulation={setOpenRegulation} />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;

@@ -1,14 +1,8 @@
-
 import { Shield } from "lucide-react";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-
+import { Card, CardContent } from "@/components/ui/card";
 export const WelcomeCard = () => {
-  return (
-    <Card className="mb-8 bg-gradient-to-br from-[#FDE1D3] to-white border-none shadow-sm">
-      <CardContent className="flex items-center gap-6 pt-6">
+  return <Card className="mb-8 bg-gradient-to-br from-[#FDE1D3] to-white border-none shadow-sm">
+      <CardContent className="flex items-center gap-6 pt-6 bg-white/[0.42]">
         <div className="w-16 h-16 rounded-full bg-[#FDE1D3] flex items-center justify-center">
           <Shield className="w-8 h-8 text-[#403E43]" />
         </div>
@@ -21,6 +15,5 @@ export const WelcomeCard = () => {
           </p>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
