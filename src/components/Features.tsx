@@ -1,21 +1,20 @@
 
 import { motion } from "framer-motion";
 import { Shield, Book, CheckCircle } from "lucide-react";
-import { Card } from "./ui/card";
 
 const features = [
   {
-    icon: <Shield className="h-8 w-8 text-sage-600" />,
+    icon: <Shield className="h-8 w-8 text-neutral-800" />,
     title: "Compliance Assessment",
     description: "Quick evaluation of your business to identify applicable regulations",
   },
   {
-    icon: <Book className="h-8 w-8 text-sage-600" />,
+    icon: <Book className="h-8 w-8 text-neutral-800" />,
     title: "Legislative Database",
     description: "Comprehensive collection of laws and requirements updated regularly",
   },
   {
-    icon: <CheckCircle className="h-8 w-8 text-sage-600" />,
+    icon: <CheckCircle className="h-8 w-8 text-neutral-800" />,
     title: "Action Plans",
     description: "Clear steps and requirements to achieve compliance",
   },
@@ -23,25 +22,26 @@ const features = [
 
 export const Features = () => {
   return (
-    <section className="py-20 px-4">
+    <section className="py-24 px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {features.map((feature, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              className="group"
             >
-              <Card className="p-6 h-full glass-panel hover:shadow-xl transition-shadow duration-200">
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2 text-slate-800">
+              <div className="p-8 bg-white/50 backdrop-blur-sm rounded-2xl transition-all duration-300 hover:bg-white/80">
+                <div className="mb-6">{feature.icon}</div>
+                <h3 className="text-xl font-serif mb-4 text-neutral-900">
                   {feature.title}
                 </h3>
-                <p className="text-slate-600">
+                <p className="text-neutral-600 leading-relaxed">
                   {feature.description}
                 </p>
-              </Card>
+              </div>
             </motion.div>
           ))}
         </div>

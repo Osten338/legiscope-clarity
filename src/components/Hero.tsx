@@ -8,29 +8,55 @@ export const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
+    <section className="min-h-[90vh] flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#f8f6f1]/50" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-3xl mx-auto"
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="max-w-4xl mx-auto relative z-10"
       >
-        <span className="px-3 py-1 text-sm font-medium bg-sage-100 text-sage-700 rounded-full inline-block mb-4">
-          Simplify Compliance
-        </span>
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-          Navigate Legislative Requirements with Confidence
-        </h1>
-        <p className="text-slate-600 text-lg md:text-xl mb-8 leading-relaxed">
-          Discover which laws and regulations apply to your business and get clear, actionable compliance requirements.
-        </p>
-        <Button
-          onClick={() => navigate("/assessment")}
-          className="group bg-sage-600 hover:bg-sage-700 text-white px-6 py-3 rounded-lg text-lg transition-all duration-200"
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="px-4 py-1.5 text-sm font-medium bg-white/80 text-neutral-800 rounded-full inline-block mb-6 backdrop-blur-sm"
         >
-          Start Assessment
-          <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-        </Button>
+          Simplify Compliance
+        </motion.span>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="text-5xl md:text-7xl font-serif font-normal mb-8 text-neutral-900 tracking-tight"
+        >
+          Navigate Legislative Requirements with Confidence
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          className="text-neutral-600 text-lg md:text-xl mb-10 leading-relaxed max-w-2xl mx-auto"
+        >
+          Discover which laws and regulations apply to your business and get clear, actionable compliance requirements.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1 }}
+        >
+          <Button
+            onClick={() => navigate("/assessment")}
+            className="group bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-6 rounded-full text-lg transition-all duration-300"
+          >
+            Start Assessment
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </motion.div>
       </motion.div>
     </section>
   );
