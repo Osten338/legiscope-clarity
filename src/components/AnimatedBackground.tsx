@@ -1,13 +1,22 @@
 
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 export const AnimatedBackground = () => {
+  useEffect(() => {
+    // Log the image URL to verify it's correct
+    console.log("Loading background image:", "/lovable-uploads/324a8be1-29b0-45ab-a478-98582c3c9c18.png");
+  }, []);
+
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100"
         style={{
           backgroundImage: "url('/lovable-uploads/324a8be1-29b0-45ab-a478-98582c3c9c18.png')"
+        }}
+        onError={(e) => {
+          console.error("Error loading background image:", e);
         }}
       />
       {[...Array(4)].map((_, i) => (
