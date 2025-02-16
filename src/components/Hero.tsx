@@ -9,6 +9,8 @@ export const Hero = () => {
 
   return (
     <section className="min-h-[90vh] flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#f8f6f1]/50" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

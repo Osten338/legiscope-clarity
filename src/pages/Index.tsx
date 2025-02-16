@@ -1,17 +1,19 @@
 
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
-import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { motion } from "framer-motion";
 
 const Index = () => {
   return (
-    <div className="relative">
-      <AnimatedBackground />
-      <div className="min-h-screen">
-        <Hero />
-        <Features />
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+      className="min-h-screen bg-[#f8f6f1]"
+    >
+      <Hero />
+      <Features />
+    </motion.div>
   );
 };
 

@@ -29,15 +29,12 @@
     --radius: 0.75rem;
   }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
+  * {
+    @apply border-border;
   }
 
   body {
-    @apply text-foreground font-['Inter'] antialiased;
+    @apply bg-background text-foreground font-['Inter'] antialiased;
   }
 
   .glass-panel {
