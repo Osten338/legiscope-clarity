@@ -10,20 +10,19 @@ export const AnimatedBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 w-full h-full" style={{ zIndex: -1 }}>
-      <img 
-        src={imageUrl}
-        alt="Wavy background pattern"
-        className="w-full h-full object-cover"
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
-        onError={(e) => {
-          console.error("Error loading image:", e);
-          setImageError(true);
-        }}
-        onLoad={() => {
-          console.log("Image loaded successfully");
-        }}
-      />
-    </div>
+    <div 
+      className="fixed top-0 left-0 w-full h-full"
+      style={{
+        backgroundImage: `url(${imageUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        zIndex: -1
+      }}
+      onError={(e) => {
+        console.error("Error loading image:", e);
+        setImageError(true);
+      }}
+    />
   );
 };

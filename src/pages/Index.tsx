@@ -5,13 +5,13 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const Index = () => {
   return (
-    <>
+    <div className="relative">
       <AnimatedBackground />
-      <div className="relative min-h-screen">
+      <div className="min-h-screen">
         <Hero />
         <Features />
       </div>
-    </>
+    </div>
   );
 };
 
