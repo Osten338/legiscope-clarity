@@ -20,13 +20,14 @@ export const AnimatedBackground = () => {
 
   return (
     <div 
-      className="fixed inset-0 w-full h-full"
+      className="fixed inset-0 w-full h-full bg-[#f8f6f1]"
       style={{
         backgroundImage: `url(${imageUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        opacity: 1,
+        opacity: loaded ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out',
         zIndex: -1
       }}
     />
