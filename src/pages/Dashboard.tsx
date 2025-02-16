@@ -44,14 +44,14 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-[#FEF7CD]">
+      <div className="flex h-screen bg-[#F1F0FB]">
         <div className="text-[#403E43] m-auto">Loading saved regulations...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[#FEF7CD]">
+    <div className="flex h-screen bg-[#F1F0FB]">
       <Sidebar />
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-8 max-w-7xl">
