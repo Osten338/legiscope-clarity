@@ -1,5 +1,4 @@
 
-import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Grid, List, Plus, RefreshCw } from "lucide-react";
@@ -7,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Layout } from "@/components/dashboard/Layout";
 
 const RiskAssessmentLanding = () => {
   const navigate = useNavigate();
@@ -86,9 +86,8 @@ const RiskAssessmentLanding = () => {
   ];
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 p-8">
+    <Layout>
+      <div className="p-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-sage-900">Risk Assessment</h1>
           <p className="text-slate-600 mt-2">Choose how you would like to view or manage your risks</p>
@@ -119,7 +118,7 @@ const RiskAssessmentLanding = () => {
           ))}
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
