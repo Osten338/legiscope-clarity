@@ -8,11 +8,27 @@ import {
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Clock, AlertTriangle, HelpCircle } from "lucide-react";
 
-const statusIcons = {
-  compliant: { icon: CheckCircle2, class: "text-green-500" },
-  in_progress: { icon: Clock, class: "text-amber-500" },
-  not_compliant: { icon: AlertTriangle, class: "text-red-500" },
-  under_review: { icon: HelpCircle, class: "text-blue-500" },
+const statusCards = {
+  compliant: { 
+    icon: CheckCircle2, 
+    class: "text-green-500",
+    gradient: "from-[#F2FCE2] to-white"
+  },
+  in_progress: { 
+    icon: Clock, 
+    class: "text-amber-500",
+    gradient: "from-[#FEF7CD] to-white"
+  },
+  not_compliant: { 
+    icon: AlertTriangle, 
+    class: "text-red-500",
+    gradient: "from-[#FFDEE2] to-white"
+  },
+  under_review: { 
+    icon: HelpCircle, 
+    class: "text-blue-500",
+    gradient: "from-[#D3E4FD] to-white"
+  },
 };
 
 const getStatusText = (status: string) => {
@@ -32,16 +48,16 @@ interface StatusOverviewProps {
 export const StatusOverview = ({ savedRegulations }: StatusOverviewProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      {Object.entries(statusIcons).map(([status, { icon: Icon, class: colorClass }]) => {
+      {Object.entries(statusCards).map(([status, { icon: Icon, class: colorClass, gradient }]) => {
         const count = savedRegulations?.filter(reg => reg.status === status).length || 0;
         return (
-          <Card key={status} className="bg-white border-none shadow-sm">
+          <Card key={status} className={cn("border-none shadow-sm bg-gradient-to-br", gradient)}>
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
                 <Icon className={cn("w-4 h-4", colorClass)} />
-                <span className="font-medium text-slate-600">{getStatusText(status)}</span>
+                <span className="font-medium text-[#403E43]">{getStatusText(status)}</span>
               </CardDescription>
-              <CardTitle className="text-2xl font-serif">{count}</CardTitle>
+              <CardTitle className="text-2xl font-serif text-[#403E43]">{count}</CardTitle>
             </CardHeader>
           </Card>
         );
