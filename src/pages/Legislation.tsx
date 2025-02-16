@@ -18,6 +18,10 @@ const Legislation = () => {
   const { data: regulation, isLoading } = useQuery({
     queryKey: ['regulation', id],
     queryFn: async () => {
+      if (!id || id === ':id') {
+        throw new Error("Invalid legislation ID");
+      }
+
       const { data, error } = await supabase
         .from('regulations')
         .select(`
@@ -33,12 +37,22 @@ const Legislation = () => {
           )
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Legislation not found");
       return data;
     },
+    enabled: Boolean(id) && id !== ':id', // Only run query when we have a valid ID
   });
+
+  if (!id || id === ':id') {
+    return (
+      <div className="flex h-screen">
+        <div className="text-red-600 m-auto">Invalid legislation ID</div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
