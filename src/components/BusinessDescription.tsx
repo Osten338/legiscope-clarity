@@ -108,7 +108,7 @@ export const BusinessDescription = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-neutral-900 text-lg md:text-xl mb-10 leading-relaxed max-w-2xl mx-auto"
+          className="text-neutral-900 text-lg md:text-xl mb-10 leading-relaxed"
         >
           Help us understand your business better to provide tailored compliance recommendations.
         </motion.p>
