@@ -35,13 +35,13 @@ export const StatusOverview = ({ savedRegulations }: StatusOverviewProps) => {
       {Object.entries(statusIcons).map(([status, { icon: Icon, class: colorClass }]) => {
         const count = savedRegulations?.filter(reg => reg.status === status).length || 0;
         return (
-          <Card key={status}>
+          <Card key={status} className="bg-white border-none shadow-sm">
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
                 <Icon className={cn("w-4 h-4", colorClass)} />
-                {getStatusText(status)}
+                <span className="font-medium text-slate-600">{getStatusText(status)}</span>
               </CardDescription>
-              <CardTitle>{count}</CardTitle>
+              <CardTitle className="text-2xl font-serif">{count}</CardTitle>
             </CardHeader>
           </Card>
         );

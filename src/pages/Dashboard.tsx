@@ -44,17 +44,17 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen">
+      <div className="flex h-screen bg-[#F8FAF8]">
         <div className="text-sage-600 m-auto">Loading saved regulations...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-[#F8FAF8]">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <div className="p-8">
+        <div className="container mx-auto p-8 max-w-7xl">
           <WelcomeCard />
           <StatusOverview savedRegulations={savedRegulations || []} />
           <UpcomingReviews savedRegulations={savedRegulations || []} />
