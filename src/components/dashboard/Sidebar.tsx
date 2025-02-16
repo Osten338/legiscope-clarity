@@ -28,8 +28,8 @@ export const Sidebar = () => {
   ];
 
   return (
-    <SidebarPrimitive>
-      <SidebarContent className="border-r border-slate-200 bg-white shadow-sm h-full transition-all duration-300 flex flex-col min-w-[68px] data-[collapsed=true]:w-[68px] data-[collapsed=false]:w-64">
+    <SidebarPrimitive className="h-full">
+      <SidebarContent className="fixed top-0 left-0 z-40 h-screen border-r border-slate-200 bg-white shadow-sm transition-all duration-300 flex flex-col min-w-[68px] data-[collapsed=true]:w-[68px] data-[collapsed=false]:w-64">
         <div className="flex justify-between items-center p-4">
           <h2 className="text-xl font-serif text-slate-900 truncate opacity-100 transition-opacity duration-300 data-[collapsed=true]:opacity-0 data-[collapsed=true]:w-0">
             Compliance Hub
