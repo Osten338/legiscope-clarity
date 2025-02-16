@@ -29,12 +29,12 @@ export const AnimatedBackground = () => {
           key={i}
           className="absolute inset-0"
           initial={{
-            opacity: 0.15,
+            opacity: 0.05, // Reduced opacity
             scale: 1,
             rotate: i * 90,
           }}
           animate={{
-            opacity: [0.15, 0.25, 0.15],
+            opacity: [0.05, 0.1, 0.05], // Reduced opacity range
             scale: [1, 1.2, 1],
             rotate: [i * 90, (i * 90) + 15, i * 90],
             y: [0, 50, 0],
@@ -48,10 +48,11 @@ export const AnimatedBackground = () => {
             ease: "easeInOut",
           }}
         >
-          <div className="w-[120%] h-[120%] -ml-[10%] -mt-[10%] bg-gradient-to-br from-[#FDE1D3] via-[#FFDEE2] to-[#FEC6A1] opacity-20 blur-3xl" />
+          <div className="w-[120%] h-[120%] -ml-[10%] -mt-[10%] bg-gradient-to-br from-[#FDE1D3]/10 via-[#FFDEE2]/10 to-[#FEC6A1]/10 opacity-10 blur-3xl" />
         </motion.div>
       ))}
-      <div className="absolute inset-0 bg-[#f8f6f1]/30 backdrop-blur-[2px]" />
+      {/* Reduced the opacity of the overlay */}
+      <div className="absolute inset-0 bg-[#f8f6f1]/10 backdrop-blur-[1px]" />
     </div>
   );
 };
