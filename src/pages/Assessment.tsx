@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { BusinessDescription } from "@/components/BusinessDescription";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const Assessment = () => {
   return (
@@ -8,8 +9,9 @@ const Assessment = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-b from-white to-sage-50"
+      className="min-h-screen"
     >
+      <AnimatedBackground />
       <BusinessDescription />
     </motion.div>
   );
