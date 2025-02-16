@@ -19,7 +19,7 @@ export const AnimatedBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden bg-[#f8f6f1]">
+    <div className="fixed inset-0 w-full h-full overflow-hidden">
       <img
         src={imageUrl}
         alt="Background"
