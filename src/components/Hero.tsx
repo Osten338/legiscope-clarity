@@ -37,7 +37,7 @@ export const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-neutral-600 text-lg md:text-xl mb-10 leading-relaxed max-w-2xl mx-auto"
+          className="text-neutral-900 text-lg md:text-xl mb-10 leading-relaxed max-w-2xl mx-auto"
         >
           Discover which laws and regulations apply to your business and get clear, actionable compliance requirements.
         </motion.p>
