@@ -7,7 +7,7 @@ export const AnimatedBackground = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/lovable-uploads/ab336122-7791-4a54-a8a8-e841bedee4df.png')"
+          backgroundImage: "url('/lovable-uploads/324a8be1-29b0-45ab-a478-98582c3c9c18.png')"
         }}
       />
       {[...Array(4)].map((_, i) => (
