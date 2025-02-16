@@ -86,14 +86,40 @@ export const BusinessDescription = () => {
         transition={{ duration: 0.5 }}
         className="max-w-4xl mx-auto"
       >
-        <h2 className="text-3xl font-bold text-slate-900 mb-6">Tell Us About Your Business</h2>
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="px-4 py-1.5 text-sm font-medium bg-white/80 text-neutral-800 rounded-full inline-block mb-6 backdrop-blur, backdrop-blur-sm"
+        >
+          Business Assessment
+        </motion.span>
+
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="text-4xl md:text-5xl font-serif font-normal mb-8 text-neutral-900 tracking-tight"
+        >
+          Tell Us About Your Business
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          className="text-neutral-900 text-lg md:text-xl mb-10 leading-relaxed max-w-2xl mx-auto"
+        >
+          Help us understand your business better to provide tailored compliance recommendations.
+        </motion.p>
+
         <Card className="p-6">
           <div className="space-y-6">
             <div>
-              <Label htmlFor="guidance" className="text-lg font-semibold text-slate-900">
+              <Label htmlFor="guidance" className="text-lg font-medium text-neutral-900">
                 What information should you include?
               </Label>
-              <ul className="mt-3 list-disc list-inside text-slate-600 space-y-2">
+              <ul className="mt-3 list-disc list-inside text-neutral-600 space-y-2">
                 <li>Your business model and primary activities</li>
                 <li>How you interact with customers or clients</li>
                 <li>Industry sector and any relevant subsectors</li>
@@ -107,7 +133,7 @@ export const BusinessDescription = () => {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="description" className="text-lg font-semibold text-slate-900">
+                <Label htmlFor="description" className="text-lg font-medium text-neutral-900">
                   Business Description
                 </Label>
                 <Textarea
@@ -120,7 +146,7 @@ export const BusinessDescription = () => {
               </div>
 
               <div>
-                <Label htmlFor="document" className="text-lg font-semibold text-slate-900">
+                <Label htmlFor="document" className="text-lg font-medium text-neutral-900">
                   Or Upload a Document
                 </Label>
                 <div className="mt-2">
@@ -137,7 +163,7 @@ export const BusinessDescription = () => {
                   >
                     <Upload className="h-6 w-6 text-sage-600" />
                     <span className="text-sage-600">Upload business documentation</span>
-                    <span className="text-sm text-slate-500">PDF, DOC, or DOCX up to 10MB</span>
+                    <span className="text-sm text-neutral-500">PDF, DOC, or DOCX up to 10MB</span>
                   </Button>
                 </div>
               </div>
@@ -146,28 +172,28 @@ export const BusinessDescription = () => {
             {isAnalyzing && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">Analyzing your business...</span>
-                  <span className="text-sm text-slate-600">Please wait</span>
+                  <span className="text-sm text-neutral-600">Analyzing your business...</span>
+                  <span className="text-sm text-neutral-600">Please wait</span>
                 </div>
                 <Progress value={100} className="w-full" />
               </div>
             )}
 
             <Button 
-              className="w-full bg-sage-600 hover:bg-sage-700 text-white"
+              className="w-full bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-6 rounded-full text-lg transition-all duration-300"
               onClick={handleSubmit}
               disabled={isAnalyzing}
             >
-              {isAnalyzing ? "Analyzing..." : "Compliance Check"}
+              {isAnalyzing ? "Analyzing..." : "Start Compliance Check"}
             </Button>
 
             {analysis && (
               <div className="mt-6">
-                <Label className="text-lg font-semibold text-slate-900">
+                <Label className="text-lg font-medium text-neutral-900">
                   Analysis Results
                 </Label>
-                <Card className="p-4 mt-2 bg-slate-50">
-                  <p className="text-slate-700 whitespace-pre-wrap">{analysis}</p>
+                <Card className="p-4 mt-2 bg-neutral-50">
+                  <p className="text-neutral-700 whitespace-pre-wrap">{analysis}</p>
                 </Card>
               </div>
             )}
