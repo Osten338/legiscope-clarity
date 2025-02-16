@@ -11,16 +11,11 @@ export const AnimatedBackground = () => {
   }, []);
 
   return (
-    <motion.div 
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 -z-10 bg-transparent"
-    >
+    <div className="fixed inset-0 -z-10">
       <img 
         src={imageUrl}
         alt="Wavy background pattern"
-        className="absolute inset-0 w-full h-full object-cover opacity-100"
-        style={{ mixBlendMode: 'normal' }}
+        className="absolute inset-0 w-full h-full object-cover"
         onError={(e) => {
           console.error("Error loading image:", e);
           setImageError(true);
@@ -29,6 +24,6 @@ export const AnimatedBackground = () => {
           console.log("Image loaded successfully");
         }}
       />
-    </motion.div>
+    </div>
   );
 };
