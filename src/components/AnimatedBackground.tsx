@@ -26,6 +26,7 @@ export const AnimatedBackground = () => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
+        opacity: 1,
         zIndex: -1
       }}
     />
