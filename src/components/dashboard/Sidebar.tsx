@@ -63,54 +63,153 @@ export const Sidebar = ({ mobile, onClose }: SidebarProps) => {
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
             <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => {
-                const isActive = location.pathname === item.href;
-                return (
-                  <li key={item.name}>
-                    <Link
-                      to={item.href}
-                      className={cn(
-                        "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
-                        isActive
-                          ? "bg-slate-50 text-indigo-600"
-                          : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
-                      )}
-                    >
-                      <item.icon
-                        className={cn(
-                          "h-6 w-6 shrink-0",
-                          isActive
-                            ? "text-indigo-600"
-                            : "text-slate-400 group-hover:text-indigo-600"
-                        )}
-                      />
-                      {item.name}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </li>
-          <li>
-            <div className="text-xs font-semibold leading-6 text-slate-400">
-              Your teams
-            </div>
-            <ul role="list" className="-mx-2 mt-2 space-y-1">
-              {teams.map((team) => (
-                <li key={team.name}>
-                  <Link
-                    to={team.href}
-                    className="group flex gap-x-3 rounded-md p-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
-                  >
-                    <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-[0.625rem] font-medium text-slate-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                    >
-                      {team.initial}
-                    </span>
-                    <span className="truncate">{team.name}</span>
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link
+                  to="/dashboard"
+                  className={cn(
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                    location.pathname === "/dashboard"
+                      ? "bg-slate-50 text-indigo-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  )}
+                >
+                  <LayoutDashboard
+                    className={cn(
+                      "h-6 w-6 shrink-0",
+                      location.pathname === "/dashboard"
+                        ? "text-indigo-600"
+                        : "text-slate-400 group-hover:text-indigo-600"
+                    )}
+                  />
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/risk-assessment"
+                  className={cn(
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                    location.pathname.includes("/risk-assessment")
+                      ? "bg-slate-50 text-indigo-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  )}
+                >
+                  <BarChart
+                    className={cn(
+                      "h-6 w-6 shrink-0",
+                      location.pathname.includes("/risk-assessment")
+                        ? "text-indigo-600"
+                        : "text-slate-400 group-hover:text-indigo-600"
+                    )}
+                  />
+                  Risk Assessment
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/documents"
+                  className={cn(
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                    location.pathname === "/documents"
+                      ? "bg-slate-50 text-indigo-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  )}
+                >
+                  <FileText
+                    className={cn(
+                      "h-6 w-6 shrink-0",
+                      location.pathname === "/documents"
+                        ? "text-indigo-600"
+                        : "text-slate-400 group-hover:text-indigo-600"
+                    )}
+                  />
+                  Documents
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/alerts"
+                  className={cn(
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                    location.pathname === "/alerts"
+                      ? "bg-slate-50 text-indigo-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  )}
+                >
+                  <Bell
+                    className={cn(
+                      "h-6 w-6 shrink-0",
+                      location.pathname === "/alerts"
+                        ? "text-indigo-600"
+                        : "text-slate-400 group-hover:text-indigo-600"
+                    )}
+                  />
+                  Alerts
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/compliance-checklist"
+                  className={cn(
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                    location.pathname === "/compliance-checklist"
+                      ? "bg-slate-50 text-indigo-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  )}
+                >
+                  <CheckSquare
+                    className={cn(
+                      "h-6 w-6 shrink-0",
+                      location.pathname === "/compliance-checklist"
+                        ? "text-indigo-600"
+                        : "text-slate-400 group-hover:text-indigo-600"
+                    )}
+                  />
+                  Compliance Checklist
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/analysis"
+                  className={cn(
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                    location.pathname === "/analysis"
+                      ? "bg-slate-50 text-indigo-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  )}
+                >
+                  <BarChart
+                    className={cn(
+                      "h-6 w-6 shrink-0",
+                      location.pathname === "/analysis"
+                        ? "text-indigo-600"
+                        : "text-slate-400 group-hover:text-indigo-600"
+                    )}
+                  />
+                  Analysis
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/documentation"
+                  className={cn(
+                    "group flex gap-x-3 rounded-md p-2 text-sm font-semibold",
+                    location.pathname === "/documentation"
+                      ? "bg-slate-50 text-indigo-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                  )}
+                >
+                  <FileText
+                    className={cn(
+                      "h-6 w-6 shrink-0",
+                      location.pathname === "/documentation"
+                        ? "text-indigo-600"
+                        : "text-slate-400 group-hover:text-indigo-600"
+                    )}
+                  />
+                  Documentation
+                </Link>
+              </li>
             </ul>
           </li>
           <li className="mt-auto">
