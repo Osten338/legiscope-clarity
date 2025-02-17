@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
@@ -8,7 +7,9 @@ import {
   FileText, 
   BarChart, 
   Settings,
-  X
+  X,
+  Bell,
+  CheckSquare
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
