@@ -84,14 +84,16 @@ export function BusinessAssessmentForm() {
     try {
       setIsSubmitting(true);
       
-      const {
-        data: { user },
-        error: userError
-      } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
         throw new Error("You must be logged in to submit an assessment");
       }
+
+      console.log("Submitting assessment data:", {
+        user_id: user.id,
+        ...data
+      });
 
       const { error } = await supabase
         .from('structured_business_assessments')
@@ -119,14 +121,16 @@ export function BusinessAssessmentForm() {
           existing_assessments: data.existingAssessments
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
 
       toast({
         title: "Assessment Submitted",
         description: "Your business assessment has been submitted successfully.",
       });
 
-      // Redirect to dashboard or another appropriate page
       navigate("/dashboard");
       
     } catch (error) {

@@ -1,9 +1,40 @@
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { BusinessAssessmentForm } from "@/components/BusinessAssessmentForm";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "lucide-react";
 
 const Assessment = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session) {
+        console.log("No active session, redirecting to auth");
+        navigate("/auth");
+      }
+    };
+
+    checkAuth();
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/auth");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   return (
     <div className="relative">
       <AnimatedBackground />
