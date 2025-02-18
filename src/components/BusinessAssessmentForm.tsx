@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -21,11 +20,16 @@ import { toast } from "./ui/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Form schema definition
 const businessAssessmentSchema = z.object({
   // 1. General Company Information
   companyName: z.string().min(1, "Company name is required"),
-  businessStructure: z.enum(["llc", "corporation", "partnership", "soleProprietorship", "other"]),
+  businessStructure: z.enum([
+    "limitedCompany", 
+    "plc", 
+    "partnership", 
+    "soleTrader", 
+    "other"
+  ]),
   employeeCount: z.string().min(1, "Employee count is required"),
   annualRevenue: z.string(),
   yearEstablished: z.string().min(1, "Year established is required"),
@@ -142,10 +146,10 @@ export function BusinessAssessmentForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="llc">LLC</SelectItem>
-                        <SelectItem value="corporation">Corporation</SelectItem>
+                        <SelectItem value="limitedCompany">Private Limited Company (Ltd)</SelectItem>
+                        <SelectItem value="plc">Public Limited Company (PLC)</SelectItem>
                         <SelectItem value="partnership">Partnership</SelectItem>
-                        <SelectItem value="soleProprietorship">Sole Proprietorship</SelectItem>
+                        <SelectItem value="soleTrader">Sole Trader</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
