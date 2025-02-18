@@ -19,26 +19,11 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Team", href: "/team", icon: Users },
-  { name: "Projects", href: "/projects", icon: Folder },
-  { name: "Calendar", href: "/calendar", icon: Calendar },
-  { name: "Documents", href: "/documents", icon: FileText },
-  { name: "Reports", href: "/reports", icon: BarChart },
-];
-
-const teams = [
-  { id: 1, name: "Heroicons", href: "#", initial: "H" },
-  { id: 2, name: "Tailwind Labs", href: "#", initial: "T" },
-  { id: 3, name: "Workcation", href: "#", initial: "W" },
-];
-
 export const Sidebar = ({ mobile, onClose }: SidebarProps) => {
   const location = useLocation();
   
   return (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-slate-200 bg-white px-6 pb-4">
+    <div className="fixed flex h-full w-72 flex-col gap-y-5 overflow-y-auto border-r border-slate-200 bg-white px-6 pb-4">
       {mobile && (
         <div className="flex h-16 shrink-0 items-center justify-between">
           <img
