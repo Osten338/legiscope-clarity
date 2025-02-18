@@ -1,19 +1,11 @@
 
 import { useState } from "react";
-import { Bot } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2, Bot } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface GenerateDocumentDialogProps {
   open: boolean;
@@ -30,175 +22,86 @@ interface GenerateDocumentDialogProps {
   };
 }
 
-export const GenerateDocumentDialog = ({
+export function GenerateDocumentDialog({
   open,
   onOpenChange,
   regulation,
-}: GenerateDocumentDialogProps) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+}: GenerateDocumentDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [documentation, setDocumentation] = useState<string | null>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const handleSelectItem = (itemId: string) => {
-    setSelectedItems(prev => {
-      if (prev.includes(itemId)) {
-        return prev.filter(id => id !== itemId);
-      }
-      return [...prev, itemId];
-    });
-  };
-
-  const handleSelectAll = () => {
-    if (selectedItems.length === regulation.checklist_items.length) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(regulation.checklist_items.map(item => item.id));
-    }
-  };
-
-  const handleGenerate = async () => {
+  const generateDocumentation = async () => {
     try {
-      if (selectedItems.length === 0) {
-        toast({
-          title: "No items selected",
-          description: "Please select at least one requirement to generate documentation.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsGenerating(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not found");
-
-      // Filter checklist items based on selection
-      const selectedChecklist = regulation.checklist_items.filter(item => 
-        selectedItems.includes(item.id)
-      );
-
-      // Generate a structured document based on selected checklist items
-      const documentTitle = `${regulation.name} - Selected Requirements Documentation`;
+      setIsLoading(true);
       
-      // Group items by category and generate content
-      const categorizedItems = selectedChecklist.reduce((acc: { [key: string]: string[] }, item) => {
-        const category = item.category || 'General';
-        if (!acc[category]) acc[category] = [];
-        acc[category].push(item.description);
-        return acc;
-      }, {});
-
-      const documentContent = `
-# ${regulation.name} - Selected Requirements Documentation
-
-## Overview
-Selected compliance requirements from ${regulation.name}.
-
-## Selected Requirements
-
-${Object.entries(categorizedItems).map(([category, items]) => `
-### ${category}
-${items.map(item => `- ${item}`).join('\n')}
-`).join('\n')}
-
-Generated on: ${new Date().toLocaleDateString()}
-      `.trim();
-
-      // Save the generated document
-      const { error } = await supabase
-        .from('generated_documents')
-        .insert({
-          title: documentTitle,
-          content: documentContent,
-          regulation_id: regulation.id,
-          status: 'draft',
-          user_id: user.id
-        });
+      const { data, error } = await supabase.functions.invoke(
+        'generate-documentation',
+        {
+          body: {
+            regulation: {
+              name: regulation.name,
+              description: regulation.description
+            },
+            checklistItem: regulation.checklist_items[0]
+          },
+        }
+      );
 
       if (error) throw error;
 
-      queryClient.invalidateQueries({ queryKey: ['compliance-documents'] });
+      setDocumentation(data.documentation);
       
-      toast({
-        title: "Documentation Generated",
-        description: "The compliance documentation for selected requirements has been generated and saved as a draft.",
-      });
-
-      onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Error generating documentation",
         description: error.message,
         variant: "destructive",
       });
     } finally {
-      setIsGenerating(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Generate Compliance Documentation</DialogTitle>
-          <DialogDescription>
-            Select the requirements you want to include in the documentation.
-          </DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-sage-600" />
+            Generate Implementation Documentation
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="select-all"
-              checked={selectedItems.length === regulation.checklist_items.length}
-              onCheckedChange={handleSelectAll}
-            />
-            <label 
-              htmlFor="select-all" 
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Select All Requirements
-            </label>
-          </div>
-          
-          <ScrollArea className="h-[300px] pr-4">
-            <div className="space-y-3">
-              {regulation.checklist_items.map((item) => (
-                <div key={item.id} className="flex items-start space-x-2">
-                  <Checkbox
-                    id={item.id}
-                    checked={selectedItems.includes(item.id)}
-                    onCheckedChange={() => handleSelectItem(item.id)}
-                  />
-                  <label
-                    htmlFor={item.id}
-                    className="text-sm text-slate-600 leading-tight"
-                  >
-                    {item.description}
-                  </label>
-                </div>
-              ))}
+        <div className="flex-1 min-h-0">
+          {!documentation && !isLoading && (
+            <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
+              <Bot className="h-12 w-12 text-sage-400" />
+              <p className="text-sage-600 text-center max-w-md">
+                Generate detailed documentation for implementing this compliance requirement using AI
+              </p>
+              <Button onClick={generateDocumentation}>
+                Generate Documentation
+              </Button>
             </div>
-          </ScrollArea>
-        </div>
+          )}
 
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="gap-2"
-          >
-            <Bot className="h-4 w-4" />
-            {isGenerating ? "Generating..." : "Generate Documentation"}
-          </Button>
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-sage-600" />
+              <p className="text-sage-600">Generating documentation...</p>
+            </div>
+          )}
+
+          {documentation && (
+            <ScrollArea className="h-full pr-4">
+              <div className="prose prose-sage max-w-none">
+                {documentation}
+              </div>
+            </ScrollArea>
+          )}
         </div>
       </DialogContent>
     </Dialog>
   );
-};
+}
