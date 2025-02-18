@@ -6,7 +6,7 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 const Assessment = () => {
   const navigate = useNavigate();
