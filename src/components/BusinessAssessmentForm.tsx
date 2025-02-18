@@ -23,43 +23,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 const businessAssessmentSchema = z.object({
-  // 1. General Company Information
   companyName: z.string().min(1, "Company name is required"),
-  businessStructure: z.enum([
-    "limitedCompany", 
-    "plc", 
-    "partnership", 
-    "soleTrader", 
-    "other"
-  ]),
+  businessStructure: z.enum(["limitedCompany", "plc", "partnership", "soleTrader", "other"]),
   employeeCount: z.string().min(1, "Employee count is required"),
-  annualRevenue: z.string(),
+  annualRevenue: z.string().optional(),
   yearEstablished: z.string().min(1, "Year established is required"),
-  
-  // 2. Geographical and Jurisdictional Data
   primaryCountry: z.string().min(1, "Primary country is required"),
   primaryState: z.string().min(1, "Primary state/province is required"),
-  operatingLocations: z.string(),
-  
-  // 3. Industry and Sector Details
+  operatingLocations: z.string().optional(),
   industryClassification: z.string().min(1, "Industry classification is required"),
-  subIndustry: z.string(),
+  subIndustry: z.string().optional(),
   businessActivities: z.string().min(1, "Business activities description is required"),
-  
-  // 4. Operational Characteristics
   businessModel: z.enum(["online", "offline", "hybrid"]),
   handlesPersonalData: z.boolean(),
   handlesFinancialData: z.boolean(),
   handlesSensitiveData: z.boolean(),
   hasThirdPartyVendors: z.boolean(),
-  
-  // 5. IT Infrastructure
   dataStorage: z.enum(["onPremise", "cloud", "hybrid"]),
   hasCyberSecurityPolicy: z.boolean(),
-  
-  // 6. Compliance Concerns
-  knownRegulations: z.string(),
-  existingAssessments: z.string()
+  knownRegulations: z.string().optional(),
+  existingAssessments: z.string().optional()
 });
 
 type BusinessAssessmentForm = z.infer<typeof businessAssessmentSchema>;
@@ -77,6 +60,20 @@ export function BusinessAssessmentForm() {
       handlesSensitiveData: false,
       hasThirdPartyVendors: false,
       hasCyberSecurityPolicy: false,
+      businessModel: "hybrid",
+      dataStorage: "cloud",
+      businessStructure: "limitedCompany",
+      companyName: "",
+      employeeCount: "",
+      yearEstablished: "",
+      primaryCountry: "",
+      primaryState: "",
+      operatingLocations: "",
+      industryClassification: "",
+      subIndustry: "",
+      businessActivities: "",
+      knownRegulations: "",
+      existingAssessments: ""
     }
   });
 
