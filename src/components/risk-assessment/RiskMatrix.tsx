@@ -32,17 +32,17 @@ export const RiskMatrix = ({ risks }: RiskMatrixProps) => {
   };
 
   return (
-    <Card className="p-8 shadow-lg">
+    <Card className="p-8 shadow-lg border-slate-200">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-semibold text-gray-900">Risk Assessment Matrix</h2>
-        <p className="text-sm text-gray-600 mt-2">Likelihood vs Impact Analysis</p>
+        <h2 className="text-2xl font-serif text-slate-900">Risk Assessment Matrix</h2>
+        <p className="text-sm text-sage-600 mt-2 font-serif">Likelihood vs Impact Analysis</p>
       </div>
 
       <div className="flex mb-4">
         <div className="w-24" /> {/* Spacer for y-axis label */}
         <div className="flex-1 grid grid-cols-5 gap-3 text-center">
           {[1, 2, 3, 4, 5].map(impact => (
-            <div key={impact} className="font-medium text-sm text-gray-700">
+            <div key={impact} className="font-medium text-sm text-sage-700 font-serif">
               Impact {impact}
             </div>
           ))}
@@ -52,7 +52,7 @@ export const RiskMatrix = ({ risks }: RiskMatrixProps) => {
       {matrix.map((row, rowIndex) => (
         <div key={rowIndex} className="flex items-center mb-3 group">
           <div className="w-24 text-right pr-4">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-sage-700 font-serif">
               Likelihood {5 - rowIndex}
             </span>
           </div>
@@ -69,14 +69,14 @@ export const RiskMatrix = ({ risks }: RiskMatrixProps) => {
                 {risks.map((risk: Risk) => (
                   <div 
                     key={risk.id} 
-                    className="mb-2 text-sm font-medium text-gray-800 truncate last:mb-0"
+                    className="mb-2 text-sm font-medium text-slate-800 truncate last:mb-0 font-serif"
                   >
                     {risk.title}
                   </div>
                 ))}
                 {risks.length === 0 && (
                   <div className="h-full w-full flex items-center justify-center">
-                    <span className="text-xs text-gray-400">No risks</span>
+                    <span className="text-xs text-sage-400 font-serif">No risks</span>
                   </div>
                 )}
               </div>
@@ -88,15 +88,15 @@ export const RiskMatrix = ({ risks }: RiskMatrixProps) => {
       <div className="mt-8 flex justify-center gap-6">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-gradient-to-br from-green-50 to-green-100 border border-green-200" />
-          <span className="text-xs text-gray-600">Low Risk</span>
+          <span className="text-xs text-sage-600 font-serif">Low Risk</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200" />
-          <span className="text-xs text-gray-600">Medium Risk</span>
+          <span className="text-xs text-sage-600 font-serif">Medium Risk</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-gradient-to-br from-red-50 to-red-100 border border-red-200" />
-          <span className="text-xs text-gray-600">High Risk</span>
+          <span className="text-xs text-sage-600 font-serif">High Risk</span>
         </div>
       </div>
     </Card>

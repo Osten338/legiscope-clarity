@@ -42,32 +42,32 @@ export const RiskList = ({ risks }: RiskListProps) => {
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border border-slate-200">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Risk Level</TableHead>
-            <TableHead>Related Regulation</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Due Date</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead className="font-serif">Title</TableHead>
+            <TableHead className="font-serif">Category</TableHead>
+            <TableHead className="font-serif">Risk Level</TableHead>
+            <TableHead className="font-serif">Related Regulation</TableHead>
+            <TableHead className="font-serif">Status</TableHead>
+            <TableHead className="font-serif">Due Date</TableHead>
+            <TableHead className="font-serif">Type</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {risks.map((risk) => (
             <TableRow key={risk.id}>
-              <TableCell className="font-medium">{risk.title}</TableCell>
-              <TableCell className="capitalize">{risk.category}</TableCell>
+              <TableCell className="font-medium font-serif">{risk.title}</TableCell>
+              <TableCell className="capitalize font-serif">{risk.category}</TableCell>
               <TableCell>
                 <Badge className={getLevelColor(risk.level)}>
                   {risk.level}
                 </Badge>
               </TableCell>
-              <TableCell>{risk.regulations?.name || 'N/A'}</TableCell>
-              <TableCell className="capitalize">{risk.status}</TableCell>
-              <TableCell>
+              <TableCell className="font-serif">{risk.regulations?.name || 'N/A'}</TableCell>
+              <TableCell className="capitalize font-serif">{risk.status}</TableCell>
+              <TableCell className="font-serif">
                 {risk.due_date 
                   ? new Date(risk.due_date).toLocaleDateString() 
                   : 'No due date'}
