@@ -56,6 +56,12 @@ const Assessment = () => {
               <p className="text-lg text-slate-600">
                 Complete this assessment to help us understand your business and identify relevant compliance requirements.
               </p>
+              <Alert variant="destructive" className="mt-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Please ensure all information provided is accurate and up-to-date.
+                </AlertDescription>
+              </Alert>
             </motion.div>
             
             <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-lg p-6">
