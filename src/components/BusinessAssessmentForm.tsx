@@ -19,6 +19,8 @@ import { Switch } from "./ui/switch";
 import { toast } from "./ui/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const businessAssessmentSchema = z.object({
   // 1. General Company Information
@@ -64,6 +66,9 @@ type BusinessAssessmentForm = z.infer<typeof businessAssessmentSchema>;
 
 export function BusinessAssessmentForm() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  
   const form = useForm<BusinessAssessmentForm>({
     resolver: zodResolver(businessAssessmentSchema),
     defaultValues: {
@@ -77,19 +82,62 @@ export function BusinessAssessmentForm() {
 
   const onSubmit = async (data: BusinessAssessmentForm) => {
     try {
-      console.log("Form data:", data);
-      // Here we'll add the API call to process the data
+      setIsSubmitting(true);
+      
+      const {
+        data: { user },
+        error: userError
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error("You must be logged in to submit an assessment");
+      }
+
+      const { error } = await supabase
+        .from('structured_business_assessments')
+        .insert({
+          user_id: user.id,
+          company_name: data.companyName,
+          business_structure: data.businessStructure,
+          employee_count: parseInt(data.employeeCount),
+          annual_revenue: data.annualRevenue ? parseFloat(data.annualRevenue) : null,
+          year_established: parseInt(data.yearEstablished),
+          primary_country: data.primaryCountry,
+          primary_state: data.primaryState,
+          operating_locations: data.operatingLocations,
+          industry_classification: data.industryClassification,
+          sub_industry: data.subIndustry,
+          business_activities: data.businessActivities,
+          business_model: data.businessModel,
+          handles_personal_data: data.handlesPersonalData,
+          handles_financial_data: data.handlesFinancialData,
+          handles_sensitive_data: data.handlesSensitiveData,
+          has_third_party_vendors: data.hasThirdPartyVendors,
+          data_storage: data.dataStorage,
+          has_cyber_security_policy: data.hasCyberSecurityPolicy,
+          known_regulations: data.knownRegulations,
+          existing_assessments: data.existingAssessments
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Assessment Submitted",
         description: "Your business assessment has been submitted successfully.",
       });
+
+      // Redirect to dashboard or another appropriate page
+      navigate("/dashboard");
+      
     } catch (error) {
       console.error("Error submitting assessment:", error);
       toast({
         title: "Error",
-        description: "There was an error submitting your assessment. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error submitting your assessment. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -499,8 +547,8 @@ export function BusinessAssessmentForm() {
                 Next
               </Button>
             ) : (
-              <Button type="submit">
-                Submit Assessment
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit Assessment"}
               </Button>
             )}
           </div>

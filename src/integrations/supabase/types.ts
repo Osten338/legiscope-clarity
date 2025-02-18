@@ -536,6 +536,87 @@ export type Database = {
           },
         ]
       }
+      structured_business_assessments: {
+        Row: {
+          annual_revenue: number | null
+          business_activities: string
+          business_model: Database["public"]["Enums"]["business_model"]
+          business_structure: Database["public"]["Enums"]["business_structure"]
+          company_name: string
+          created_at: string
+          data_storage: Database["public"]["Enums"]["data_storage_type"]
+          employee_count: number
+          existing_assessments: string | null
+          handles_financial_data: boolean
+          handles_personal_data: boolean
+          handles_sensitive_data: boolean
+          has_cyber_security_policy: boolean
+          has_third_party_vendors: boolean
+          id: string
+          industry_classification: string
+          known_regulations: string | null
+          operating_locations: string | null
+          primary_country: string
+          primary_state: string
+          sub_industry: string | null
+          updated_at: string
+          user_id: string
+          year_established: number
+        }
+        Insert: {
+          annual_revenue?: number | null
+          business_activities: string
+          business_model: Database["public"]["Enums"]["business_model"]
+          business_structure: Database["public"]["Enums"]["business_structure"]
+          company_name: string
+          created_at?: string
+          data_storage: Database["public"]["Enums"]["data_storage_type"]
+          employee_count: number
+          existing_assessments?: string | null
+          handles_financial_data?: boolean
+          handles_personal_data?: boolean
+          handles_sensitive_data?: boolean
+          has_cyber_security_policy?: boolean
+          has_third_party_vendors?: boolean
+          id?: string
+          industry_classification: string
+          known_regulations?: string | null
+          operating_locations?: string | null
+          primary_country: string
+          primary_state: string
+          sub_industry?: string | null
+          updated_at?: string
+          user_id: string
+          year_established: number
+        }
+        Update: {
+          annual_revenue?: number | null
+          business_activities?: string
+          business_model?: Database["public"]["Enums"]["business_model"]
+          business_structure?: Database["public"]["Enums"]["business_structure"]
+          company_name?: string
+          created_at?: string
+          data_storage?: Database["public"]["Enums"]["data_storage_type"]
+          employee_count?: number
+          existing_assessments?: string | null
+          handles_financial_data?: boolean
+          handles_personal_data?: boolean
+          handles_sensitive_data?: boolean
+          has_cyber_security_policy?: boolean
+          has_third_party_vendors?: boolean
+          id?: string
+          industry_classification?: string
+          known_regulations?: string | null
+          operating_locations?: string | null
+          primary_country?: string
+          primary_state?: string
+          sub_industry?: string | null
+          updated_at?: string
+          user_id?: string
+          year_established?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -578,7 +659,15 @@ export type Database = {
       }
     }
     Enums: {
+      business_model: "online" | "offline" | "hybrid"
+      business_structure:
+        | "limitedCompany"
+        | "plc"
+        | "partnership"
+        | "soleTrader"
+        | "other"
       checklist_item_status: "completed" | "will_do" | "will_not_do"
+      data_storage_type: "onPremise" | "cloud" | "hybrid"
       risk_category: "compliance" | "operational" | "financial" | "reputational"
       risk_level: "low" | "medium" | "high"
     }
