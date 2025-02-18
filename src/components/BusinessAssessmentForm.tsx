@@ -92,7 +92,7 @@ export function BusinessAssessmentForm() {
         ...data
       });
 
-      const { error } = await supabase
+      const { data: assessmentData, error } = await supabase
         .from('structured_business_assessments')
         .insert({
           user_id: user.id,
@@ -116,19 +116,46 @@ export function BusinessAssessmentForm() {
           has_cyber_security_policy: data.hasCyberSecurityPolicy,
           known_regulations: data.knownRegulations,
           existing_assessments: data.existingAssessments
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error("Supabase error:", error);
         throw error;
       }
 
-      toast({
-        title: "Assessment Submitted",
-        description: "Your business assessment has been submitted successfully.",
+      const { data: analysisResponse, error: analysisError } = await supabase.functions.invoke('analyze-business', {
+        body: {
+          assessment_id: assessmentData.id,
+          description: `${data.companyName} is a ${data.businessStructure} company established in ${data.yearEstablished}, 
+            operating primarily in ${data.primaryCountry}. The company operates in the ${data.industryClassification} industry 
+            and has ${data.employeeCount} employees. Their main business activities include: ${data.businessActivities}. 
+            They operate with a ${data.businessModel} business model.
+            
+            Data handling characteristics:
+            - Handles personal data: ${data.handlesPersonalData}
+            - Handles financial data: ${data.handlesFinancialData}
+            - Handles sensitive data: ${data.handlesSensitiveData}
+            - Has third-party vendors: ${data.hasThirdPartyVendors}
+            - Data storage approach: ${data.dataStorage}
+            - Has cybersecurity policy: ${data.hasCyberSecurityPolicy}`,
+        }
       });
 
-      navigate("/dashboard");
+      if (analysisError) {
+        console.error("Analysis error:", analysisError);
+        throw analysisError;
+      }
+
+      console.log("Analysis response:", analysisResponse);
+
+      toast({
+        title: "Assessment Submitted",
+        description: "Your business assessment has been submitted and analyzed successfully.",
+      });
+
+      navigate(`/analysis/${assessmentData.id}`);
       
     } catch (error) {
       console.error("Error submitting assessment:", error);
