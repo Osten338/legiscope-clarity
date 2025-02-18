@@ -1,14 +1,14 @@
-import type { Config } from "tailwindcss";
+
+import { type Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -19,6 +19,18 @@ export default {
     },
     extend: {
       colors: {
+        sage: {
+          '50': '#f6f7f6',
+          '100': '#e3e5e3',
+          '200': '#c6cbc6',
+          '300': '#a3aba3',
+          '400': '#808a80',
+          '500': '#666f66',
+          '600': '#4d554d',
+          '700': '#3d433d',
+          '800': '#313431',
+          '900': '#2a2c2a',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -52,23 +64,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sage: {
-          50: "#f8faf8",
-          100: "#f1f4f1",
-          200: "#e2e8e2",
-          300: "#c5d1c5",
-          400: "#a3b4a3",
-          500: "#839683",
-          600: "#6b7b6b",
-          700: "#586058",
-          800: "#4a4f4a",
-          900: "#404340",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        serif: ['Addington CF', 'serif'],
       },
       keyframes: {
         "accordion-down": {
@@ -79,25 +82,13 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        "slide-up": {
-          "0%": { transform: "translateY(10px)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.5s ease-out",
-        "slide-up": "slide-up 0.5s ease-out",
-      },
-      fontFamily: {
-        serif: ['Playfair Display', 'serif'],
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+} satisfies Config
+
