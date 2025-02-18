@@ -16,6 +16,7 @@ interface ChecklistItemProps {
   estimatedEffort?: string;
   regulationId: string;
   regulationName: string;
+  regulationDescription: string; // Add this prop
   response?: {
     status: "completed" | "will_do" | "will_not_do";
     justification?: string | null;
@@ -30,6 +31,7 @@ export const ChecklistItem = ({
   estimatedEffort,
   regulationId,
   regulationName,
+  regulationDescription, // Add this parameter
   response 
 }: ChecklistItemProps) => {
   const { toast } = useToast();
@@ -182,6 +184,7 @@ export const ChecklistItem = ({
         regulation={{
           id: regulationId,
           name: regulationName,
+          description: regulationDescription, // Add the description here
           checklist_items: [{
             id,
             description

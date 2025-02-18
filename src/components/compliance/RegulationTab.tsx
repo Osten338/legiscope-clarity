@@ -59,6 +59,7 @@ export const RegulationTab = ({
                   estimatedEffort={item.estimated_effort}
                   regulationId={regulation.id}
                   regulationName={regulation.name}
+                  regulationDescription={regulation.description}
                   response={response}
                 />
               );
