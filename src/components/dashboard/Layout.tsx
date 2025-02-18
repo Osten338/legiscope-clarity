@@ -4,7 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { Bell, Menu as MenuIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,7 @@ export const Layout = ({ children }: LayoutProps) => {
       {/* Mobile sidebar */}
       <Dialog open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <DialogContent className="p-0 sm:max-w-[300px] bg-white data-[state=open]:duration-300">
+          <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
           <Sidebar mobile onClose={() => setSidebarOpen(false)} />
         </DialogContent>
       </Dialog>
@@ -44,15 +45,14 @@ export const Layout = ({ children }: LayoutProps) => {
 
       <div className="lg:pl-72">
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
+            type="button"
             onClick={() => setSidebarOpen(true)}
             className="-m-2.5 p-2.5 text-slate-700 lg:hidden"
           >
             <span className="sr-only">Open sidebar</span>
             <MenuIcon className="h-6 w-6" />
-          </Button>
+          </button>
 
           {/* Separator */}
           <div aria-hidden="true" className="h-6 w-px bg-slate-200 lg:hidden" />

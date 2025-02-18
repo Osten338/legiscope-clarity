@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
@@ -12,7 +13,6 @@ import {
   CheckSquare
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   mobile?: boolean;
@@ -23,7 +23,7 @@ export const Sidebar = ({ mobile, onClose }: SidebarProps) => {
   const location = useLocation();
   
   return (
-    <div className="fixed flex h-full w-72 flex-col gap-y-5 overflow-y-auto border-r border-slate-200 bg-white px-6 pb-4">
+    <div className="flex h-full w-72 flex-col gap-y-5 overflow-y-auto border-r border-slate-200 bg-white px-6 pb-4">
       {mobile && (
         <div className="flex h-16 shrink-0 items-center justify-between">
           <img
@@ -31,9 +31,15 @@ export const Sidebar = ({ mobile, onClose }: SidebarProps) => {
             src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
             className="h-8 w-auto"
           />
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-6 w-6" />
-          </Button>
+          {onClose && (
+            <button
+              type="button"
+              className="text-slate-600 hover:text-slate-700"
+              onClick={onClose}
+            >
+              <X className="h-6 w-6" />
+            </button>
+          )}
         </div>
       )}
       {!mobile && (
