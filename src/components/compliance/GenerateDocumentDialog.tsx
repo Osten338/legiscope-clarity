@@ -73,24 +73,37 @@ export function GenerateDocumentDialog({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not found");
 
-      const { error } = await supabase
-        .from('generated_documents')
+      // Create a blob from the documentation text
+      const blob = new Blob([documentation || ''], { type: 'text/plain' });
+      const fileName = `implementation-guide-${regulation.name.toLowerCase().replace(/\s+/g, '-')}.txt`;
+      
+      // Upload the file to storage
+      const { data: fileData, error: uploadError } = await supabase.storage
+        .from('compliance_documents')
+        .upload(`${user.id}/${fileName}`, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Save the document metadata
+      const { error: insertError } = await supabase
+        .from('compliance_documents')
         .insert({
-          title: `Implementation Guide: ${regulation.name}`,
-          content: documentation,
+          file_name: fileName,
+          file_path: fileData.path,
+          document_type: 'Implementation Guide',
+          description: `AI-generated implementation guide for ${regulation.name}`,
           regulation_id: regulation.id,
           user_id: user.id,
-          status: 'published'
         });
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
-      // Invalidate the generated documents query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['generated-documents'] });
+      // Invalidate the compliance documents query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['compliance-documents'] });
 
       toast({
         title: "Documentation saved",
-        description: "The documentation has been saved and can be accessed from the Documentation view.",
+        description: "The implementation guide has been saved and can be accessed from the Documents view.",
       });
 
       // Close the dialog
