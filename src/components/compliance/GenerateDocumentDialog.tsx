@@ -109,7 +109,7 @@ export function GenerateDocumentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-sage-600" />
@@ -117,7 +117,7 @@ export function GenerateDocumentDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0">
+        <div className="flex flex-col flex-1 overflow-hidden">
           {!documentation && !isLoading && (
             <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
               <Bot className="h-12 w-12 text-sage-400" />
@@ -139,11 +139,13 @@ export function GenerateDocumentDialog({
 
           {documentation && (
             <>
-              <ScrollArea className="h-[calc(100%-4rem)] pr-4">
-                <div className="prose prose-sage max-w-none">
-                  {documentation}
-                </div>
-              </ScrollArea>
+              <div className="flex-1 min-h-0">
+                <ScrollArea className="h-full">
+                  <div className="prose prose-sage max-w-none p-4">
+                    {documentation}
+                  </div>
+                </ScrollArea>
+              </div>
               <div className="flex justify-end mt-4 pt-4 border-t border-slate-200">
                 <Button 
                   onClick={saveDocumentation} 
