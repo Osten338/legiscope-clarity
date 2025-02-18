@@ -12,7 +12,6 @@ export const SidebarNavigation = () => {
     { to: "/documents", icon: FileText, label: "Documents" },
     { to: "/alerts", icon: Bell, label: "Alerts" },
     { to: "/compliance-checklist", icon: CheckSquare, label: "Compliance Checklist" },
-    { to: "/analysis", icon: BarChart, label: "Analysis" },
     { to: "/documentation", icon: FileText, label: "Documentation" },
   ];
 
