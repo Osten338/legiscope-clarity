@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Info } from "lucide-react";
+import { Info, FileText } from "lucide-react";
+import { GenerateDocumentDialog } from "./GenerateDocumentDialog";
 
 interface ChecklistItemProps {
   id: string;
@@ -13,6 +14,8 @@ interface ChecklistItemProps {
   importance?: number;
   category?: string;
   estimatedEffort?: string;
+  regulationId: string;
+  regulationName: string;
   response?: {
     status: "completed" | "will_do" | "will_not_do";
     justification?: string | null;
@@ -24,10 +27,13 @@ export const ChecklistItem = ({
   description, 
   importance, 
   category, 
-  estimatedEffort, 
+  estimatedEffort,
+  regulationId,
+  regulationName,
   response 
 }: ChecklistItemProps) => {
   const { toast } = useToast();
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
 
   const handleChecklistResponse = async (
     status: "completed" | "will_do" | "will_not_do",
@@ -135,7 +141,7 @@ export const ChecklistItem = ({
             </div>
           )}
           {!response?.status && (
-            <div className="flex gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2">
               <Button
                 size="sm"
                 onClick={() => handleChecklistResponse("will_do")}
@@ -156,10 +162,32 @@ export const ChecklistItem = ({
               >
                 Will Not Do
               </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="gap-2"
+                onClick={() => setGenerateDialogOpen(true)}
+              >
+                <FileText className="h-4 w-4" />
+                Generate Documentation
+              </Button>
             </div>
           )}
         </div>
       </div>
+
+      <GenerateDocumentDialog 
+        open={generateDialogOpen}
+        onOpenChange={setGenerateDialogOpen}
+        regulation={{
+          id: regulationId,
+          name: regulationName,
+          checklist_items: [{
+            id,
+            description
+          }]
+        }}
+      />
     </div>
   );
 };

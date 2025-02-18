@@ -1,23 +1,19 @@
-
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
-import { ClipboardList, ArrowLeft, Bot, FileText } from "lucide-react";
+import { ClipboardList, ArrowLeft, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
-import { GenerateDocumentDialog } from "@/components/compliance/GenerateDocumentDialog";
 import { Layout } from "@/components/dashboard/Layout";
 
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
-  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   const { data: savedRegulations, isLoading: isLoadingSaved } = useQuery({
     queryKey: ["saved-regulations"],
@@ -91,16 +87,6 @@ const ComplianceChecklist = () => {
                 Compliance Checklist
               </h1>
             </div>
-            {selectedRegulation && currentRegulation && (
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => setGenerateDialogOpen(true)}
-              >
-                <FileText className="h-4 w-4" />
-                Generate Documentation
-              </Button>
-            )}
           </div>
 
           {isLoadingSaved ? (
@@ -197,14 +183,6 @@ const ComplianceChecklist = () => {
         onOpenChange={setShowChat}
         checklistItem={{ description: "How can I improve my compliance?" }}
       />
-
-      {currentRegulation && (
-        <GenerateDocumentDialog 
-          open={generateDialogOpen}
-          onOpenChange={setGenerateDialogOpen}
-          regulation={currentRegulation}
-        />
-      )}
     </Layout>
   );
 };
