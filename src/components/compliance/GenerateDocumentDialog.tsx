@@ -3,9 +3,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Bot } from "lucide-react";
+import { Loader2, Bot, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface GenerateDocumentDialogProps {
   open: boolean;
@@ -28,8 +29,10 @@ export function GenerateDocumentDialog({
   regulation,
 }: GenerateDocumentDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [documentation, setDocumentation] = useState<string | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const generateDocumentation = async () => {
     try {
@@ -60,6 +63,47 @@ export function GenerateDocumentDialog({
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveDocumentation = async () => {
+    try {
+      setIsSaving(true);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not found");
+
+      const { error } = await supabase
+        .from('generated_documents')
+        .insert({
+          title: `Implementation Guide: ${regulation.name}`,
+          content: documentation,
+          regulation_id: regulation.id,
+          user_id: user.id,
+          status: 'published'
+        });
+
+      if (error) throw error;
+
+      // Invalidate the generated documents query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['generated-documents'] });
+
+      toast({
+        title: "Documentation saved",
+        description: "The documentation has been saved and can be accessed from the Documentation view.",
+      });
+
+      // Close the dialog
+      onOpenChange(false);
+      
+    } catch (error: any) {
+      toast({
+        title: "Error saving documentation",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -94,11 +138,24 @@ export function GenerateDocumentDialog({
           )}
 
           {documentation && (
-            <ScrollArea className="h-full pr-4">
-              <div className="prose prose-sage max-w-none">
-                {documentation}
+            <>
+              <ScrollArea className="h-[calc(100%-4rem)] pr-4">
+                <div className="prose prose-sage max-w-none">
+                  {documentation}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end mt-4 pt-4 border-t border-slate-200">
+                <Button 
+                  onClick={saveDocumentation} 
+                  disabled={isSaving}
+                  className="gap-2"
+                >
+                  {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {!isSaving && <Save className="h-4 w-4" />}
+                  Save to Documentation
+                </Button>
               </div>
-            </ScrollArea>
+            </>
           )}
         </div>
       </DialogContent>
