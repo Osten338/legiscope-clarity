@@ -7,6 +7,113 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface ModelResponse {
+  role: string;
+  content: string;
+}
+
+async function getLegalAnalysis(messages: any[], checklistItem: string): Promise<ModelResponse> {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: `You are LegalComplianceBuddy, a specialized legal compliance assistant. Focus on providing a detailed legal analysis with citations and requirements.
+
+For the compliance requirement: "${checklistItem}"
+
+Structure your response with:
+- Legal Context and Framework
+- Core Legal Requirements
+- Compliance Steps
+- Documentation Requirements
+- Legal References and Citations`
+        },
+        ...messages
+      ],
+      temperature: 0.2,
+      max_tokens: 2000,
+    }),
+  });
+
+  const data = await response.json();
+  return data.choices[0].message;
+}
+
+async function getPracticalImplementation(messages: any[], checklistItem: string): Promise<ModelResponse> {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are ImplementationBuddy, focused on practical implementation steps. Provide concrete, actionable steps and best practices.
+
+For the requirement: "${checklistItem}"
+
+Focus on:
+- Step-by-step Implementation Guide
+- Tools and Resources Needed
+- Timeline and Milestones
+- Best Practices and Tips
+- Common Pitfalls to Avoid`
+        },
+        ...messages
+      ],
+      temperature: 0.3,
+      max_tokens: 1500,
+    }),
+  });
+
+  const data = await response.json();
+  return data.choices[0].message;
+}
+
+async function getRiskAssessment(messages: any[], checklistItem: string): Promise<ModelResponse> {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are RiskAnalysisBuddy, specialized in risk assessment and mitigation strategies.
+
+For the requirement: "${checklistItem}"
+
+Focus on:
+- Key Risk Factors
+- Potential Compliance Gaps
+- Risk Mitigation Strategies
+- Monitoring and Review Plans
+- Risk Management Best Practices`
+        },
+        ...messages
+      ],
+      temperature: 0.3,
+      max_tokens: 1500,
+    }),
+  });
+
+  const data = await response.json();
+  return data.choices[0].message;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -15,79 +122,28 @@ serve(async (req) => {
   try {
     const { messages, checklistItem } = await req.json();
 
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: `You are LegalComplianceBuddy, a specialized legal compliance assistant with expertise in business regulations and compliance requirements. Your role is to provide precise, legally-focused guidance while maintaining clarity for non-legal professionals.
+    // Run all analyses in parallel
+    const [legalAnalysis, practicalSteps, riskAnalysis] = await Promise.all([
+      getLegalAnalysis(messages, checklistItem),
+      getPracticalImplementation(messages, checklistItem),
+      getRiskAssessment(messages, checklistItem),
+    ]);
 
-For the compliance requirement: "${checklistItem}"
+    // Combine and structure the responses
+    const combinedResponse = `# Comprehensive Compliance Analysis
 
-Structure your responses using these sections:
+## Legal Framework and Requirements
+${legalAnalysis.content}
 
-## Legal Context
-- Brief overview of the legal framework
-- Jurisdiction and scope
-- Key regulatory bodies involved
+## Implementation Guide
+${practicalSteps.content}
 
-## Compliance Requirements
-1. Core Obligations
-   - List primary legal duties
-   - Specify mandatory requirements
-   - Define key compliance metrics
-
-2. Implementation Steps
-   - Step-by-step compliance actions
-   - Required documentation
-   - Timeline considerations
-
-## Risk Mitigation
-• Identify potential legal risks
-• Recommend preventive measures
-• Highlight common compliance pitfalls
-
-## Documentation Requirements
-- Required records and forms
-- Retention periods
-- Filing requirements
-- Audit trail requirements
-
-## Legal References
-• Relevant statutes
-• Regulatory guidelines
-• Case law (if applicable)
-• Industry standards
-
-## Next Steps
-1. Immediate actions needed
-2. Long-term compliance strategy
-3. Review and update schedule
-
-Always cite specific regulations when possible. Use clear, precise language while avoiding legal jargon where possible. Flag any critical deadlines or penalties.`
-          },
-          ...messages
-        ],
-        temperature: 0.2, // Lower temperature for more consistent, precise responses
-        max_tokens: 2000, // Increased token limit for comprehensive legal analysis
-      }),
-    });
-
-    if (!openAIResponse.ok) {
-      throw new Error('Failed to get AI response');
-    }
-
-    const data = await openAIResponse.json();
-    const reply = data.choices[0].message.content;
+## Risk Assessment and Mitigation
+${riskAnalysis.content}
+`;
 
     return new Response(
-      JSON.stringify({ reply }),
+      JSON.stringify({ reply: combinedResponse }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
