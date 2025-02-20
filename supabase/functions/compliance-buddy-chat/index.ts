@@ -1,6 +1,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,6 +12,12 @@ interface ModelResponse {
   role: string;
   content: string;
 }
+
+// Initialize Supabase client
+const supabaseClient = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 async function getLegalAnalysis(messages: any[], checklistItem: string): Promise<ModelResponse> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -119,8 +126,24 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const startTime = performance.now();
+
   try {
     const { messages, checklistItem } = await req.json();
+    
+    // Get the user ID from the authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
+
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (userError || !user) {
+      throw new Error('Unauthorized');
+    }
 
     // Run all analyses in parallel
     const [legalAnalysis, practicalSteps, riskAnalysis] = await Promise.all([
@@ -142,8 +165,36 @@ ${practicalSteps.content}
 ${riskAnalysis.content}
 `;
 
+    const endTime = performance.now();
+    const responseTime = Math.round(endTime - startTime);
+
+    // Store the response data in the database
+    const { error: insertError } = await supabaseClient
+      .from('ai_responses')
+      .insert({
+        checklist_item: checklistItem,
+        user_query: messages[messages.length - 1].content,
+        legal_analysis: legalAnalysis.content,
+        practical_implementation: practicalSteps.content,
+        risk_assessment: riskAnalysis.content,
+        combined_response: combinedResponse,
+        user_id: user.id,
+        response_time_ms: responseTime,
+        model_version: 'v1.0-multi-model'
+      });
+
+    if (insertError) {
+      console.error('Error storing response:', insertError);
+    }
+
     return new Response(
-      JSON.stringify({ reply: combinedResponse }),
+      JSON.stringify({ 
+        reply: combinedResponse,
+        metrics: {
+          responseTime,
+          modelVersion: 'v1.0-multi-model'
+        }
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
