@@ -33,6 +33,8 @@ export function ComplianceBuddyDialog({
   const sendMessage = async (content: string) => {
     try {
       setIsLoading(true);
+      const startTime = performance.now();
+      
       const newMessages = [...messages, { role: "user" as const, content }];
       setMessages(newMessages);
       setInput("");
@@ -48,6 +50,28 @@ export function ComplianceBuddyDialog({
       );
 
       if (error) throw error;
+
+      // Calculate response time
+      const endTime = performance.now();
+      const responseTimeMs = Math.round(endTime - startTime);
+
+      // Store the interaction in the database
+      const { data: userData } = await supabase.auth.getUser();
+      const { error: dbError } = await supabase.from("ai_responses").insert({
+        user_query: content,
+        checklist_item: checklistItem.description,
+        legal_analysis: data.legalAnalysis || "Not provided",
+        practical_implementation: data.practicalSteps || "Not provided",
+        risk_assessment: data.riskAssessment || "Not provided",
+        combined_response: data.reply,
+        response_time_ms: responseTimeMs,
+        model_version: "gpt-4o-mini",
+        user_id: userData.user?.id
+      });
+
+      if (dbError) {
+        console.error("Error storing AI response:", dbError);
+      }
 
       setMessages([...newMessages, { role: "assistant" as const, content: data.reply }]);
     } catch (error) {
@@ -142,4 +166,3 @@ export function ComplianceBuddyDialog({
     </Dialog>
   );
 }
-
