@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_responses: {
+        Row: {
+          checklist_item: string
+          combined_response: string
+          created_at: string | null
+          id: string
+          legal_analysis: string
+          model_version: string | null
+          practical_implementation: string
+          response_time_ms: number | null
+          risk_assessment: string
+          user_id: string | null
+          user_query: string
+        }
+        Insert: {
+          checklist_item: string
+          combined_response: string
+          created_at?: string | null
+          id?: string
+          legal_analysis: string
+          model_version?: string | null
+          practical_implementation: string
+          response_time_ms?: number | null
+          risk_assessment: string
+          user_id?: string | null
+          user_query: string
+        }
+        Update: {
+          checklist_item?: string
+          combined_response?: string
+          created_at?: string | null
+          id?: string
+          legal_analysis?: string
+          model_version?: string | null
+          practical_implementation?: string
+          response_time_ms?: number | null
+          risk_assessment?: string
+          user_id?: string | null
+          user_query?: string
+        }
+        Relationships: []
+      }
       alert_settings: {
         Row: {
           alerts_enabled: boolean | null
