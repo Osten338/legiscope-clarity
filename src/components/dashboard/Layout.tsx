@@ -37,10 +37,8 @@ export const Layout = ({ children }: LayoutProps) => {
       </Dialog>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="w-72">
-          <Sidebar />
-        </div>
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col">
+        <Sidebar />
       </div>
 
       <div className="lg:pl-72">

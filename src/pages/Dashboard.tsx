@@ -9,6 +9,32 @@ import { RegulationsList } from "@/components/dashboard/RegulationsList";
 import { Layout } from "@/components/dashboard/Layout";
 import { useToast } from "@/hooks/use-toast";
 
+// Define types for the data structure
+type ChecklistItem = {
+  id: string;
+  description: string;
+};
+
+type Regulation = {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
+  checklist_items: ChecklistItem[];
+};
+
+type SavedRegulation = {
+  id: string;
+  regulation_id: string;
+  status: string;
+  progress: number;
+  next_review_date: string;
+  completion_date: string;
+  notes: string;
+  regulations: Regulation;
+};
+
 const Dashboard = () => {
   const [openRegulation, setOpenRegulation] = useState<string | null>(null);
   const { toast } = useToast();
@@ -55,7 +81,19 @@ const Dashboard = () => {
           throw error;
         }
         
-        return savedRegs;
+        // Transform the data to match our types
+        const typedRegulations = savedRegs?.map(reg => ({
+          id: reg.id,
+          regulation_id: reg.regulation_id,
+          status: reg.status,
+          progress: reg.progress,
+          next_review_date: reg.next_review_date,
+          completion_date: reg.completion_date,
+          notes: reg.notes,
+          regulations: reg.regulations
+        })) as SavedRegulation[];
+        
+        return typedRegulations || [];
       } catch (err) {
         console.error("Error in query function:", err);
         throw err;
