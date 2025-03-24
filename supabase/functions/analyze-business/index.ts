@@ -26,13 +26,57 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Generate an enhanced AI analysis of the business description
+    const openAIKey = Deno.env.get('OPENAI_API_KEY');
+    let aiAnalysis = "Analysis in progress...";
+
+    if (openAIKey) {
+      try {
+        console.log("Generating AI analysis using OpenAI API");
+        
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openAIKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "You are a compliance and regulatory expert. Analyze the business description and identify potential compliance requirements, risks, and regulatory frameworks that may apply. Focus on data protection, industry-specific regulations, and business operations."
+              },
+              {
+                role: "user",
+                content: `Analyze this business description and provide a detailed compliance assessment with specific regulatory frameworks that might apply: ${description}`
+              }
+            ]
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          aiAnalysis = data.choices[0].message.content;
+          console.log("Successfully generated AI analysis");
+        } else {
+          console.error("Unexpected OpenAI API response structure:", data);
+        }
+      } catch (aiError) {
+        console.error("Error generating AI analysis:", aiError);
+      }
+    } else {
+      console.log("No OpenAI API key found, skipping enhanced analysis");
+    }
+
     // First create a business analysis record
     const { data: analysisData, error: analysisError } = await supabaseAdmin
       .from('business_analyses')
       .insert({
         id: assessment_id, // Use the same ID as the assessment
         description,
-        analysis: "Analysis in progress..."
+        analysis: aiAnalysis
       })
       .select()
       .single();
@@ -44,18 +88,21 @@ serve(async (req) => {
 
     console.log("Created analysis record:", analysisData);
 
-    // Generate some example regulations (in a real app, this would be more sophisticated)
+    // Generate more comprehensive regulations based on the AI analysis
+    // These would normally come from the AI, but we'll use example data for now
     const regulations = [
       {
         name: "Data Protection Regulation",
-        description: "Basic data protection requirements for businesses handling personal information",
+        description: "Comprehensive data protection requirements for businesses handling personal information",
         motivation: "Your business handles personal data and needs to ensure proper protection measures",
-        requirements: "Implement data protection measures, maintain records of processing activities, ensure secure storage",
+        requirements: "Implement data protection measures, maintain records of processing activities, ensure secure storage, provide privacy notices, and obtain consent where necessary",
         checklist_items: [
           "Implement data encryption for stored personal data",
           "Create a data breach response plan",
           "Maintain records of data processing activities",
-          "Appoint a data protection officer if required"
+          "Appoint a data protection officer if required",
+          "Implement privacy by design in all data handling processes",
+          "Establish a process for handling data subject requests"
         ]
       },
       {
@@ -67,7 +114,22 @@ serve(async (req) => {
           "Implement strong password policies",
           "Regular security training for employees",
           "Setup multi-factor authentication",
-          "Regular security audits"
+          "Regular security audits",
+          "Network security monitoring",
+          "Application security testing"
+        ]
+      },
+      {
+        name: "Industry Compliance Framework",
+        description: "Specific compliance requirements for your industry sector",
+        motivation: "Based on your business activities, specialized industry regulations may apply",
+        requirements: "Sector-specific requirements related to your business operations, reporting, and risk management",
+        checklist_items: [
+          "Identify all industry-specific regulations applicable to your business",
+          "Establish a compliance calendar for industry reporting requirements",
+          "Document industry-standard processes and procedures",
+          "Conduct regular compliance reviews against industry standards",
+          "Join industry associations to stay updated on regulatory changes"
         ]
       }
     ];
@@ -93,7 +155,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        analysis_id: assessment_id
+        analysis_id: assessment_id,
+        has_enhanced_analysis: !!openAIKey
       }),
       { 
         headers: { 

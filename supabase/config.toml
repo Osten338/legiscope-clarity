@@ -5,3 +5,4 @@ enabled = true
 [functions]
 [functions.analyze-business]
 verify_jwt = false
+
