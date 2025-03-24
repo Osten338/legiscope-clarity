@@ -52,8 +52,10 @@ const RiskAssessmentLanding = () => {
       if (error) throw error;
 
       toast.success("Default risks have been generated successfully!");
-      // Use type assertion here to help TypeScript understand
-      navigate("/risk-assessment/list" as never);
+      
+      // Fix this line to use the correct type casting approach
+      // We need to cast the string path to 'any' first before 'never' to avoid the TypeScript error
+      navigate("/risk-assessment/list" as any as never);
     } catch (error) {
       console.error('Error generating default risks:', error);
       toast.error("Failed to generate default risks");
@@ -65,19 +67,19 @@ const RiskAssessmentLanding = () => {
       title: "Risk Matrix",
       description: "Visualize risks based on likelihood and impact in a matrix format",
       icon: Grid,
-      action: () => navigate("/risk-assessment/matrix" as never),
+      action: () => navigate("/risk-assessment/matrix" as any as never),
     },
     {
       title: "Risk List",
       description: "View all risks in a detailed list format with filtering options",
       icon: List,
-      action: () => navigate("/risk-assessment/list" as never),
+      action: () => navigate("/risk-assessment/list" as any as never),
     },
     {
       title: "Create New Risk",
       description: "Add a new risk to your assessment registry",
       icon: Plus,
-      action: () => navigate("/risk-assessment/matrix?new=true" as never),
+      action: () => navigate("/risk-assessment/matrix?new=true" as any as never),
     },
     {
       title: "Generate Default Risks",
