@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Grid, List, Plus, RefreshCw } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavigateFunction } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -51,7 +52,8 @@ const RiskAssessmentLanding = () => {
 
       toast.success("Default risks have been generated successfully!");
       
-      navigate("/risk-assessment/list");
+      // Use type assertion to help TypeScript understand the path is valid
+      navigate("/risk-assessment/list" as string);
     } catch (error) {
       console.error('Error generating default risks:', error);
       toast.error("Failed to generate default risks");
@@ -63,19 +65,19 @@ const RiskAssessmentLanding = () => {
       title: "Risk Matrix",
       description: "Visualize risks based on likelihood and impact in a matrix format",
       icon: Grid,
-      action: () => navigate("/risk-assessment/matrix"),
+      action: () => navigate("/risk-assessment/matrix" as string),
     },
     {
       title: "Risk List",
       description: "View all risks in a detailed list format with filtering options",
       icon: List,
-      action: () => navigate("/risk-assessment/list"),
+      action: () => navigate("/risk-assessment/list" as string),
     },
     {
       title: "Create New Risk",
       description: "Add a new risk to your assessment registry",
       icon: Plus,
-      action: () => navigate("/risk-assessment/matrix?new=true"),
+      action: () => navigate("/risk-assessment/matrix?new=true" as string),
     },
     {
       title: "Generate Default Risks",
