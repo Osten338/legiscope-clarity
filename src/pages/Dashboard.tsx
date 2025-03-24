@@ -29,9 +29,9 @@ type SavedRegulation = {
   regulation_id: string;
   status: string;
   progress: number;
-  next_review_date: string;
-  completion_date: string;
-  notes: string;
+  next_review_date: string | null;
+  completion_date: string | null;
+  notes: string | null;
   regulations: Regulation;
 };
 

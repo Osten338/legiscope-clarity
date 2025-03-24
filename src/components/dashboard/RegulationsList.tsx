@@ -10,11 +10,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
+
+type ChecklistItem = {
+  id: string;
+  description: string;
+};
+
+type Regulation = {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
+  checklist_items: ChecklistItem[];
+};
+
+type SavedRegulation = {
+  id: string;
+  regulation_id: string;
+  status: string;
+  progress: number;
+  next_review_date: string | null;
+  completion_date: string | null;
+  notes: string | null;
+  regulations: Regulation;
+};
+
 interface RegulationsListProps {
-  savedRegulations: any[];
+  savedRegulations: SavedRegulation[];
   openRegulation: string | null;
   setOpenRegulation: (id: string | null) => void;
 }
+
 export const RegulationsList = ({
   savedRegulations,
   openRegulation,
@@ -24,6 +51,7 @@ export const RegulationsList = ({
     toast
   } = useToast();
   const queryClient = useQueryClient();
+
   const handleRemoveRegulation = async (savedRegulationId: string) => {
     try {
       const {
@@ -49,7 +77,7 @@ export const RegulationsList = ({
   };
 
   // Filter out duplicates by keeping only the latest entry for each regulation
-  const uniqueRegulations = savedRegulations?.reduce((acc, current) => {
+  const uniqueRegulations = savedRegulations?.reduce((acc: SavedRegulation[], current: SavedRegulation) => {
     if (!current.regulations) return acc;
     const existingEntry = acc.find(item => item.regulations?.id === current.regulations.id);
     if (!existingEntry || new Date(current.created_at) > new Date(existingEntry.created_at)) {
@@ -58,7 +86,8 @@ export const RegulationsList = ({
       return [...filtered, current];
     }
     return acc;
-  }, [] as typeof savedRegulations);
+  }, [] as SavedRegulation[]);
+
   return <Card>
       <CardHeader>
         <CardTitle className="font-serif">Active Regulations</CardTitle>

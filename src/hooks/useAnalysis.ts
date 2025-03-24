@@ -3,10 +3,37 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Define types for the data structure
+type ChecklistItem = {
+  id: string;
+  description: string;
+};
+
+type Regulation = {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
+  checklist_items: ChecklistItem[];
+};
+
+type AnalysisData = {
+  analysis: {
+    id: string;
+    description: string;
+    analysis: string | null;
+    user_id: string | null;
+    created_at: string;
+    updated_at: string;
+  };
+  regulations: Regulation[];
+};
+
 export const useAnalysis = (id: string) => {
   return useQuery({
     queryKey: ["analysis", id],
-    queryFn: async () => {
+    queryFn: async (): Promise<AnalysisData> => {
       // Validate the ID parameter
       if (!id || id === ':id') {
         console.error("Invalid ID parameter:", id);
@@ -80,7 +107,7 @@ export const useAnalysis = (id: string) => {
       // Extract and format the regulations data
       const formattedRegulations = regulationsData
         .map(br => br.regulations)
-        .filter((reg): reg is NonNullable<typeof reg> => reg !== null);
+        .filter((reg): reg is NonNullable<typeof reg> => reg !== null) as Regulation[];
 
       console.log("Processed regulations:", formattedRegulations);
 

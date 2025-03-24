@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,31 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
 import { Layout } from "@/components/dashboard/Layout";
+
+// Define the types for the regulation data
+type RegulationWithChecklistItems = {
+  id: string;
+  name: string;
+  description: string;
+  checklist_items: {
+    id: string;
+    description: string;
+    importance?: number;
+    category?: string;
+    estimated_effort?: string;
+  }[];
+};
+
+type SavedRegulationWithDetails = {
+  id: string;
+  regulation: RegulationWithChecklistItems;
+};
+
+type ChecklistItemResponse = {
+  checklist_item_id: string;
+  status: 'completed' | 'will_do' | 'will_not_do';
+  justification: string | null;
+};
 
 const ComplianceChecklist = () => {
   const [selectedRegulation, setSelectedRegulation] = useState<string | null>(null);
@@ -41,7 +67,7 @@ const ComplianceChecklist = () => {
         .eq("user_id", user.id);
 
       if (error) throw error;
-      return data;
+      return data as SavedRegulationWithDetails[];
     },
   });
 
@@ -58,7 +84,7 @@ const ComplianceChecklist = () => {
         .eq("user_id", user.id);
 
       if (error) throw error;
-      return data;
+      return data as ChecklistItemResponse[];
     },
   });
 
@@ -94,7 +120,7 @@ const ComplianceChecklist = () => {
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-600 border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite] mb-4" />
               <p className="text-slate-600 font-serif">Loading your regulations...</p>
             </div>
-          ) : savedRegulations?.length === 0 ? (
+          ) : !savedRegulations || savedRegulations.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-slate-100">
               <ClipboardList className="h-12 w-12 text-slate-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-slate-900 mb-2 font-serif">
@@ -159,10 +185,12 @@ const ComplianceChecklist = () => {
                     value={saved.regulation.id}
                     className="focus-visible:outline-none focus-visible:ring-0"
                   >
-                    <RegulationTab
-                      regulation={saved.regulation}
-                      responses={responses}
-                    />
+                    {currentRegulation && (
+                      <RegulationTab
+                        regulation={currentRegulation}
+                        responses={responses}
+                      />
+                    )}
                   </TabsContent>
                 ))}
               </Tabs>

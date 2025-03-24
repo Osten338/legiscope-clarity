@@ -493,6 +493,61 @@ export interface Database extends OriginalDatabase {
           business_activities?: string;
         };
       };
+      profiles: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          email: string | null;
+        };
+        Insert: {
+          id: string;
+          created_at?: string;
+          updated_at?: string;
+          email?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          email?: string | null;
+        };
+      };
+      custom_regulations: {
+        Row: {
+          id: string;
+          user_id: string;
+          created_at: string;
+          updated_at: string;
+          sanctions: string;
+          name: string;
+          description: string;
+          requirements: string;
+          motivation: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          created_at?: string;
+          updated_at?: string;
+          sanctions?: string;
+          name: string;
+          description: string;
+          requirements: string;
+          motivation: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          created_at?: string;
+          updated_at?: string;
+          sanctions?: string;
+          name?: string;
+          description?: string;
+          requirements?: string;
+          motivation?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

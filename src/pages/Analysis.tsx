@@ -11,6 +11,30 @@ import { useAnalysis } from "@/hooks/useAnalysis";
 import { RegulationCard } from "@/components/RegulationCard";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define types for the data structure
+type ChecklistItem = {
+  id: string;
+  description: string;
+};
+
+type Regulation = {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
+  checklist_items: ChecklistItem[];
+};
+
+type AnalysisDataType = {
+  analysis: {
+    id: string;
+    description: string;
+    analysis: string | null;
+  };
+  regulations: Regulation[];
+};
+
 const Analysis = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -18,7 +42,10 @@ const Analysis = () => {
   const [savingRegulations, setSavingRegulations] = useState<Set<string>>(new Set());
   const [rejectedRegulations, setRejectedRegulations] = useState<Set<string>>(new Set());
   
-  const { data: analysisData, isLoading: isLoadingAnalysis } = useAnalysis(id!);
+  const { data: analysisData, isLoading: isLoadingAnalysis } = useAnalysis(id!) as { 
+    data: AnalysisDataType | undefined;
+    isLoading: boolean;
+  };
 
   const handleAddRegulation = async (regulationId: string) => {
     try {
@@ -185,4 +212,3 @@ const Analysis = () => {
 };
 
 export default Analysis;
-
