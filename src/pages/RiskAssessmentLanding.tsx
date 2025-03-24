@@ -2,15 +2,15 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Grid, List, Plus, RefreshCw } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavigateFunction } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/dashboard/Layout";
 
 const RiskAssessmentLanding = () => {
-  // Explicitly define the correct type for navigate
-  const navigate = useNavigate();
+  // Explicitly type navigate as NavigateFunction
+  const navigate: NavigateFunction = useNavigate();
 
   // Fetch the latest business analysis to generate risks from
   const { data: latestAnalysis } = useQuery({
@@ -52,8 +52,8 @@ const RiskAssessmentLanding = () => {
       if (error) throw error;
 
       toast.success("Default risks have been generated successfully!");
-      // Use navigate as a function with a string literal
-      navigate("/risk-assessment/list");
+      // Use type assertion here to help TypeScript understand
+      navigate("/risk-assessment/list" as never);
     } catch (error) {
       console.error('Error generating default risks:', error);
       toast.error("Failed to generate default risks");
@@ -65,19 +65,19 @@ const RiskAssessmentLanding = () => {
       title: "Risk Matrix",
       description: "Visualize risks based on likelihood and impact in a matrix format",
       icon: Grid,
-      action: () => navigate("/risk-assessment/matrix"),
+      action: () => navigate("/risk-assessment/matrix" as never),
     },
     {
       title: "Risk List",
       description: "View all risks in a detailed list format with filtering options",
       icon: List,
-      action: () => navigate("/risk-assessment/list"),
+      action: () => navigate("/risk-assessment/list" as never),
     },
     {
       title: "Create New Risk",
       description: "Add a new risk to your assessment registry",
       icon: Plus,
-      action: () => navigate("/risk-assessment/matrix?new=true"),
+      action: () => navigate("/risk-assessment/matrix?new=true" as never),
     },
     {
       title: "Generate Default Risks",
