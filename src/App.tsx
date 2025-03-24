@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,14 +29,19 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      // Use onError instead of onSettled
-      onError: (error) => {
-        console.error("Query error:", error);
+      // Using meta for error handling instead of onError
+      meta: {
+        onError: (error: Error) => {
+          console.error("Query error:", error);
+        }
       }
     },
     mutations: {
-      onError: (error) => {
-        console.error("Mutation error:", error);
+      // Using meta for error handling
+      meta: {
+        onError: (error: Error) => {
+          console.error("Mutation error:", error);
+        }
       }
     }
   },

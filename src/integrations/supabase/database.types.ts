@@ -1,8 +1,9 @@
 
 import { Database as OriginalDatabase } from './types';
+import type { Json } from './types';
 
 // Extended Database interface that includes our tables
-export interface Database extends OriginalDatabase {
+export interface Database {
   public: {
     Tables: {
       saved_regulations: {
@@ -42,6 +43,15 @@ export interface Database extends OriginalDatabase {
           notes?: string | null;
           status?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "saved_regulations_regulation_id_fkey";
+            columns: ["regulation_id"];
+            isOneToOne: false;
+            referencedRelation: "regulations";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       regulations: {
         Row: {
@@ -74,6 +84,7 @@ export interface Database extends OriginalDatabase {
           requirements?: string;
           sanctions?: string;
         };
+        Relationships: [];
       };
       alert_settings: {
         Row: {
@@ -109,6 +120,7 @@ export interface Database extends OriginalDatabase {
           compliance_alerts_enabled?: boolean | null;
           system_alerts_enabled?: boolean | null;
         };
+        Relationships: [];
       };
       ai_responses: {
         Row: {
@@ -150,6 +162,7 @@ export interface Database extends OriginalDatabase {
           response_time_ms?: number | null;
           model_version?: string | null;
         };
+        Relationships: [];
       };
       business_analyses: {
         Row: {
@@ -176,6 +189,7 @@ export interface Database extends OriginalDatabase {
           description?: string;
           analysis?: string | null;
         };
+        Relationships: [];
       };
       business_regulations: {
         Row: {
@@ -196,6 +210,22 @@ export interface Database extends OriginalDatabase {
           regulation_id?: string | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "business_regulations_business_analysis_id_fkey";
+            columns: ["business_analysis_id"];
+            isOneToOne: false;
+            referencedRelation: "business_analyses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "business_regulations_regulation_id_fkey";
+            columns: ["regulation_id"];
+            isOneToOne: false;
+            referencedRelation: "regulations";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       checklist_items: {
         Row: {
@@ -228,6 +258,15 @@ export interface Database extends OriginalDatabase {
           category?: string | null;
           estimated_effort?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_regulation_id_fkey";
+            columns: ["regulation_id"];
+            isOneToOne: false;
+            referencedRelation: "regulations";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       checklist_item_responses: {
         Row: {
@@ -263,6 +302,15 @@ export interface Database extends OriginalDatabase {
           notes?: string | null;
           justification?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "checklist_item_responses_checklist_item_id_fkey";
+            columns: ["checklist_item_id"];
+            isOneToOne: false;
+            referencedRelation: "checklist_items";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       compliance_documents: {
         Row: {
@@ -298,6 +346,15 @@ export interface Database extends OriginalDatabase {
           document_type?: string;
           description?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "compliance_documents_regulation_id_fkey";
+            columns: ["regulation_id"];
+            isOneToOne: false;
+            referencedRelation: "regulations";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       document_reviews: {
         Row: {
@@ -324,6 +381,15 @@ export interface Database extends OriginalDatabase {
           user_id?: string;
           content?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "document_reviews_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "compliance_documents";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       generated_documents: {
         Row: {
@@ -356,6 +422,15 @@ export interface Database extends OriginalDatabase {
           content?: string;
           status?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "generated_documents_regulation_id_fkey";
+            columns: ["regulation_id"];
+            isOneToOne: false;
+            referencedRelation: "regulations";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       risks: {
         Row: {
@@ -412,6 +487,15 @@ export interface Database extends OriginalDatabase {
           status?: string | null;
           is_generated?: boolean | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: "risks_regulation_id_fkey";
+            columns: ["regulation_id"];
+            isOneToOne: false;
+            referencedRelation: "regulations";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       structured_business_assessments: {
         Row: {
@@ -492,6 +576,7 @@ export interface Database extends OriginalDatabase {
           sub_industry?: string | null;
           business_activities?: string;
         };
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -512,6 +597,7 @@ export interface Database extends OriginalDatabase {
           updated_at?: string;
           email?: string | null;
         };
+        Relationships: [];
       };
       custom_regulations: {
         Row: {
@@ -547,6 +633,7 @@ export interface Database extends OriginalDatabase {
           requirements?: string;
           motivation?: string;
         };
+        Relationships: [];
       };
     };
     Views: {

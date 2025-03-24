@@ -67,7 +67,14 @@ const ComplianceChecklist = () => {
         .eq("user_id", user.id);
 
       if (error) throw error;
-      return data as SavedRegulationWithDetails[];
+      
+      // Transform the data to match our types
+      const transformedData = data.map(item => ({
+        id: item.id,
+        regulation: item.regulation
+      })) as SavedRegulationWithDetails[];
+      
+      return transformedData;
     },
   });
 

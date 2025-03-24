@@ -79,13 +79,17 @@ export const RegulationsList = ({
   // Filter out duplicates by keeping only the latest entry for each regulation
   const uniqueRegulations = savedRegulations?.reduce((acc: SavedRegulation[], current: SavedRegulation) => {
     if (!current.regulations) return acc;
-    const existingEntry = acc.find(item => item.regulations?.id === current.regulations.id);
-    if (!existingEntry || new Date(current.created_at) > new Date(existingEntry.created_at)) {
-      // Remove existing entry if it exists
-      const filtered = acc.filter(item => item.regulations?.id !== current.regulations?.id);
-      return [...filtered, current];
+    
+    const existingIndex = acc.findIndex(item => item.regulations?.id === current.regulations.id);
+    if (existingIndex === -1) {
+      // No existing entry, add current to accumulator
+      return [...acc, current];
     }
-    return acc;
+    
+    // Keep the current one if it's newer (no created_at comparison needed)
+    acc.splice(existingIndex, 1);
+    return [...acc, current];
+    
   }, [] as SavedRegulation[]);
 
   return <Card>
