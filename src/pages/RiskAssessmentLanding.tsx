@@ -51,8 +51,8 @@ const RiskAssessmentLanding = () => {
       if (error) throw error;
 
       toast.success("Default risks have been generated successfully!");
-      // Fix: Use a type assertion for the navigation path
-      navigate("/risk-assessment/list" as string);
+      // Fix: Providing the route path as a valid parameter for navigate function
+      navigate("/risk-assessment/list");
     } catch (error) {
       console.error('Error generating default risks:', error);
       toast.error("Failed to generate default risks");
@@ -64,19 +64,19 @@ const RiskAssessmentLanding = () => {
       title: "Risk Matrix",
       description: "Visualize risks based on likelihood and impact in a matrix format",
       icon: Grid,
-      action: () => navigate("/risk-assessment/matrix" as string),
+      action: () => navigate("/risk-assessment/matrix"),
     },
     {
       title: "Risk List",
       description: "View all risks in a detailed list format with filtering options",
       icon: List,
-      action: () => navigate("/risk-assessment/list" as string),
+      action: () => navigate("/risk-assessment/list"),
     },
     {
       title: "Create New Risk",
       description: "Add a new risk to your assessment registry",
       icon: Plus,
-      action: () => navigate("/risk-assessment/matrix?new=true" as string),
+      action: () => navigate("/risk-assessment/matrix?new=true"),
     },
     {
       title: "Generate Default Risks",
