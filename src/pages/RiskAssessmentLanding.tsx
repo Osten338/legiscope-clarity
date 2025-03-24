@@ -2,15 +2,13 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Grid, List, Plus, RefreshCw } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/dashboard/Layout";
+import { Link } from "react-router-dom";
 
 const RiskAssessmentLanding = () => {
-  const navigate = useNavigate();
-
   // Fetch the latest business analysis to generate risks from
   const { data: latestAnalysis } = useQuery({
     queryKey: ['latest-analysis'],
@@ -52,37 +50,32 @@ const RiskAssessmentLanding = () => {
 
       toast.success("Default risks have been generated successfully!");
       
-      // Navigate to the risk list page (using the function directly)
-      navigate("/risk-assessment/list");
+      // Navigate using window.location instead of React Router's navigate
+      window.location.href = "/risk-assessment/list";
     } catch (error) {
       console.error('Error generating default risks:', error);
       toast.error("Failed to generate default risks");
     }
   };
 
-  // Define navigation functions separately to avoid type issues
-  const goToMatrix = () => navigate("/risk-assessment/matrix");
-  const goToList = () => navigate("/risk-assessment/list");
-  const goToNewRisk = () => navigate("/risk-assessment/matrix?new=true");
-
   const options = [
     {
       title: "Risk Matrix",
       description: "Visualize risks based on likelihood and impact in a matrix format",
       icon: Grid,
-      action: goToMatrix,
+      path: "/risk-assessment/matrix",
     },
     {
       title: "Risk List",
       description: "View all risks in a detailed list format with filtering options",
       icon: List,
-      action: goToList,
+      path: "/risk-assessment/list",
     },
     {
       title: "Create New Risk",
       description: "Add a new risk to your assessment registry",
       icon: Plus,
-      action: goToNewRisk,
+      path: "/risk-assessment/matrix?new=true",
     },
     {
       title: "Generate Default Risks",
@@ -105,7 +98,7 @@ const RiskAssessmentLanding = () => {
             <Card
               key={option.title}
               className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => option.action()}
+              onClick={() => option.action ? option.action() : null}
             >
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="p-3 rounded-full bg-sage-100">
@@ -113,16 +106,28 @@ const RiskAssessmentLanding = () => {
                 </div>
                 <h2 className="text-lg font-semibold">{option.title}</h2>
                 <p className="text-sm text-slate-600">{option.description}</p>
-                <Button
-                  variant="ghost"
-                  className="mt-4 w-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    option.action();
-                  }}
-                >
-                  Select
-                </Button>
+                {option.path ? (
+                  <Link to={option.path} className="w-full">
+                    <Button
+                      variant="ghost"
+                      className="mt-4 w-full"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Select
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="mt-4 w-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (option.action) option.action();
+                    }}
+                  >
+                    Select
+                  </Button>
+                )}
               </div>
             </Card>
           ))}
