@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/dashboard/Layout";
 
 const RiskAssessmentLanding = () => {
+  // Explicitly define the correct type for navigate
   const navigate = useNavigate();
 
   // Fetch the latest business analysis to generate risks from
@@ -51,8 +52,8 @@ const RiskAssessmentLanding = () => {
       if (error) throw error;
 
       toast.success("Default risks have been generated successfully!");
-      // Use navigate directly with the string path
-      navigate(`/risk-assessment/list`);
+      // Use navigate as a function with a string literal
+      navigate("/risk-assessment/list");
     } catch (error) {
       console.error('Error generating default risks:', error);
       toast.error("Failed to generate default risks");
@@ -64,19 +65,19 @@ const RiskAssessmentLanding = () => {
       title: "Risk Matrix",
       description: "Visualize risks based on likelihood and impact in a matrix format",
       icon: Grid,
-      action: () => navigate(`/risk-assessment/matrix`),
+      action: () => navigate("/risk-assessment/matrix"),
     },
     {
       title: "Risk List",
       description: "View all risks in a detailed list format with filtering options",
       icon: List,
-      action: () => navigate(`/risk-assessment/list`),
+      action: () => navigate("/risk-assessment/list"),
     },
     {
       title: "Create New Risk",
       description: "Add a new risk to your assessment registry",
       icon: Plus,
-      action: () => navigate(`/risk-assessment/matrix?new=true`),
+      action: () => navigate("/risk-assessment/matrix?new=true"),
     },
     {
       title: "Generate Default Risks",
@@ -99,7 +100,7 @@ const RiskAssessmentLanding = () => {
             <Card
               key={option.title}
               className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={option.action}
+              onClick={() => option.action()}
             >
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="p-3 rounded-full bg-sage-100">
