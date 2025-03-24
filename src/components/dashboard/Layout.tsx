@@ -1,7 +1,7 @@
 
 import { useState, ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
-import { Bell, Menu as MenuIcon, Search } from "lucide-react";
+import { Bell, LogOut, Menu as MenuIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,11 +90,13 @@ export const Layout = ({ children }: LayoutProps) => {
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-32" align="end">
+                <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuItem onClick={() => navigate("/settings")}>
                     Your profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut}>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                    <LogOut className="h-4 w-4 mr-2" />
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
