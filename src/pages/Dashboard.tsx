@@ -60,9 +60,7 @@ const Dashboard = () => {
         console.error("Error in query function:", err);
         throw err;
       }
-    },
-    retry: 2,
-    refetchOnWindowFocus: false
+    }
   });
 
   return (

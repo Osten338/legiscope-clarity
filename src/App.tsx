@@ -34,6 +34,11 @@ const queryClient = new QueryClient({
         console.error("Query error:", error);
       }
     },
+    mutations: {
+      onError: (error) => {
+        console.error("Mutation error:", error);
+      }
+    }
   },
 });
 
