@@ -51,7 +51,7 @@ const RiskAssessmentLanding = () => {
       if (error) throw error;
 
       toast.success("Default risks have been generated successfully!");
-      // Use navigate with explicit path
+      // Navigate to the risk list page
       navigate("/risk-assessment/list");
     } catch (error) {
       console.error('Error generating default risks:', error);
