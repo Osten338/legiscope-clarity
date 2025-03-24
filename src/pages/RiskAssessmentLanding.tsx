@@ -51,8 +51,8 @@ const RiskAssessmentLanding = () => {
       if (error) throw error;
 
       toast.success("Default risks have been generated successfully!");
-      // Navigate to the risk list page
-      navigate("/risk-assessment/list");
+      // Use navigate directly with the string path
+      navigate(`/risk-assessment/list`);
     } catch (error) {
       console.error('Error generating default risks:', error);
       toast.error("Failed to generate default risks");
@@ -64,19 +64,19 @@ const RiskAssessmentLanding = () => {
       title: "Risk Matrix",
       description: "Visualize risks based on likelihood and impact in a matrix format",
       icon: Grid,
-      action: () => navigate("/risk-assessment/matrix"),
+      action: () => navigate(`/risk-assessment/matrix`),
     },
     {
       title: "Risk List",
       description: "View all risks in a detailed list format with filtering options",
       icon: List,
-      action: () => navigate("/risk-assessment/list"),
+      action: () => navigate(`/risk-assessment/list`),
     },
     {
       title: "Create New Risk",
       description: "Add a new risk to your assessment registry",
       icon: Plus,
-      action: () => navigate("/risk-assessment/matrix?new=true"),
+      action: () => navigate(`/risk-assessment/matrix?new=true`),
     },
     {
       title: "Generate Default Risks",
@@ -110,7 +110,10 @@ const RiskAssessmentLanding = () => {
                 <Button
                   variant="ghost"
                   className="mt-4 w-full"
-                  onClick={option.action}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    option.action();
+                  }}
                 >
                   Select
                 </Button>
