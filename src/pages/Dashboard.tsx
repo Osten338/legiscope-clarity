@@ -7,65 +7,99 @@ import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
 import { RegulationsList } from "@/components/dashboard/RegulationsList";
 import { Layout } from "@/components/dashboard/Layout";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [openRegulation, setOpenRegulation] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const {
     data: savedRegulations,
-    isLoading
+    isLoading,
+    error
   } = useQuery({
     queryKey: ['savedRegulations'],
     queryFn: async () => {
-      const {
-        data: savedRegs,
-        error
-      } = await supabase.from('saved_regulations').select(`
-          id,
-          regulation_id,
-          status,
-          progress,
-          next_review_date,
-          completion_date,
-          notes,
-          regulations (
+      try {
+        const {
+          data: savedRegs,
+          error
+        } = await supabase.from('saved_regulations').select(`
             id,
-            name,
-            description,
-            motivation,
-            requirements,
-            checklist_items!checklist_items_regulation_id_fkey (
+            regulation_id,
+            status,
+            progress,
+            next_review_date,
+            completion_date,
+            notes,
+            regulations (
               id,
-              description
+              name,
+              description,
+              motivation,
+              requirements,
+              checklist_items!checklist_items_regulation_id_fkey (
+                id,
+                description
+              )
             )
-          )
-        `);
-      if (error) throw error;
-      return savedRegs;
-    }
+          `);
+          
+        if (error) {
+          console.error("Supabase error:", error);
+          toast({
+            title: "Data loading error",
+            description: "Could not load your saved regulations. Please try again.",
+            variant: "destructive"
+          });
+          throw error;
+        }
+        
+        return savedRegs;
+      } catch (err) {
+        console.error("Error in query function:", err);
+        throw err;
+      }
+    },
+    retry: 2,
+    refetchOnWindowFocus: false
   });
-
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto p-8">
-          <div className="text-slate-900 text-center">Loading saved regulations...</div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
       <div className="container mx-auto p-8 max-w-7xl">
         <WelcomeCard />
-        <StatusOverview savedRegulations={savedRegulations || []} />
-        <UpcomingReviews savedRegulations={savedRegulations || []} />
-        <RegulationsList
-          savedRegulations={savedRegulations || []}
-          openRegulation={openRegulation}
-          setOpenRegulation={setOpenRegulation}
-        />
+        {error ? (
+          <div className="p-6 bg-red-50 border border-red-100 rounded-lg mb-8">
+            <h3 className="text-lg font-medium text-red-800 mb-2">Could not load your data</h3>
+            <p className="text-red-700 mb-4">
+              We're having trouble connecting to our database. This might be due to network issues or temporary service disruption.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <>
+            <StatusOverview savedRegulations={savedRegulations || []} />
+            <UpcomingReviews savedRegulations={savedRegulations || []} />
+            {isLoading ? (
+              <div className="text-center p-12 bg-white rounded-lg border border-slate-200 shadow-sm">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sage-600 mx-auto mb-4"></div>
+                <p className="text-slate-600">Loading your regulations...</p>
+              </div>
+            ) : (
+              <RegulationsList
+                savedRegulations={savedRegulations || []}
+                openRegulation={openRegulation}
+                setOpenRegulation={setOpenRegulation}
+              />
+            )}
+          </>
+        )}
       </div>
     </Layout>
   );
