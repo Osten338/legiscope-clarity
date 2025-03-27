@@ -1,136 +1,77 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Grid, List, Plus, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { Layout } from "@/components/dashboard/Layout";
-import { Link } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, ArrowRight, ShieldCheck, FileSpreadsheet } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Layout from "@/components/dashboard/Layout";
 
 const RiskAssessmentLanding = () => {
-  // Fetch the latest business analysis to generate risks from
-  const { data: latestAnalysis } = useQuery({
-    queryKey: ['latest-analysis'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('business_analyses')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+  const [selectedAssessment, setSelectedAssessment] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const generateDefaultRisks = async () => {
-    try {
-      if (!latestAnalysis?.id) {
-        toast.error("No business analysis found. Please complete a business analysis first.");
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("User not authenticated");
-        return;
-      }
-
-      const { data, error } = await supabase.rpc(
-        'generate_default_risks_for_analysis',
-        {
-          p_analysis_id: latestAnalysis.id,
-          p_user_id: user.id
-        }
-      );
-
-      if (error) throw error;
-
-      toast.success("Default risks have been generated successfully!");
-      
-      // Navigate using window.location instead of React Router's navigate
-      window.location.href = "/risk-assessment/list";
-    } catch (error) {
-      console.error('Error generating default risks:', error);
-      toast.error("Failed to generate default risks");
-    }
-  };
-
-  const options = [
+  const assessmentTypes = [
     {
-      title: "Risk Matrix",
-      description: "Visualize risks based on likelihood and impact in a matrix format",
-      icon: Grid,
-      path: "/risk-assessment/matrix",
+      id: "matrix",
+      title: "Risk Matrix Assessment",
+      description: "Create a risk matrix to visualize and prioritize risks based on impact and likelihood.",
+      icon: <ShieldCheck className="h-6 w-6 text-sage-600" />,
     },
     {
-      title: "Risk List",
-      description: "View all risks in a detailed list format with filtering options",
-      icon: List,
-      path: "/risk-assessment/list",
-    },
-    {
-      title: "Create New Risk",
-      description: "Add a new risk to your assessment registry",
-      icon: Plus,
-      path: "/risk-assessment/matrix?new=true",
-    },
-    {
-      title: "Generate Default Risks",
-      description: "Generate standard risks based on your applicable regulations",
-      icon: RefreshCw,
-      action: generateDefaultRisks,
+      id: "detailed",
+      title: "Detailed Risk Analysis",
+      description: "Conduct an in-depth analysis of specific risks with detailed documentation and mitigation plans.",
+      icon: <FileSpreadsheet className="h-6 w-6 text-sage-600" />,
     },
   ];
 
+  const handleContinue = () => {
+    if (selectedAssessment) {
+      navigate(`/risk-assessment/${selectedAssessment}`);
+    }
+  };
+
   return (
     <Layout>
-      <div className="p-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-sage-900">Risk Assessment</h1>
-          <p className="text-slate-600 mt-2">Choose how you would like to view or manage your risks</p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl">
-          {options.map((option) => (
-            <Card
-              key={option.title}
-              className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => option.action ? option.action() : null}
+      <div className="container mx-auto py-8">
+        <h1 className="text-2xl font-semibold mb-6">Risk Assessment Tools</h1>
+        
+        <Alert className="mb-6 bg-blue-50 border-blue-200">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-700">
+            Risk assessments help you identify, analyze, and evaluate potential risks to your organization's compliance posture.
+          </AlertDescription>
+        </Alert>
+        
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          {assessmentTypes.map((assessment) => (
+            <Card 
+              key={assessment.id} 
+              className={`cursor-pointer transition-all ${selectedAssessment === assessment.id ? 'border-sage-500 bg-sage-50/50' : 'border-sage-200 hover:border-sage-300'}`}
+              onClick={() => setSelectedAssessment(assessment.id)}
             >
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="p-3 rounded-full bg-sage-100">
-                  <option.icon className="w-6 h-6 text-sage-600" />
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  {assessment.icon}
+                  <CardTitle className="text-lg">{assessment.title}</CardTitle>
                 </div>
-                <h2 className="text-lg font-semibold">{option.title}</h2>
-                <p className="text-sm text-slate-600">{option.description}</p>
-                {option.path ? (
-                  <Link to={option.path} className="w-full">
-                    <Button
-                      variant="ghost"
-                      className="mt-4 w-full"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Select
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="mt-4 w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (option.action) option.action();
-                    }}
-                  >
-                    Select
-                  </Button>
-                )}
-              </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-slate-600">{assessment.description}</CardDescription>
+              </CardContent>
             </Card>
           ))}
+        </div>
+        
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleContinue} 
+            disabled={!selectedAssessment}
+            className="gap-2"
+          >
+            Continue <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </Layout>
