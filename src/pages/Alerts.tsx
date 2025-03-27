@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Layout } from "@/components/dashboard/Layout"; // Updated to use named import
+import { Layout } from "@/components/dashboard/Layout"; 
 import { AlertsHeader } from "@/components/alerts/AlertsHeader";
 import { AlertCategoryCard } from "@/components/alerts/AlertCategoryCard";
 import { Button } from "@/components/ui/button";

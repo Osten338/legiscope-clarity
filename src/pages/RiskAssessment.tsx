@@ -16,9 +16,12 @@ interface Risk {
   description: string;
   impact: number;
   likelihood: number;
-  level: string;
+  level: "low" | "medium" | "high";
   category: string;
   status: string;
+  due_date: string | null;
+  regulations?: { name: string } | null;
+  is_generated?: boolean;
 }
 
 const RiskAssessment = () => {
@@ -33,7 +36,9 @@ const RiskAssessment = () => {
       likelihood: 4, 
       level: "high",
       category: "security",
-      status: "open"
+      status: "open",
+      due_date: null,
+      is_generated: false
     },
     { 
       id: "2", 
@@ -43,7 +48,9 @@ const RiskAssessment = () => {
       likelihood: 3, 
       level: "medium",
       category: "operational",
-      status: "open"
+      status: "open",
+      due_date: null,
+      is_generated: false
     },
   ]);
 
@@ -57,7 +64,9 @@ const RiskAssessment = () => {
       ...newRisk,
       id: String(Date.now()),
       level: calculateRiskLevel(newRisk.likelihood, newRisk.impact),
-      status: "open"
+      status: "open",
+      due_date: null,
+      is_generated: false
     };
     
     setRisks([...risks, fullRisk]);
@@ -65,7 +74,7 @@ const RiskAssessment = () => {
   };
   
   // Helper function to calculate risk level
-  const calculateRiskLevel = (likelihood: number, impact: number): string => {
+  const calculateRiskLevel = (likelihood: number, impact: number): "low" | "medium" | "high" => {
     const score = likelihood * impact;
     if (score <= 6) return "low";
     if (score <= 15) return "medium";

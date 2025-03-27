@@ -73,7 +73,14 @@ const ComplianceChecklist = () => {
                       {regulation.checklist_items && regulation.checklist_items.length > 0 ? (
                         <ul>
                           {regulation.checklist_items.map((item) => (
-                            <ChecklistItem key={item.id} description={item.description} status="pending" />
+                            <ChecklistItem 
+                              key={item.id} 
+                              id={item.id}
+                              description={item.description} 
+                              regulationId={regulation.id}
+                              regulationName={regulation.name}
+                              regulationDescription={regulation.description}
+                            />
                           ))}
                         </ul>
                       ) : (

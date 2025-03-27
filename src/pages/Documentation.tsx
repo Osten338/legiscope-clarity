@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DocumentationCard } from "@/components/documentation/DocumentationCard";
 import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
 import { GenerateDocumentDialog } from "@/components/compliance/GenerateDocumentDialog";
+import { FileText, Shield, CheckSquare, GraduationCap, AlertTriangle, FileText as FileTextIcon } from "lucide-react";
 
 // Define dummy checklist item and regulation for the required props
 const dummyChecklistItem = {
@@ -17,7 +18,13 @@ const dummyChecklistItem = {
 const dummyRegulation = {
   id: "dummy-id",
   name: "Dummy Regulation",
-  description: "Dummy regulation description"
+  description: "Dummy regulation description",
+  checklist_items: [
+    {
+      id: "item-1",
+      description: "Checklist item 1"
+    }
+  ]
 };
 
 const Documentation = () => {
@@ -51,36 +58,29 @@ const Documentation = () => {
         />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <DocumentationCard
-            title="Policies and Procedures"
-            icon="document"
-            href="#"
-          />
-          <DocumentationCard
-            title="Risk Assessments"
-            icon="shield"
-            href="#"
-          />
-          <DocumentationCard
-            title="Compliance Checklists"
-            icon="check-square"
-            href="#"
-          />
-          <DocumentationCard
-            title="Training Materials"
-            icon="graduation-cap"
-            href="#"
-          />
-          <DocumentationCard
-            title="Incident Reports"
-            icon="alert-triangle"
-            href="#"
-          />
-          <DocumentationCard
-            title="Audit Logs"
-            icon="file-text"
-            href="#"
-          />
+          <DocumentationCard title="Policies and Procedures">
+            <p className="text-slate-600">Guidelines and procedures for compliance operations</p>
+          </DocumentationCard>
+          
+          <DocumentationCard title="Risk Assessments">
+            <p className="text-slate-600">Templates and results for risk assessment activities</p>
+          </DocumentationCard>
+          
+          <DocumentationCard title="Compliance Checklists">
+            <p className="text-slate-600">Comprehensive checklists for regulatory compliance</p>
+          </DocumentationCard>
+          
+          <DocumentationCard title="Training Materials">
+            <p className="text-slate-600">Resources for staff training on compliance matters</p>
+          </DocumentationCard>
+          
+          <DocumentationCard title="Incident Reports">
+            <p className="text-slate-600">Documentation of compliance incidents and resolutions</p>
+          </DocumentationCard>
+          
+          <DocumentationCard title="Audit Logs">
+            <p className="text-slate-600">Records of compliance audits and findings</p>
+          </DocumentationCard>
         </div>
       </div>
     </Layout>

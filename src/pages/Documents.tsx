@@ -16,6 +16,7 @@ const Documents = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [selectedRegulation, setSelectedRegulation] = useState<string | undefined>("all");
 
   const handleOpenUploadDialog = () => {
     setUploadDialogOpen(true);
@@ -38,13 +39,21 @@ const Documents = () => {
   return (
     <Layout>
       <div className="container mx-auto py-8">
-        <DocumentsHeader title="Document Repository" />
-        <DocumentsList documents={mockDocuments} onSelect={handleOpenReviewDialog} />
+        <DocumentsHeader 
+          onUpload={handleOpenUploadDialog} 
+          selectedRegulation={selectedRegulation}
+          onRegulationChange={setSelectedRegulation}
+        />
+        
+        <DocumentsList 
+          selectedRegulation={selectedRegulation} 
+        />
 
         <UploadDocumentDialog 
           open={uploadDialogOpen} 
           onOpenChange={setUploadDialogOpen} 
         />
+        
         {selectedDocument && (
           <ReviewDocumentDialog
             open={reviewDialogOpen}
