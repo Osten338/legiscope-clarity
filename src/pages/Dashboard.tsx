@@ -6,8 +6,9 @@ import { WelcomeCard } from "@/components/dashboard/WelcomeCard";
 import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
 import { RegulationsList } from "@/components/dashboard/RegulationsList";
-import { Layout } from "@/components/dashboard/Layout"; // Updated to use named import
+import { Layout } from "@/components/dashboard/Layout";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 // Define types for the data structure
 type ChecklistItem = {
@@ -42,11 +43,13 @@ const Dashboard = () => {
   const {
     data: savedRegulations,
     isLoading,
-    error
+    error,
+    refetch
   } = useQuery({
     queryKey: ['savedRegulations'],
     queryFn: async () => {
       try {
+        console.log("Fetching saved regulations...");
         const {
           data: savedRegs,
           error
@@ -81,6 +84,8 @@ const Dashboard = () => {
           throw error;
         }
         
+        console.log("Saved regulations data:", savedRegs);
+        
         // Transform the data to match our types
         const typedRegulations = savedRegs?.map(reg => ({
           id: reg.id,
@@ -111,12 +116,12 @@ const Dashboard = () => {
             <p className="text-red-700 mb-4">
               We're having trouble connecting to our database. This might be due to network issues or temporary service disruption.
             </p>
-            <button
-              onClick={() => window.location.reload()}
+            <Button
+              onClick={() => refetch()}
               className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -127,12 +132,32 @@ const Dashboard = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sage-600 mx-auto mb-4"></div>
                 <p className="text-slate-600">Loading your regulations...</p>
               </div>
-            ) : (
+            ) : savedRegulations && savedRegulations.length > 0 ? (
               <RegulationsList
-                savedRegulations={savedRegulations || []}
+                savedRegulations={savedRegulations}
                 openRegulation={openRegulation}
                 setOpenRegulation={setOpenRegulation}
               />
+            ) : (
+              <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg shadow-sm">
+                <h3 className="text-lg font-medium text-slate-800 mb-2">No saved regulations found</h3>
+                <p className="text-slate-600 mb-4">
+                  You haven't saved any regulations to your dashboard yet. To add regulations:
+                </p>
+                <ol className="list-decimal ml-5 mb-6 text-slate-600 space-y-2">
+                  <li>Perform a business analysis to get personalized regulations</li>
+                  <li>Browse regulations in the Legislation section</li>
+                  <li>Save regulations relevant to your business</li>
+                </ol>
+                <div className="flex gap-3">
+                  <Button asChild variant="default">
+                    <a href="/assessment">Perform Business Analysis</a>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <a href="/legislation">Browse Regulations</a>
+                  </Button>
+                </div>
+              </div>
             )}
           </>
         )}
