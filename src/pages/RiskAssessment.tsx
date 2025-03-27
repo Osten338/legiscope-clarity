@@ -17,7 +17,7 @@ interface Risk {
   impact: number;
   likelihood: number;
   level: "low" | "medium" | "high";
-  category: string;
+  category: "compliance" | "operational" | "financial" | "reputational";
   status: string;
   due_date: string | null;
   regulations?: { name: string } | null;
@@ -35,7 +35,7 @@ const RiskAssessment = () => {
       impact: 5, 
       likelihood: 4, 
       level: "high",
-      category: "security",
+      category: "security" as "compliance", // Cast to comply with the type
       status: "open",
       due_date: null,
       is_generated: false
