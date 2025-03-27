@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -35,7 +36,17 @@ type SavedRegulation = {
   regulations: Regulation;
 };
 
-const categoryData = {
+// Define a consistent type for categoryData entries
+type CategoryDataItem = {
+  progress: number;
+  count: number;
+  description: string;
+  regulations: string[];
+  status: string;
+  background: string;
+};
+
+const categoryData: Record<string, CategoryDataItem> = {
   "Data Privacy": {
     progress: 67,
     count: 3,
@@ -307,7 +318,7 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <p className="text-slate-800 mb-4">
-                            {data.count} {data.description ? data.description : 'regulations'}
+                            {data.count} {data.description}
                           </p>
                           <div className="space-y-1 mb-6">
                             {data.regulations.map((reg, index) => (
