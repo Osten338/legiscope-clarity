@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -40,6 +39,7 @@ const categoryData = {
   "Data Privacy": {
     progress: 67,
     count: 3,
+    description: "regulations",
     regulations: ["GDPR", "CCPA", "LGPD"],
     status: "Compliant",
     background: "data-privacy-bg"
@@ -47,7 +47,7 @@ const categoryData = {
   "Financial": {
     progress: 100,
     count: 1,
-    description: "(fia conduct)",
+    description: "fia conduct",
     regulations: ["SOX", "PCI DSS", "IFRS"],
     status: "Compliant",
     background: "financial-bg"
@@ -55,6 +55,7 @@ const categoryData = {
   "Healthcare": {
     progress: 50,
     count: 4,
+    description: "regulations",
     regulations: ["HIPAA", "HITECH"],
     status: "Compliant",
     background: "healthcare-bg"
