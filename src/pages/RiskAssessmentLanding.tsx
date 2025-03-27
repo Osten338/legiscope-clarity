@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, ArrowRight, ShieldCheck, FileSpreadsheet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Layout from "@/components/dashboard/Layout";
+import { Layout } from "@/components/dashboard/Layout";
 
 const RiskAssessmentLanding = () => {
   const [selectedAssessment, setSelectedAssessment] = useState<string | null>(null);
