@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
-import { Upload, Loader2, CheckCircle2 } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, Brain } from "lucide-react";
 import { Input } from "./ui/input";
 import { motion } from "framer-motion";
 import { useToast } from "./ui/use-toast";
@@ -22,10 +23,14 @@ export const BusinessDescription = () => {
 
   const progressSteps = [
     "Initializing analysis...",
+    "Processing business information...",
     "Analyzing business description...",
-    "Identifying applicable regulations...",
+    "Identifying compliance frameworks...",
+    "Determining applicable regulations...",
     "Generating compliance checklist...",
-    "Finalizing assessment..."
+    "Performing risk assessment...",
+    "Finalizing compliance analysis...",
+    "Preparing recommendations..."
   ];
 
   const simulateProgress = () => {
@@ -33,20 +38,20 @@ export const BusinessDescription = () => {
     
     let step = 0;
     const totalSteps = progressSteps.length;
-    const progressInterval = 100 / totalSteps;
+    const progressInterval = 85 / totalSteps; // Cap at 85% to show it's still processing
     
     const interval = setInterval(() => {
       if (step < totalSteps) {
         setCurrentStep(progressSteps[step]);
         setAnalysisProgress((prevProgress) => {
           const newProgress = (step + 1) * progressInterval;
-          return Math.min(newProgress, 95); // Cap at 95% until complete
+          return Math.min(newProgress, 85); // Cap at 85% until complete
         });
         step++;
       } else {
         clearInterval(interval);
       }
-    }, 1200); // Update progress every 1.2 seconds
+    }, 2500); // Slowed down to indicate more processing time
 
     return interval;
   };
@@ -86,7 +91,8 @@ export const BusinessDescription = () => {
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          description
+          description,
+          assessment_id: crypto.randomUUID()
         })
       });
 
@@ -106,14 +112,14 @@ export const BusinessDescription = () => {
       toast({
         title: "Analysis Complete",
         description: data.has_enhanced_analysis 
-          ? "Your business description has been analyzed using AI for more comprehensive results."
+          ? "Your business description has been analyzed using our advanced AI model for comprehensive results."
           : "Your business description has been analyzed successfully.",
       });
 
       // Short delay to show the completed progress
       setTimeout(() => {
         navigate(`/analysis/${data.analysis_id}`);
-      }, 800);
+      }, 1000);
       
     } catch (error: any) {
       clearInterval(progressInterval);
@@ -123,11 +129,7 @@ export const BusinessDescription = () => {
         description: error.message || "Failed to analyze business description. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      // Keep isAnalyzing true until we navigate away
-      if (!isAnalyzing) {
-        setIsAnalyzing(false);
-      }
+      setIsAnalyzing(false);
     }
   };
 
@@ -145,7 +147,7 @@ export const BusinessDescription = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="px-4 py-1.5 text-sm font-medium bg-white/80 text-neutral-800 rounded-full inline-block mb-6 backdrop-blur-sm"
         >
-          Business Assessment
+          Comprehensive Compliance Assessment
         </motion.span>
 
         <motion.h2
@@ -163,7 +165,7 @@ export const BusinessDescription = () => {
           transition={{ duration: 0.8, delay: 0.8 }}
           className="text-neutral-900 text-lg md:text-xl mb-10 leading-relaxed"
         >
-          Help us understand your business better to provide tailored compliance recommendations.
+          Provide details about your business for a thorough compliance analysis. The more information you share, the more accurate our assessment will be.
         </motion.p>
 
         <Card className="backdrop-blur-sm border-white/40 shadow-lg transition-all duration-300 p-8 bg-white/[0.84]">
@@ -181,12 +183,15 @@ export const BusinessDescription = () => {
                 <li>Products or services you offer</li>
                 <li>Number of employees (approximate)</li>
                 <li>Annual revenue range (if applicable)</li>
+                <li>Regulatory frameworks you believe apply to your business</li>
+                <li>Any specific compliance concerns you have</li>
               </ul>
             </div>
 
             <Alert className="bg-sage-50 border-sage-200">
+              <Brain className="h-5 w-5 text-sage-600" />
               <AlertDescription className="text-sage-700">
-                <strong>Enhanced AI Analysis:</strong> Our system will analyze your business description to provide tailored compliance recommendations. The more details you provide, the more accurate our analysis will be.
+                <strong>Advanced AI Analysis:</strong> Our system uses a sophisticated AI model to thoroughly analyze your business description and provide comprehensive, tailored compliance recommendations. This process may take several minutes but delivers detailed, actionable insights.
               </AlertDescription>
             </Alert>
 
@@ -197,7 +202,7 @@ export const BusinessDescription = () => {
                 </Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe your business here..."
+                  placeholder="Describe your business here in as much detail as possible..."
                   className="mt-3 h-48 bg-white/70 border-white/40 focus:border-white/60 transition-all duration-300"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -244,8 +249,8 @@ export const BusinessDescription = () => {
                     )}
                     <p className="text-sage-700 text-sm">
                       {analysisProgress < 100
-                        ? "AI is analyzing your business description to provide tailored compliance recommendations..."
-                        : "Analysis complete! Preparing your personalized compliance dashboard..."}
+                        ? "Our advanced AI is performing a detailed analysis of your business description to provide comprehensive compliance recommendations. This may take several minutes..."
+                        : "Analysis complete! Preparing your personalized compliance dashboard with detailed recommendations..."}
                     </p>
                   </div>
                 </div>
@@ -263,7 +268,7 @@ export const BusinessDescription = () => {
                   Analyzing...
                 </div>
               ) : (
-                "Start Compliance Check"
+                "Start Comprehensive Compliance Analysis"
               )}
             </Button>
           </div>

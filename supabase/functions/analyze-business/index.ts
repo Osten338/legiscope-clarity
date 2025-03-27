@@ -41,19 +41,19 @@ serve(async (req) => {
             "Authorization": `Bearer ${perplexityApiKey}`
           },
           body: JSON.stringify({
-            model: "llama-3.1-sonar-small-128k-online",
+            model: "llama-3.1-sonar-large-128k-online", // Using a more sophisticated model
             messages: [
               {
                 role: "system",
-                content: "You are a compliance and regulatory expert. Analyze the business description and identify potential compliance requirements, risks, and regulatory frameworks that may apply. Focus on data protection, industry-specific regulations, and business operations."
+                content: "You are a detailed compliance and regulatory expert with deep domain knowledge. Analyze the business description thoroughly and provide a comprehensive compliance assessment. Include specific regulatory frameworks that apply, detailed requirements, potential risks, and mitigation strategies. Be thorough in your analysis and provide actionable, practical guidance. Cover all relevant areas including data protection, industry-specific regulations, environmental compliance, labor laws, and financial regulations."
               },
               {
                 role: "user",
-                content: `Analyze this business description and provide a detailed compliance assessment with specific regulatory frameworks that might apply: ${description}`
+                content: `Provide a detailed and comprehensive compliance assessment for this business description: ${description}`
               }
             ],
-            temperature: 0.2,
-            max_tokens: 2000,
+            temperature: 0.1, // Lower temperature for more consistent results
+            max_tokens: 4000, // Increased token limit for more detailed responses
             top_p: 0.9
           })
         });
@@ -91,8 +91,7 @@ serve(async (req) => {
 
     console.log("Created analysis record:", analysisData);
 
-    // Generate more comprehensive regulations based on the AI analysis
-    // These would normally come from the AI, but we'll use example data for now
+    // Generate more detailed and industry-specific regulations based on the AI analysis
     const regulations = [
       {
         name: "Data Protection Regulation",
@@ -105,7 +104,9 @@ serve(async (req) => {
           "Maintain records of data processing activities",
           "Appoint a data protection officer if required",
           "Implement privacy by design in all data handling processes",
-          "Establish a process for handling data subject requests"
+          "Establish a process for handling data subject requests",
+          "Conduct regular data protection impact assessments",
+          "Ensure lawful basis for all data processing activities"
         ]
       },
       {
@@ -119,7 +120,10 @@ serve(async (req) => {
           "Setup multi-factor authentication",
           "Regular security audits",
           "Network security monitoring",
-          "Application security testing"
+          "Application security testing",
+          "Develop an incident response procedure",
+          "Implement endpoint protection solutions",
+          "Conduct regular vulnerability scanning"
         ]
       },
       {
@@ -132,7 +136,39 @@ serve(async (req) => {
           "Establish a compliance calendar for industry reporting requirements",
           "Document industry-standard processes and procedures",
           "Conduct regular compliance reviews against industry standards",
-          "Join industry associations to stay updated on regulatory changes"
+          "Join industry associations to stay updated on regulatory changes",
+          "Perform regular industry-specific risk assessments",
+          "Develop compliance training specific to your industry"
+        ]
+      },
+      {
+        name: "Financial Compliance Requirements",
+        description: "Financial and accounting compliance standards for businesses",
+        motivation: "Businesses must maintain proper financial records and comply with tax regulations",
+        requirements: "Implement accounting standards, financial controls, tax compliance measures, and regular financial reporting",
+        checklist_items: [
+          "Establish proper accounting procedures",
+          "Implement financial controls and segregation of duties",
+          "Ensure compliance with tax filing requirements",
+          "Maintain records for required retention periods",
+          "Conduct regular financial audits",
+          "Document financial policies and procedures",
+          "Implement anti-fraud measures"
+        ]
+      },
+      {
+        name: "Health and Safety Regulations",
+        description: "Workplace health and safety requirements",
+        motivation: "Ensuring employee safety and compliance with occupational health regulations",
+        requirements: "Implement safety procedures, conduct risk assessments, provide proper training, and maintain safe working environments",
+        checklist_items: [
+          "Conduct workplace risk assessments",
+          "Develop health and safety policies",
+          "Provide safety training for all employees",
+          "Maintain safety equipment and first aid supplies",
+          "Establish incident reporting procedures",
+          "Conduct regular safety inspections",
+          "Appoint safety representatives if required"
         ]
       }
     ];

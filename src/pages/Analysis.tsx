@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Layout } from "@/components/dashboard/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertTriangle, ArrowLeft, CheckCircle, Clock, FileText } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Analysis = () => {
   const { id } = useParams<{ id: string }>();
@@ -100,6 +102,29 @@ const Analysis = () => {
     navigate('/dashboard');
   };
 
+  const renderAnalysisContent = (content: string) => {
+    // Split content by headers (###) for better formatting
+    const sections = content.split(/^###\s+/m).filter(Boolean);
+    
+    if (sections.length <= 1) {
+      return <div className="whitespace-pre-wrap">{content}</div>;
+    }
+    
+    return (
+      <div className="space-y-6">
+        {sections.map((section, index) => {
+          const [title, ...body] = section.split('\n');
+          return (
+            <div key={index} className="border-b pb-4 last:border-b-0">
+              <h3 className="text-xl font-semibold mb-3">{title.trim()}</h3>
+              <div className="whitespace-pre-wrap">{body.join('\n')}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -107,6 +132,7 @@ const Analysis = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mx-auto mb-4"></div>
             <p className="text-slate-600">Loading analysis...</p>
+            <p className="text-sage-600 text-sm mt-2">This may take a moment as we generate a detailed compliance analysis</p>
           </div>
         </div>
       </Layout>
@@ -119,6 +145,9 @@ const Analysis = () => {
         <div className="container mx-auto p-8">
           <div className="text-center">
             <p className="text-slate-600">No analysis data available.</p>
+            <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+            </Button>
           </div>
         </div>
       </Layout>
@@ -128,31 +157,49 @@ const Analysis = () => {
   return (
     <Layout>
       <div className="container mx-auto p-8">
-        <div className="flex justify-end mb-4 space-x-4">
-          {!saved ? (
-            <Button onClick={saveRegulationsToUser} disabled={saving || saved}>
-              {saving ? "Saving..." : "Save Regulations to Dashboard"}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Compliance Analysis</h1>
+            <p className="text-slate-600">AI-powered analysis of your business compliance requirements</p>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-          ) : (
-            <Button onClick={goToDashboard}>
-              View Regulations in Dashboard
-            </Button>
-          )}
+            {!saved ? (
+              <Button onClick={saveRegulationsToUser} disabled={saving || saved}>
+                {saving ? "Saving..." : "Save Regulations to Dashboard"}
+              </Button>
+            ) : (
+              <Button onClick={goToDashboard}>
+                View Regulations in Dashboard
+              </Button>
+            )}
+          </div>
         </div>
         
+        {data?.analysis?.analysis?.includes("Analysis in progress") && (
+          <Alert className="mb-6">
+            <Clock className="h-4 w-4" />
+            <AlertDescription>
+              The detailed analysis is still being generated. Please check back in a few minutes or refresh this page.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Tabs defaultValue="summary" className="w-full">
-          <TabsList>
+          <TabsList className="mb-4">
             <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="regulations">Regulations</TabsTrigger>
+            <TabsTrigger value="details">Detailed Analysis</TabsTrigger>
+            <TabsTrigger value="regulations">Identified Regulations ({data.regulations?.length || 0})</TabsTrigger>
           </TabsList>
           <TabsContent value="summary">
             <Card>
               <CardContent className="pt-6">
                 <h2 className="text-lg font-semibold mb-4">
-                  Analysis Summary
+                  Business Profile
                 </h2>
-                <p>{data.analysis.description || "No summary available."}</p>
+                <p className="whitespace-pre-wrap">{data.analysis.description || "No summary available."}</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -160,9 +207,17 @@ const Analysis = () => {
             <Card>
               <CardContent className="pt-6">
                 <h2 className="text-lg font-semibold mb-4">
-                  Detailed Analysis
+                  Detailed Compliance Analysis
                 </h2>
-                <div className="whitespace-pre-wrap">{data.analysis.analysis || "No detailed analysis available."}</div>
+                {data.analysis.analysis === "Analysis in progress..." ? (
+                  <div className="flex flex-col items-center justify-center p-8 space-y-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sage-600"></div>
+                    <p className="text-slate-600">Detailed analysis is still being generated...</p>
+                    <Button onClick={() => refetch()} variant="outline" size="sm">Refresh Analysis</Button>
+                  </div>
+                ) : (
+                  renderAnalysisContent(data.analysis.analysis || "No detailed analysis available.")
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -175,17 +230,20 @@ const Analysis = () => {
                 {data.regulations && data.regulations.length > 0 ? (
                   <div className="space-y-4">
                     {data.regulations.map(reg => (
-                      <div key={reg.id} className="p-4 border rounded-md">
-                        <h3 className="font-medium text-lg">{reg.name}</h3>
+                      <div key={reg.id} className="p-4 border rounded-md hover:shadow-md transition-shadow">
+                        <h3 className="font-medium text-lg text-sage-800">{reg.name}</h3>
                         <p className="text-slate-600 my-2">{reg.description}</p>
                         <div className="mt-3">
-                          <h4 className="font-medium">Requirements:</h4>
+                          <h4 className="font-medium text-sage-700">Motivation:</h4>
+                          <p className="text-slate-700 mb-3">{reg.motivation}</p>
+                          
+                          <h4 className="font-medium text-sage-700">Requirements:</h4>
                           <p className="text-slate-700">{reg.requirements}</p>
                         </div>
                         {reg.checklist_items && reg.checklist_items.length > 0 && (
                           <div className="mt-3">
-                            <h4 className="font-medium">Checklist:</h4>
-                            <ul className="list-disc ml-5 mt-2">
+                            <h4 className="font-medium text-sage-700">Checklist:</h4>
+                            <ul className="list-disc ml-5 mt-2 space-y-1">
                               {reg.checklist_items.map(item => (
                                 <li key={item.id} className="text-slate-700">{item.description}</li>
                               ))}
@@ -196,15 +254,26 @@ const Analysis = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-slate-600">No regulations identified for this analysis.</p>
+                  <div className="text-center p-8">
+                    <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-600">No regulations have been identified for this analysis yet.</p>
+                    <Button onClick={() => refetch()} variant="outline" className="mt-4">Refresh Analysis</Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
         
-        <div className="mt-6">
-          <Button onClick={() => refetch()} variant="outline">Refresh Analysis</Button>
+        <div className="mt-6 flex justify-between">
+          <Button onClick={() => refetch()} variant="outline">
+            Refresh Analysis
+          </Button>
+          {!saved && data.regulations && data.regulations.length > 0 && (
+            <Button onClick={saveRegulationsToUser} disabled={saving}>
+              {saving ? "Saving..." : "Save All Regulations"}
+            </Button>
+          )}
         </div>
       </div>
     </Layout>
