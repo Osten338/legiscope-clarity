@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +7,7 @@ import { Layout } from "@/components/dashboard/Layout";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Legislation = () => {
   const { id } = useParams<{ id: string }>();

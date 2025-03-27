@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/dashboard/Layout"; // Updated to use named import
 import { AlertsHeader } from "@/components/alerts/AlertsHeader";
@@ -45,21 +46,31 @@ const Alerts = () => {
     ? alertCategories 
     : alertCategories.filter(category => category.id === activeTab);
 
+  const totalAlerts = alertCategories.reduce((sum, cat) => sum + cat.count, 0);
+  const alertsEnabled = alertSettings?.alerts_enabled ?? true;
+  
+  const handleToggleAlerts = (checked: boolean) => {
+    // This would call updateAlertSettings in a real implementation
+    console.log("Toggle alerts:", checked);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-8">
         <AlertsHeader 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          totalAlerts={alertCategories.reduce((sum, cat) => sum + cat.count, 0)}
+          alertsEnabled={alertsEnabled}
+          onToggle={handleToggleAlerts}
         />
         
         <div className="grid md:grid-cols-2 gap-6 mt-6">
           {filteredAlerts.map((category) => (
             <AlertCategoryCard 
               key={category.id}
-              category={category}
-              enabled={alertSettings[category.id]?.enabled ?? true}
+              title={category.title}
+              description={category.description}
+              icon={category.icon}
+              count={category.count}
+              enabled={alertSettings?.[category.id]?.enabled ?? true}
             />
           ))}
         </div>

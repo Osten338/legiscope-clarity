@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/dashboard/Layout";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DocumentationCard } from "@/components/documentation/DocumentationCard";
 import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
 import { GenerateDocumentDialog } from "@/components/compliance/GenerateDocumentDialog";
+
+// Define dummy checklist item and regulation for the required props
+const dummyChecklistItem = {
+  id: "dummy-id",
+  description: "Dummy checklist item",
+  status: "pending" as const
+};
+
+const dummyRegulation = {
+  id: "dummy-id",
+  name: "Dummy Regulation",
+  description: "Dummy regulation description"
+};
 
 const Documentation = () => {
   const [isComplianceBuddyOpen, setIsComplianceBuddyOpen] = useState(false);
@@ -25,38 +39,46 @@ const Documentation = () => {
           </div>
         </div>
 
-        <ComplianceBuddyDialog open={isComplianceBuddyOpen} onOpenChange={setIsComplianceBuddyOpen} />
-        <GenerateDocumentDialog open={isGenerateDocumentOpen} onOpenChange={setIsGenerateDocumentOpen} />
+        <ComplianceBuddyDialog 
+          open={isComplianceBuddyOpen} 
+          onOpenChange={setIsComplianceBuddyOpen}
+          checklistItem={dummyChecklistItem}
+        />
+        <GenerateDocumentDialog 
+          open={isGenerateDocumentOpen} 
+          onOpenChange={setIsGenerateDocumentOpen}
+          regulation={dummyRegulation}
+        />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <DocumentationCard
             title="Policies and Procedures"
-            description="Create, manage, and track your organization's policies and procedures."
+            icon="document"
             href="#"
           />
           <DocumentationCard
             title="Risk Assessments"
-            description="Identify, analyze, and evaluate potential risks to your organization."
+            icon="shield"
             href="#"
           />
           <DocumentationCard
             title="Compliance Checklists"
-            description="Ensure compliance with industry standards and regulations."
+            icon="check-square"
             href="#"
           />
           <DocumentationCard
             title="Training Materials"
-            description="Develop and deliver training materials to educate employees on compliance."
+            icon="graduation-cap"
             href="#"
           />
           <DocumentationCard
             title="Incident Reports"
-            description="Report and track security incidents and compliance breaches."
+            icon="alert-triangle"
             href="#"
           />
           <DocumentationCard
             title="Audit Logs"
-            description="Maintain detailed audit logs for compliance and security purposes."
+            icon="file-text"
             href="#"
           />
         </div>

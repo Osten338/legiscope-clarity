@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
+// Define proper types for the data
+interface ChecklistItemType {
+  id: string;
+  description: string;
+}
+
+interface RegulationType {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
+  checklist_items?: ChecklistItemType[];
+}
+
 const ComplianceChecklist = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -15,14 +31,14 @@ const ComplianceChecklist = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("regulations")
-        .select("*");
+        .select("*, checklist_items(*)");
 
       if (error) {
         console.error("Error fetching regulations:", error);
         throw error;
       }
 
-      return data;
+      return data as RegulationType[];
     },
   });
 
@@ -57,7 +73,7 @@ const ComplianceChecklist = () => {
                       {regulation.checklist_items && regulation.checklist_items.length > 0 ? (
                         <ul>
                           {regulation.checklist_items.map((item) => (
-                            <ChecklistItem key={item.id} item={item} />
+                            <ChecklistItem key={item.id} description={item.description} status="pending" />
                           ))}
                         </ul>
                       ) : (

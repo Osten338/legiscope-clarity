@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAnalysis } from "../hooks/useAnalysis";
@@ -62,7 +63,7 @@ const Analysis = () => {
                 <h2 className="text-lg font-semibold mb-4">
                   Analysis Summary
                 </h2>
-                <p>{data.summary}</p>
+                <p>{data.analysis.description || "No summary available."}</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -72,7 +73,7 @@ const Analysis = () => {
                 <h2 className="text-lg font-semibold mb-4">
                   Detailed Analysis
                 </h2>
-                <pre className="whitespace-pre-wrap">{data.details}</pre>
+                <pre className="whitespace-pre-wrap">{data.analysis.analysis || "No detailed analysis available."}</pre>
               </CardContent>
             </Card>
           </TabsContent>

@@ -1,9 +1,16 @@
+
 import { useState } from "react";
 import { Layout } from "@/components/dashboard/Layout";
 import { DocumentsHeader } from "@/components/documents/DocumentsHeader";
 import { DocumentsList } from "@/components/documents/DocumentsList";
 import { UploadDocumentDialog } from "@/components/documents/UploadDocumentDialog";
 import { ReviewDocumentDialog } from "@/components/documents/ReviewDocumentDialog";
+
+// Define mock documents data
+const mockDocuments = [
+  { id: "1", title: "Privacy Policy", category: "Policy", updatedAt: "2023-06-01" },
+  { id: "2", title: "Data Breach Response Plan", category: "Procedure", updatedAt: "2023-05-15" },
+];
 
 const Documents = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -31,15 +38,17 @@ const Documents = () => {
   return (
     <Layout>
       <div className="container mx-auto py-8">
-        <DocumentsHeader onOpenUploadDialog={handleOpenUploadDialog} />
-        <DocumentsList onOpenReviewDialog={handleOpenReviewDialog} />
+        <DocumentsHeader title="Document Repository" />
+        <DocumentsList documents={mockDocuments} onSelect={handleOpenReviewDialog} />
 
-        <UploadDocumentDialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen} onClose={handleCloseUploadDialog} />
+        <UploadDocumentDialog 
+          open={uploadDialogOpen} 
+          onOpenChange={setUploadDialogOpen} 
+        />
         {selectedDocument && (
           <ReviewDocumentDialog
             open={reviewDialogOpen}
             onOpenChange={setReviewDialogOpen}
-            onClose={handleCloseReviewDialog}
             document={selectedDocument}
           />
         )}
