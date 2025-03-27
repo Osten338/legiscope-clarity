@@ -102,7 +102,7 @@ export function ReviewDocumentDialog({
           {isLoading && (
             <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-sage-600" />
-              <p className="text-sage-600">Analyzing document...</p>
+              <p className="text-sage-600">Analyzing document with Perplexity AI...</p>
             </div>
           )}
 

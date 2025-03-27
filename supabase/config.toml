@@ -5,4 +5,7 @@ enabled = true
 [functions]
 [functions.analyze-business]
 verify_jwt = false
-
+[functions.compliance-buddy-chat]
+verify_jwt = false
+[functions.generate-documentation]
+verify_jwt = false

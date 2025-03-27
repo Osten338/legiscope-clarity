@@ -16,9 +16,9 @@ serve(async (req) => {
   try {
     const { messages, checklistItem } = await req.json()
 
-    const openAIKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openAIKey) {
-      throw new Error('OpenAI API key not configured')
+    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
+    if (!perplexityApiKey) {
+      throw new Error('Perplexity API key not configured')
     }
 
     const prompt = `As a compliance expert, analyze this requirement: "${checklistItem}"
@@ -32,14 +32,16 @@ serve(async (req) => {
     
     Format your response in a clear, organized way with sections.`
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log("Sending request to Perplexity API")
+    
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIKey}`,
+        'Authorization': `Bearer ${perplexityApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'llama-3.1-sonar-small-128k-online',
         messages: [
           {
             role: 'system',
@@ -50,10 +52,21 @@ serve(async (req) => {
             content: prompt,
           },
         ],
+        temperature: 0.2,
+        max_tokens: 1500,
+        top_p: 0.9,
+        frequency_penalty: 1,
+        presence_penalty: 0
       }),
     })
 
     const data = await response.json()
+    console.log("Received response from Perplexity API")
+    
+    if (data.error) {
+      throw new Error(`Perplexity API error: ${data.error.message || JSON.stringify(data.error)}`)
+    }
+    
     const fullResponse = data.choices[0].message.content
 
     // Parse the response into sections

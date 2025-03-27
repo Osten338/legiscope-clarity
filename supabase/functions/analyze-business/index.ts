@@ -27,21 +27,21 @@ serve(async (req) => {
     );
 
     // Generate an enhanced AI analysis of the business description
-    const openAIKey = Deno.env.get('OPENAI_API_KEY');
+    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
     let aiAnalysis = "Analysis in progress...";
 
-    if (openAIKey) {
+    if (perplexityApiKey) {
       try {
-        console.log("Generating AI analysis using OpenAI API");
+        console.log("Generating AI analysis using Perplexity API");
         
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        const response = await fetch("https://api.perplexity.ai/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${openAIKey}`
+            "Authorization": `Bearer ${perplexityApiKey}`
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
+            model: "llama-3.1-sonar-small-128k-online",
             messages: [
               {
                 role: "system",
@@ -51,7 +51,10 @@ serve(async (req) => {
                 role: "user",
                 content: `Analyze this business description and provide a detailed compliance assessment with specific regulatory frameworks that might apply: ${description}`
               }
-            ]
+            ],
+            temperature: 0.2,
+            max_tokens: 2000,
+            top_p: 0.9
           })
         });
 
@@ -61,13 +64,13 @@ serve(async (req) => {
           aiAnalysis = data.choices[0].message.content;
           console.log("Successfully generated AI analysis");
         } else {
-          console.error("Unexpected OpenAI API response structure:", data);
+          console.error("Unexpected Perplexity API response structure:", data);
         }
       } catch (aiError) {
         console.error("Error generating AI analysis:", aiError);
       }
     } else {
-      console.log("No OpenAI API key found, skipping enhanced analysis");
+      console.log("No Perplexity API key found, skipping enhanced analysis");
     }
 
     // First create a business analysis record
@@ -156,7 +159,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         analysis_id: assessment_id,
-        has_enhanced_analysis: !!openAIKey
+        has_enhanced_analysis: !!perplexityApiKey
       }),
       { 
         headers: { 
