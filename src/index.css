@@ -1,4 +1,6 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -32,16 +34,62 @@
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background: transparent;
+    background-color: #f8f5f1;
   }
 
   body {
-    @apply text-foreground font-['Inter'] antialiased;
-    background: transparent !important;
+    @apply text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f5f1 !important;
   }
 
   .glass-panel {
     @apply backdrop-blur-md bg-white/30 border border-white/40 shadow-lg;
+  }
+
+  .nature-card {
+    @apply rounded-xl overflow-hidden relative;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .nature-card-content {
+    @apply rounded-xl p-6 h-full flex flex-col justify-between relative z-10;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+  }
+
+  .category-card {
+    @apply rounded-xl overflow-hidden relative border border-slate-200/50;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .category-card-content {
+    @apply rounded-xl p-6 h-full flex flex-col justify-between;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+  }
+
+  .forest-bg {
+    background-image: url('/lovable-uploads/0d1dfc81-bb07-46fc-aa89-ae53c8acc1cf.png');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .data-privacy-bg {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url('https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80');
+  }
+
+  .financial-bg {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+  }
+
+  .healthcare-bg {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+  }
+
+  .industry-bg {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), url('https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
   }
 
   .slide-enter {

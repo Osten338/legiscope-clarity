@@ -72,6 +72,7 @@ export default {
       },
       fontFamily: {
         serif: ['Addington CF', 'serif'],
+        playfair: ['Playfair Display', 'serif'],
       },
       keyframes: {
         "accordion-down": {
@@ -91,4 +92,3 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config
-
