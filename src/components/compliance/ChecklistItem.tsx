@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Info, FileText } from "lucide-react";
+import { Info, FileText, Bot } from "lucide-react";
 import { GenerateDocumentDialog } from "./GenerateDocumentDialog";
+import { ComplianceBuddyDialog } from "./ComplianceBuddyDialog";
 
 interface ChecklistItemProps {
   id: string;
@@ -16,7 +17,7 @@ interface ChecklistItemProps {
   estimatedEffort?: string;
   regulationId: string;
   regulationName: string;
-  regulationDescription: string; // Add this prop
+  regulationDescription: string;
   response?: {
     status: "completed" | "will_do" | "will_not_do";
     justification?: string | null;
@@ -31,11 +32,12 @@ export const ChecklistItem = ({
   estimatedEffort,
   regulationId,
   regulationName,
-  regulationDescription, // Add this parameter
+  regulationDescription,
   response 
 }: ChecklistItemProps) => {
   const { toast } = useToast();
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
+  const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
 
   const handleChecklistResponse = async (
     status: "completed" | "will_do" | "will_not_do",
@@ -173,6 +175,15 @@ export const ChecklistItem = ({
                 <FileText className="h-4 w-4" />
                 Generate Documentation
               </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="gap-2"
+                onClick={() => setBuddyDialogOpen(true)}
+              >
+                <Bot className="h-4 w-4" />
+                Ask Compliance Buddy
+              </Button>
             </div>
           )}
         </div>
@@ -184,11 +195,19 @@ export const ChecklistItem = ({
         regulation={{
           id: regulationId,
           name: regulationName,
-          description: regulationDescription, // Add the description here
+          description: regulationDescription,
           checklist_items: [{
             id,
             description
           }]
+        }}
+      />
+
+      <ComplianceBuddyDialog
+        open={buddyDialogOpen}
+        onOpenChange={setBuddyDialogOpen}
+        checklistItem={{
+          description
         }}
       />
     </div>
