@@ -1,163 +1,79 @@
-
-import { Card } from "@/components/ui/card";
-import {
-  Clock,
-  AlertCircle,
-  Scale,
-  Bell,
-  BellRing,
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/dashboard/Sidebar";
-import { AlertCategoryCard } from "@/components/alerts/AlertCategoryCard";
+import { useState } from "react";
+import { Layout } from "@/components/dashboard/Layout"; // Updated to use named import
 import { AlertsHeader } from "@/components/alerts/AlertsHeader";
+import { AlertCategoryCard } from "@/components/alerts/AlertCategoryCard";
+import { Button } from "@/components/ui/button";
+import { Bell, ShieldAlert, FileWarning, AlertTriangle } from "lucide-react";
 import { useAlertSettings } from "@/hooks/useAlertSettings";
 
 const Alerts = () => {
-  const [alertsEnabled, setAlertsEnabled] = useState(true);
-  const [deadlineAlertsEnabled, setDeadlineAlertsEnabled] = useState(true);
-  const [riskAlertsEnabled, setRiskAlertsEnabled] = useState(true);
-  const [complianceAlertsEnabled, setComplianceAlertsEnabled] = useState(true);
-  const [systemAlertsEnabled, setSystemAlertsEnabled] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("all");
+  const { alertSettings } = useAlertSettings();
 
-  const { alertSettings, updateAlertSettings } = useAlertSettings();
+  const alertCategories = [
+    {
+      id: "regulatory",
+      title: "Regulatory Updates",
+      description: "New regulations or changes to existing ones that may affect your compliance status.",
+      icon: <ShieldAlert className="h-6 w-6 text-amber-500" />,
+      count: 3,
+    },
+    {
+      id: "documentation",
+      title: "Documentation Alerts",
+      description: "Policies or procedures that need review or are approaching expiration dates.",
+      icon: <FileWarning className="h-6 w-6 text-blue-500" />,
+      count: 2,
+    },
+    {
+      id: "compliance",
+      title: "Compliance Gaps",
+      description: "Areas where your organization may not be fully compliant with applicable regulations.",
+      icon: <AlertTriangle className="h-6 w-6 text-red-500" />,
+      count: 1,
+    },
+    {
+      id: "review",
+      title: "Scheduled Reviews",
+      description: "Upcoming compliance reviews or audits that require preparation.",
+      icon: <Bell className="h-6 w-6 text-purple-500" />,
+      count: 4,
+    },
+  ];
 
-  // This would typically come from your backend
-  const alerts = {
-    upcomingDeadlines: [
-      {
-        id: 1,
-        title: "Annual Compliance Review Due",
-        description: "Complete the annual compliance review by December 31, 2024",
-        type: "deadline",
-      },
-      {
-        id: 2,
-        title: "License Renewal",
-        description: "Business operation license expires in 30 days",
-        type: "deadline",
-      },
-    ],
-    riskStatus: [
-      {
-        id: 3,
-        title: "High Risk Alert",
-        description: "Data protection risk level has been elevated to HIGH",
-        type: "risk",
-      },
-    ],
-    complianceUpdates: [
-      {
-        id: 4,
-        title: "New Regulation Update",
-        description: "Changes to environmental compliance requirements effective next quarter",
-        type: "compliance",
-      },
-    ],
-    systemNotifications: [
-      {
-        id: 5,
-        title: "Document Review Required",
-        description: "Safety protocol document needs your review and approval",
-        type: "system",
-      },
-    ],
-  };
-
-  // Update local state when settings are fetched
-  useEffect(() => {
-    if (alertSettings) {
-      setAlertsEnabled(alertSettings.alerts_enabled);
-      setDeadlineAlertsEnabled(alertSettings.deadline_alerts_enabled);
-      setRiskAlertsEnabled(alertSettings.risk_alerts_enabled);
-      setComplianceAlertsEnabled(alertSettings.compliance_alerts_enabled);
-      setSystemAlertsEnabled(alertSettings.system_alerts_enabled);
-    }
-  }, [alertSettings]);
-
-  const handleAlertToggle = async (checked: boolean) => {
-    setAlertsEnabled(checked);
-    updateAlertSettings.mutate({ alerts_enabled: checked });
-  };
-
-  const handleCategoryToggle = async (category: string, checked: boolean) => {
-    switch (category) {
-      case 'deadline':
-        setDeadlineAlertsEnabled(checked);
-        updateAlertSettings.mutate({ deadline_alerts_enabled: checked });
-        break;
-      case 'risk':
-        setRiskAlertsEnabled(checked);
-        updateAlertSettings.mutate({ risk_alerts_enabled: checked });
-        break;
-      case 'compliance':
-        setComplianceAlertsEnabled(checked);
-        updateAlertSettings.mutate({ compliance_alerts_enabled: checked });
-        break;
-      case 'system':
-        setSystemAlertsEnabled(checked);
-        updateAlertSettings.mutate({ system_alerts_enabled: checked });
-        break;
-    }
-  };
+  const filteredAlerts = activeTab === "all" 
+    ? alertCategories 
+    : alertCategories.filter(category => category.id === activeTab);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-4 py-8">
-          <AlertsHeader 
-            alertsEnabled={alertsEnabled}
-            onToggle={handleAlertToggle}
-          />
-
-          {alertsEnabled ? (
-            <div className="grid gap-6 md:grid-cols-2">
-              <AlertCategoryCard
-                title="Upcoming Deadlines"
-                icon={Clock}
-                alerts={alerts.upcomingDeadlines}
-                isEnabled={deadlineAlertsEnabled}
-                onToggle={(checked) => handleCategoryToggle('deadline', checked)}
-              />
-
-              <AlertCategoryCard
-                title="Risk Status Changes"
-                icon={AlertCircle}
-                alerts={alerts.riskStatus}
-                isEnabled={riskAlertsEnabled}
-                onToggle={(checked) => handleCategoryToggle('risk', checked)}
-                variant="destructive"
-              />
-
-              <AlertCategoryCard
-                title="Compliance Updates"
-                icon={Scale}
-                alerts={alerts.complianceUpdates}
-                isEnabled={complianceAlertsEnabled}
-                onToggle={(checked) => handleCategoryToggle('compliance', checked)}
-              />
-
-              <AlertCategoryCard
-                title="System Notifications"
-                icon={Bell}
-                alerts={alerts.systemNotifications}
-                isEnabled={systemAlertsEnabled}
-                onToggle={(checked) => handleCategoryToggle('system', checked)}
-              />
-            </div>
-          ) : (
-            <Card className="p-6">
-              <div className="text-center text-sage-600">
-                <BellRing className="h-12 w-12 mx-auto mb-4 text-sage-400" />
-                <h2 className="text-xl font-semibold mb-2">Alerts are disabled</h2>
-                <p>Enable alerts using the toggle above to see your notifications.</p>
-              </div>
-            </Card>
-          )}
+    <Layout>
+      <div className="container mx-auto py-8">
+        <AlertsHeader 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          totalAlerts={alertCategories.reduce((sum, cat) => sum + cat.count, 0)}
+        />
+        
+        <div className="grid md:grid-cols-2 gap-6 mt-6">
+          {filteredAlerts.map((category) => (
+            <AlertCategoryCard 
+              key={category.id}
+              category={category}
+              enabled={alertSettings[category.id]?.enabled ?? true}
+            />
+          ))}
         </div>
+        
+        {filteredAlerts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-slate-500 mb-4">No alerts in this category</p>
+            <Button variant="outline" onClick={() => setActiveTab("all")}>
+              View all alerts
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+    </Layout>
   );
 };
 

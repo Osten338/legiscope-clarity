@@ -6,7 +6,7 @@ import { WelcomeCard } from "@/components/dashboard/WelcomeCard";
 import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
 import { RegulationsList } from "@/components/dashboard/RegulationsList";
-import { Layout } from "@/components/dashboard/Layout";
+import { Layout } from "@/components/dashboard/Layout"; // Updated to use named import
 import { useToast } from "@/hooks/use-toast";
 
 // Define types for the data structure
