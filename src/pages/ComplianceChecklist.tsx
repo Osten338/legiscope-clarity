@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Layout } from "@/components/dashboard/Layout";
@@ -30,13 +30,41 @@ interface RegulationType {
 const ComplianceChecklist = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { data: regulations, isLoading, error } = useQuery({
+  const { data: regulations, isLoading, error, refetch } = useQuery({
     queryKey: ["regulations"],
     queryFn: async () => {
       try {
-        const { data: regulations, error: regulationsError } = await supabase
-          .from("regulations")
-          .select("*");
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          throw new Error("User not authenticated");
+        }
+        
+        // First get saved regulations for the user
+        const { data: savedRegs, error: savedError } = await supabase
+          .from("saved_regulations")
+          .select("regulation_id")
+          .eq("user_id", user.id);
+          
+        if (savedError) {
+          throw savedError;
+        }
+        
+        // If no saved regulations, get all regulations
+        let regulationQuery;
+        if (savedRegs && savedRegs.length > 0) {
+          regulationQuery = supabase
+            .from("regulations")
+            .select("*")
+            .in("id", savedRegs.map(r => r.regulation_id));
+        } else {
+          regulationQuery = supabase
+            .from("regulations")
+            .select("*");
+        }
+        
+        const { data: regulations, error: regulationsError } = await regulationQuery;
 
         if (regulationsError) {
           console.error("Error fetching regulations:", regulationsError);
@@ -79,6 +107,11 @@ const ComplianceChecklist = () => {
     },
   });
 
+  useEffect(() => {
+    // Refresh data on mount
+    refetch();
+  }, [refetch]);
+
   if (isLoading) {
     return (
       <Layout>
@@ -98,7 +131,8 @@ const ComplianceChecklist = () => {
         <div className="container mx-auto py-8">
           <div className="p-6 bg-red-50 border border-red-100 rounded-lg">
             <h3 className="text-lg font-medium text-red-800 mb-2">Error loading regulations</h3>
-            <p className="text-red-700">Please try again later.</p>
+            <p className="text-red-700 mb-4">There was a problem loading your compliance checklist.</p>
+            <Button onClick={() => refetch()}>Try Again</Button>
           </div>
         </div>
       </Layout>
@@ -126,9 +160,26 @@ const ComplianceChecklist = () => {
                 <TabsContent value="overview">
                   <div>
                     <h2 className="text-lg font-semibold mb-4">Overview</h2>
-                    <p>Select a regulation from the tabs above to view its checklist.</p>
-                    
-                    {regulations && regulations.length === 0 && (
+                    {regulations && regulations.length > 0 ? (
+                      <div className="space-y-4">
+                        <p>Select a regulation from the tabs above to view its checklist.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                          {regulations.map((reg) => (
+                            <div 
+                              key={reg.id} 
+                              className="border rounded-lg p-4 hover:bg-slate-50 cursor-pointer"
+                              onClick={() => setActiveTab(reg.id)}
+                            >
+                              <h3 className="font-medium text-lg">{reg.name}</h3>
+                              <p className="text-slate-600 mt-2 text-sm">{reg.description}</p>
+                              <div className="mt-3 text-sage-600 text-sm">
+                                {reg.checklist_items?.length || 0} checklist items
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
                       <div className="p-6 bg-amber-50 border border-amber-100 rounded-lg mt-4">
                         <h3 className="text-lg font-medium text-amber-800 mb-2">No regulations found</h3>
                         <p className="text-amber-700 mb-4">

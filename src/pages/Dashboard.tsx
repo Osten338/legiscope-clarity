@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { WelcomeCard } from "@/components/dashboard/WelcomeCard";
@@ -50,6 +50,12 @@ const Dashboard = () => {
     queryFn: async () => {
       try {
         console.log("Fetching saved regulations...");
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          throw new Error("User not authenticated");
+        }
+        
         const {
           data: savedRegs,
           error
@@ -72,7 +78,8 @@ const Dashboard = () => {
                 description
               )
             )
-          `);
+          `)
+          .eq('user_id', user.id);
           
         if (error) {
           console.error("Supabase error:", error);
@@ -103,8 +110,14 @@ const Dashboard = () => {
         console.error("Error in query function:", err);
         throw err;
       }
-    }
+    },
+    staleTime: 10000, // Refetch after 10 seconds
   });
+
+  // Refetch on initial load to ensure we have the latest data
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   return (
     <Layout>
@@ -146,8 +159,8 @@ const Dashboard = () => {
                 </p>
                 <ol className="list-decimal ml-5 mb-6 text-slate-600 space-y-2">
                   <li>Perform a business analysis to get personalized regulations</li>
+                  <li>Save regulations to your dashboard from the analysis results</li>
                   <li>Browse regulations in the Legislation section</li>
-                  <li>Save regulations relevant to your business</li>
                 </ol>
                 <div className="flex gap-3">
                   <Button asChild variant="default">
