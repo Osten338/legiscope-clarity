@@ -15,8 +15,8 @@ export const AnalysisProgressIndicator = ({
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-neutral-600 font-playfair">{currentStep}</span>
-          <span className="text-sm text-neutral-600 font-playfair">{Math.round(analysisProgress)}%</span>
+          <span className="text-sm text-neutral-600">{currentStep}</span>
+          <span className="text-sm text-neutral-600">{Math.round(analysisProgress)}%</span>
         </div>
         <Progress value={analysisProgress} className="w-full h-2" />
       </div>
@@ -28,7 +28,7 @@ export const AnalysisProgressIndicator = ({
           ) : (
             <CheckCircle2 className="h-5 w-5 text-sage-600" />
           )}
-          <p className="text-sage-700 text-sm font-playfair">
+          <p className="text-sage-700 text-sm">
             {analysisProgress < 100
               ? "Our advanced AI is performing a detailed analysis of your business description to provide comprehensive compliance recommendations. This may take several minutes..."
               : "Analysis complete! Preparing your personalized compliance dashboard with detailed recommendations..."}

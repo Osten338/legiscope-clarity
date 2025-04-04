@@ -28,7 +28,7 @@ export const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="bg-[#f8f5f1] min-h-screen">
+    <div>
       {/* Mobile sidebar */}
       <Dialog open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <DialogContent className="p-0 sm:max-w-[300px] bg-white data-[state=open]:duration-300">
@@ -43,7 +43,7 @@ export const Layout = ({ children }: LayoutProps) => {
       </div>
 
       <div className="lg:pl-72">
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-[#f8f5f1] px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}

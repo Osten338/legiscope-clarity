@@ -1,28 +1,27 @@
-
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Clock, AlertTriangle, HelpCircle } from "lucide-react";
 
 const statusCards = {
   compliant: {
     icon: CheckCircle2,
-    class: "text-emerald-600",
-    gradient: "bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-100"
+    class: "text-slate-600",
+    gradient: "bg-white"
   },
   in_progress: {
     icon: Clock,
-    class: "text-amber-600",
-    gradient: "bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-100"
+    class: "text-slate-600",
+    gradient: "bg-white"
   },
   not_compliant: {
     icon: AlertTriangle,
-    class: "text-red-600",
-    gradient: "bg-gradient-to-br from-red-50 to-red-100/50 border-red-100"
+    class: "text-slate-600",
+    gradient: "bg-white"
   },
   under_review: {
     icon: HelpCircle,
-    class: "text-blue-600",
-    gradient: "bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-100"
+    class: "text-slate-600",
+    gradient: "bg-white"
   }
 };
 
@@ -48,14 +47,14 @@ export const StatusOverview = ({ savedRegulations }: StatusOverviewProps) => {
       {Object.entries(statusCards).map(([status, { icon: Icon, class: colorClass, gradient }]) => {
         const count = savedRegulations?.filter(reg => reg.status === status).length || 0;
         return (
-          <Card key={status} className={cn("border rounded-xl overflow-hidden", gradient)}>
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className={cn("w-5 h-5", colorClass)} />
-                <span className="font-medium text-slate-700 font-playfair">{getStatusText(status)}</span>
-              </div>
-              <div className="text-3xl font-playfair text-slate-900">{count}</div>
-            </div>
+          <Card key={status} className={cn("border-slate-200 shadow-sm", gradient)}>
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <Icon className={cn("w-4 h-4", colorClass)} />
+                <span className="font-medium text-slate-600 font-serif">{getStatusText(status)}</span>
+              </CardDescription>
+              <CardTitle className="text-2xl font-serif text-slate-900">{count}</CardTitle>
+            </CardHeader>
           </Card>
         );
       })}
