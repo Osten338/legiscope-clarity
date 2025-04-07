@@ -10,7 +10,7 @@ export const LandingFooter = () => {
           <div className="mb-8 md:mb-0">
             <Link to="/" className="flex items-center gap-2 font-semibold mb-4">
               <Shield className="h-6 w-6 text-sage-400" />
-              <span className="text-xl">LegisScope</span>
+              <span className="text-xl">Compliance Buddy</span>
             </Link>
             <p className="text-slate-400 max-w-xs">
               Simplifying regulatory compliance for businesses of all sizes.
@@ -51,7 +51,7 @@ export const LandingFooter = () => {
         
         <div className="border-t border-slate-800 mt-8 pt-8 text-slate-400 text-sm">
           <div className="flex flex-col md:flex-row justify-between gap-4">
-            <p>© {new Date().getFullYear()} LegisScope. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Compliance Buddy. All rights reserved.</p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-white">Twitter</a>
               <a href="#" className="hover:text-white">LinkedIn</a>
