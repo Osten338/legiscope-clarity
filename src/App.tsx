@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeProvider } from "next-themes";
+import LoadingScreen from "./components/LoadingScreen";
 import Index from "./pages/Index";
 import Assessment from "./pages/Assessment";
 import Analysis from "./pages/Analysis";
@@ -51,6 +52,7 @@ const App = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [appInitialized, setAppInitialized] = useState(false);
 
   useEffect(() => {
     const getInitialSession = async () => {
@@ -64,10 +66,14 @@ const App = () => {
         
         setSession(session);
         setLoading(false);
+        
+        // Add a small delay before showing the main app for better UX
+        setTimeout(() => setAppInitialized(true), 1500);
       } catch (err) {
         console.error("Failed to initialize session:", err);
         setAuthError("Failed to connect to authentication service");
         setLoading(false);
+        setAppInitialized(true);
       }
     };
 
@@ -82,15 +88,12 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  if (!appInitialized) {
+    return <LoadingScreen />;
+  }
+
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading application...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (authError) {
