@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ThemeProvider } from "next-themes";
 import LoadingScreen from "./components/LoadingScreen";
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import Assessment from "./pages/Assessment";
 import Analysis from "./pages/Analysis";
 import Auth from "./pages/Auth";
@@ -135,7 +136,8 @@ const App = () => {
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/home" element={<Index />} />
                   <Route
                     path="/assessment"
                     element={
