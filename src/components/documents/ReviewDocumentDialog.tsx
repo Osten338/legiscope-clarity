@@ -2,10 +2,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Bot } from "lucide-react";
+import { Loader2, Bot, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
 
 interface ReviewDocumentDialogProps {
   open: boolean;
@@ -26,6 +28,8 @@ export function ReviewDocumentDialog({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [review, setReview] = useState<string | null>(null);
+  const [retrievedContext, setRetrievedContext] = useState<{ content: string; similarity: number }[]>([]);
+  const [showContext, setShowContext] = useState(false);
 
   const requestReview = async () => {
     try {
@@ -51,6 +55,11 @@ export function ReviewDocumentDialog({
       );
 
       if (error) throw error;
+      
+      // Store retrieved context if available
+      if (data.retrievedContext) {
+        setRetrievedContext(data.retrievedContext);
+      }
 
       // Save the review in the database
       const { error: insertError } = await supabase
@@ -83,11 +92,45 @@ export function ReviewDocumentDialog({
           <DialogTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-sage-600" />
             Document Review
+            
+            {retrievedContext.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="ml-auto h-8 px-3"
+                onClick={() => setShowContext(!showContext)}
+              >
+                <BookOpen className="h-4 w-4 mr-1.5" />
+                {showContext ? "Hide Sources" : "Show Sources"}
+              </Button>
+            )}
           </DialogTitle>
           <DialogDescription>
             ComplianceBuddy will analyze {document.file_name} for compliance requirements and provide recommendations
           </DialogDescription>
         </DialogHeader>
+
+        {showContext && retrievedContext.length > 0 && (
+          <div className="mb-4 p-3 bg-sage-50 rounded-lg text-sm border border-sage-200">
+            <h4 className="text-sm font-medium text-sage-700 mb-2 flex items-center">
+              <BookOpen className="h-4 w-4 mr-1.5" />
+              Retrieved Knowledge Sources
+            </h4>
+            <div className="space-y-2">
+              {retrievedContext.map((ctx, idx) => (
+                <div key={idx} className="relative p-2 bg-white rounded border border-sage-100">
+                  <Badge 
+                    variant="outline" 
+                    className="absolute top-2 right-2 text-xs"
+                  >
+                    Match: {Math.round(ctx.similarity * 100)}%
+                  </Badge>
+                  <p className="pr-20">{ctx.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex-1 min-h-0">
           {!review && !isLoading && (
@@ -102,7 +145,7 @@ export function ReviewDocumentDialog({
           {isLoading && (
             <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-sage-600" />
-              <p className="text-sage-600">Analyzing document with Perplexity AI...</p>
+              <p className="text-sage-600">Analyzing document with AI and retrieving relevant context...</p>
             </div>
           )}
 
