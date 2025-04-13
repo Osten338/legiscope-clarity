@@ -125,30 +125,39 @@ async function queryDocumentEmbeddings(query) {
     const { data } = await embeddingResponse.json();
     const embedding = data[0].embedding;
 
-    // Query Supabase for similar documents
-    const rpcUrl = `${SUPABASE_URL}/rest/v1/rpc/match_documents`;
-    const rpcResponse = await fetchWithAuth(rpcUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query_embedding: embedding,
-        match_threshold: 0.7,
-        match_count: 5,
-      }),
-    });
+    try {
+      // Query Supabase for similar documents
+      const rpcUrl = `${SUPABASE_URL}/rest/v1/rpc/match_documents`;
+      const rpcResponse = await fetchWithAuth(rpcUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query_embedding: embedding,
+          match_threshold: 0.7,
+          match_count: 5,
+        }),
+      });
 
-    if (!rpcResponse.ok) {
-      console.error("Error matching documents:", await rpcResponse.text());
-      throw new Error("Failed to match documents");
+      if (!rpcResponse.ok) {
+        const errorText = await rpcResponse.text();
+        console.error("Error matching documents:", errorText);
+        // Return empty array instead of throwing
+        return [];
+      }
+
+      const matches = await rpcResponse.json();
+      return matches;
+    } catch (error) {
+      console.error("Error in vector search:", error);
+      // Return empty array for any errors in the vector search
+      return [];
     }
-
-    const matches = await rpcResponse.json();
-    return matches;
   } catch (error) {
-    console.error("Error querying document embeddings:", error);
-    throw error;
+    console.error("Error in embedding generation:", error);
+    // Return empty array for any errors
+    return [];
   }
 }
 
@@ -164,21 +173,32 @@ serve(async (req) => {
     // Get the latest user message
     const latestUserMessage = messages.filter(msg => msg.role === "user").pop();
     
-    // Query for relevant document embeddings
-    const relevantDocuments = await queryDocumentEmbeddings(
-      `${checklistItem} ${latestUserMessage.content}`
-    );
-
-    // Extract context from relevant documents
-    const context = relevantDocuments.map(doc => doc.content).join("\n\n");
+    // Create a fallback context message if vector search fails
+    let context = "No relevant context could be found in the database. The vector search functionality may not be fully configured yet.";
+    let relevantDocuments = [];
+    
+    try {
+      // Try to query for relevant document embeddings
+      relevantDocuments = await queryDocumentEmbeddings(
+        `${checklistItem} ${latestUserMessage.content}`
+      );
+      
+      // Extract context from relevant documents if available
+      if (relevantDocuments && relevantDocuments.length > 0) {
+        context = relevantDocuments.map(doc => doc.content).join("\n\n");
+      }
+    } catch (error) {
+      console.error("Error querying documents, using fallback context:", error);
+      // Continue with the fallback context
+    }
     
     // Clean the context
-    const cleanedContext = cleanContextForChat(context);
+    const cleanedContext = cleanContextForChat(context) || context;
 
     // Update the system message with the retrieved context
     const systemMessageWithContext = {
       ...systemMessage,
-      content: systemMessage.content.replace("{context}", cleanedContext || "No relevant context found.")
+      content: systemMessage.content.replace("{context}", cleanedContext)
     };
 
     // Prepare the messages array for OpenAI
@@ -215,7 +235,7 @@ serve(async (req) => {
         reply,
         retrievedContext: relevantDocuments.map(doc => ({
           content: doc.content,
-          similarity: doc.similarity
+          similarity: doc.similarity || 0
         }))
       }),
       {
@@ -228,7 +248,10 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in compliance-buddy-chat function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        reply: "I'm sorry, but I encountered an error processing your request. Please try again later or contact support if the issue persists."
+      }),
       {
         status: 500,
         headers: {
