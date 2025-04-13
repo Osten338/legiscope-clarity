@@ -3,10 +3,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, AlertCircle, Check, FileText } from "lucide-react";
+import { Upload, AlertCircle, Check, FileText, HelpCircle, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function EmbeddingsUploader() {
   const [file, setFile] = useState<File | null>(null);
@@ -27,6 +32,53 @@ export function EmbeddingsUploader() {
     }
   };
 
+  const validateEmbeddingsFormat = async (fileContents: string): Promise<boolean> => {
+    try {
+      const data = JSON.parse(fileContents);
+      
+      // Check if it's an array
+      if (!Array.isArray(data)) {
+        setError("JSON file should contain an array of embedding objects");
+        return false;
+      }
+      
+      // Check a sample of items to verify structure
+      const sampleSize = Math.min(5, data.length);
+      for (let i = 0; i < sampleSize; i++) {
+        const item = data[i];
+        
+        if (!item || typeof item !== 'object') {
+          setError(`Invalid item at index ${i}: Items must be objects`);
+          return false;
+        }
+        
+        if (!item.content || typeof item.content !== 'string') {
+          setError(`Missing or invalid 'content' field at index ${i}: Must be a string`);
+          return false;
+        }
+        
+        if (!Array.isArray(item.embedding)) {
+          setError(`Missing or invalid 'embedding' field at index ${i}: Must be an array of numbers`);
+          return false;
+        }
+        
+        // Check a few embedding values
+        const embSample = item.embedding.slice(0, 3);
+        for (let j = 0; j < embSample.length; j++) {
+          if (typeof embSample[j] !== 'number') {
+            setError(`Invalid embedding value at item ${i}: All embedding values must be numbers`);
+            return false;
+          }
+        }
+      }
+      
+      return true;
+    } catch (e) {
+      setError("Invalid JSON format. Please check your file.");
+      return false;
+    }
+  };
+
   const processEmbeddings = async () => {
     if (!file) {
       setError("Please select a JSON file to upload");
@@ -44,20 +96,17 @@ export function EmbeddingsUploader() {
 
     try {
       const fileContents = await file.text();
-      let embeddings;
       
-      try {
-        embeddings = JSON.parse(fileContents);
-      } catch (e) {
-        throw new Error("Invalid JSON format. Please check your file.");
+      // Validate the JSON structure
+      const isValid = await validateEmbeddingsFormat(fileContents);
+      if (!isValid) {
+        setIsUploading(false);
+        return;
       }
-
-      // Check if it's an array 
-      if (!Array.isArray(embeddings)) {
-        throw new Error("JSON file should contain an array of embedding objects");
-      }
-
+      
+      const embeddings = JSON.parse(fileContents);
       const total = embeddings.length;
+      
       setProcessingStats({
         total,
         processed: 0,
@@ -116,6 +165,24 @@ export function EmbeddingsUploader() {
     }
   };
 
+  const exampleJson = `[
+  {
+    "content": "This is the text content to be retrieved later",
+    "embedding": [0.123, 0.456, 0.789, ...],
+    "metadata": { 
+      "source": "optional metadata",
+      "category": "your custom fields"
+    }
+  },
+  {
+    "content": "Another piece of text content",
+    "embedding": [0.321, 0.654, 0.987, ...],
+    "metadata": { 
+      "source": "optional metadata" 
+    }
+  }
+]`;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -127,6 +194,28 @@ export function EmbeddingsUploader() {
             disabled={isUploading}
           />
         </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="icon">
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-96">
+            <div className="space-y-2">
+              <h4 className="font-medium">Expected JSON Format</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Your JSON file should contain an array of objects with the following structure:
+              </p>
+              <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-40">
+                {exampleJson}
+              </pre>
+              <p className="text-xs text-muted-foreground mt-2">
+                Each object must have a <code>content</code> field (text) and an <code>embedding</code> field (array of numbers).
+                The <code>metadata</code> field is optional.
+              </p>
+            </div>
+          </PopoverContent>
+        </Popover>
         <Button 
           onClick={processEmbeddings}
           disabled={!file || isUploading}
@@ -142,6 +231,15 @@ export function EmbeddingsUploader() {
           )}
         </Button>
       </div>
+      
+      <Alert variant="default" className="bg-blue-50 border-blue-200">
+        <Info className="h-4 w-4 text-blue-600" />
+        <AlertTitle className="text-blue-800">Embedding Format</AlertTitle>
+        <AlertDescription className="text-blue-700">
+          Upload a JSON file containing an array of objects with <code className="bg-blue-100 px-1 rounded">content</code> and <code className="bg-blue-100 px-1 rounded">embedding</code> fields. 
+          Each embedding should be a vector of floating-point numbers.
+        </AlertDescription>
+      </Alert>
       
       {error && (
         <Alert variant="destructive">
