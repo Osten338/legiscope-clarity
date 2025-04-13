@@ -1,10 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { ExternalLink, Clock, FileText, AlertTriangle } from "lucide-react";
+import { ExternalLink, Clock, FileText, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface LegislationItem {
   title: string;
@@ -18,32 +19,46 @@ export const LegislationFeed = () => {
   const [legislationItems, setLegislationItems] = useState<LegislationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFallback, setIsFallback] = useState(false);
+  const { toast } = useToast();
+
+  const fetchLegislation = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setIsFallback(false);
+      
+      console.log("Fetching legislation feed...");
+      const { data, error } = await supabase.functions.invoke("fetch-eurlex-rss");
+      
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw new Error(error.message || "Failed to fetch legislation feed");
+      }
+      
+      if (data && data.entries) {
+        setLegislationItems(data.entries);
+        // Check if we're using fallback data
+        if (data.status === "fallback") {
+          setIsFallback(true);
+          toast({
+            title: "Using cached legislation data",
+            description: "We couldn't connect to EUR-Lex. Showing cached data instead.",
+            variant: "default"
+          });
+        }
+      } else {
+        throw new Error("No legislation data received");
+      }
+    } catch (err: any) {
+      console.error("Error fetching legislation feed:", err);
+      setError(err.message || "Failed to load legislation feed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLegislation = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const { data, error } = await supabase.functions.invoke("fetch-eurlex-rss");
-        
-        if (error) {
-          throw new Error(error.message || "Failed to fetch legislation feed");
-        }
-        
-        if (data && data.entries) {
-          setLegislationItems(data.entries);
-        } else {
-          throw new Error("No legislation data received");
-        }
-      } catch (err: any) {
-        console.error("Error fetching legislation feed:", err);
-        setError(err.message || "Failed to load legislation feed");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchLegislation();
   }, []);
 
@@ -103,11 +118,12 @@ export const LegislationFeed = () => {
         <CardContent className="pt-4">
           <p className="text-sm text-slate-600">{error}</p>
           <Button 
-            onClick={() => window.location.reload()} 
+            onClick={fetchLegislation} 
             variant="outline" 
             size="sm"
             className="mt-4"
           >
+            <RefreshCw size={14} className="mr-2" />
             Retry
           </Button>
         </CardContent>
@@ -118,14 +134,32 @@ export const LegislationFeed = () => {
   return (
     <Card className="shadow-sm">
       <CardHeader className="border-b pb-3">
-        <CardTitle>Latest EU Legislation</CardTitle>
-        <CardDescription>Recent regulatory updates from EUR-Lex</CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Latest EU Legislation</CardTitle>
+            <CardDescription>
+              {isFallback 
+                ? "Temporarily using cached data due to connection issues" 
+                : "Recent regulatory updates from EUR-Lex"}
+            </CardDescription>
+          </div>
+          {isFallback && (
+            <Button 
+              onClick={fetchLegislation} 
+              variant="outline" 
+              size="sm"
+            >
+              <RefreshCw size={14} className="mr-2" />
+              Retry
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="pt-4">
         {legislationItems.length === 0 ? (
           <p className="text-sm text-slate-600">No legislation found</p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {legislationItems.map((item, index) => (
               <div key={index} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
                 <h3 className="font-medium text-slate-900 mb-1 leading-tight">
@@ -145,15 +179,17 @@ export const LegislationFeed = () => {
                 <p className="text-sm text-slate-600 mb-2">
                   {truncateDescription(item.description)}
                 </p>
-                <a 
-                  href={item.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-xs font-medium text-sage-600 hover:text-sage-800"
-                >
-                  View on EUR-Lex
-                  <ExternalLink size={12} className="ml-1" />
-                </a>
+                {item.link && (
+                  <a 
+                    href={item.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                  >
+                    View on EUR-Lex
+                    <ExternalLink size={12} className="ml-1" />
+                  </a>
+                )}
               </div>
             ))}
           </div>

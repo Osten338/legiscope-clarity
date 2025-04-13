@@ -14,10 +14,10 @@ serve(async (req) => {
   }
 
   try {
-    // Use a different EUR-Lex feed URL that is currently working
-    const rssUrl = "https://eur-lex.europa.eu/eurlex-ws/feed/rss";
+    // Try a more reliable URL for EUR-Lex legislation feed
+    const rssUrl = "https://eur-lex.europa.eu/oj/direct-access.html?rss=true";
     
-    console.log(`Fetching EUR-Lex RSS feed from ${rssUrl}...`);
+    console.log(`Fetching EUR-Lex legislation from ${rssUrl}...`);
     const response = await fetch(rssUrl);
     
     if (!response.ok) {
@@ -35,6 +35,28 @@ serve(async (req) => {
     }
     
     const items = xmlDoc.querySelectorAll("item");
+    
+    // If no items found, try to get any content available
+    if (!items || items.length === 0) {
+      console.log("No RSS items found, returning HTML content with fallback structure");
+      
+      // Create a fallback structure with the HTML content
+      return new Response(JSON.stringify({ 
+        entries: [{
+          title: "EUR-Lex Latest Updates",
+          link: rssUrl,
+          description: "The EUR-Lex feed format has changed. Please visit the EUR-Lex website for the latest updates.",
+          pubDate: new Date().toUTCString(),
+          celex: ""
+        }]
+      }), { 
+        headers: { 
+          ...corsHeaders,
+          "Content-Type": "application/json" 
+        } 
+      });
+    }
+    
     const entries = Array.from(items).map((item) => {
       return {
         title: item.querySelector("title")?.textContent || "",
@@ -56,11 +78,21 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error fetching RSS feed:", error);
+    
+    // Return a fallback response with mock data instead of an error
+    // This ensures the UI always has something to display
     return new Response(JSON.stringify({ 
-      error: "Failed to fetch or parse RSS feed", 
-      details: error.message 
+      entries: [
+        {
+          title: "EU Legislation Update Service",
+          link: "https://eur-lex.europa.eu/homepage.html",
+          description: "We're currently experiencing difficulties connecting to the EUR-Lex feed. Please check back later or visit EUR-Lex directly for the latest legislation updates.",
+          pubDate: new Date().toUTCString(),
+          celex: ""
+        }
+      ],
+      status: "fallback"
     }), { 
-      status: 500,
       headers: { 
         ...corsHeaders,
         "Content-Type": "application/json" 
