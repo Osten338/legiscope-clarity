@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -38,6 +38,26 @@ export function ComplianceBuddyDialog({
   const [retrievedContext, setRetrievedContext] = useState<RetrievedContext[]>([]);
   const [showContext, setShowContext] = useState(false);
   const { toast } = useToast();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollElement = scrollAreaRef.current;
+      scrollElement.scrollTop = scrollElement.scrollHeight;
+    }
+  }, [messages]);
+
+  const formatMessageContent = (content: string) => {
+    if (!content) return "";
+    // Replace double line breaks with proper paragraph breaks
+    return content.split("\n").map((line, i) => (
+      <span key={i}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
 
   const sendMessage = async (content: string) => {
     try {
@@ -74,9 +94,9 @@ export function ComplianceBuddyDialog({
       const { error: dbError } = await supabase.from("ai_responses").insert({
         user_query: content,
         checklist_item: checklistItem.description,
-        legal_analysis: data.legalAnalysis || "Not provided",
-        practical_implementation: data.practicalSteps || "Not provided",
-        risk_assessment: data.riskAssessment || "Not provided",
+        legal_analysis: "Not provided",
+        practical_implementation: "Not provided",
+        risk_assessment: "Not provided",
         combined_response: data.reply,
         response_time_ms: responseTimeMs,
         model_version: "gpt-4o-mini",
@@ -156,7 +176,7 @@ export function ComplianceBuddyDialog({
           </Collapsible>
         )}
 
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
           <div className="space-y-4 mb-4">
             {messages.length === 0 ? (
               <div className="text-center text-slate-500 mt-8">
@@ -180,11 +200,11 @@ export function ComplianceBuddyDialog({
                   <div
                     className={`rounded-lg px-4 py-2 max-w-[80%] ${
                       message.role === "assistant"
-                        ? "bg-sage-50 text-sage-900 prose prose-sm max-w-none"
+                        ? "bg-sage-50 text-sage-900 prose prose-sm max-w-none whitespace-pre-line"
                         : "bg-sage-600 text-white"
                     }`}
                   >
-                    {message.content}
+                    {message.role === "assistant" ? formatMessageContent(message.content) : message.content}
                   </div>
                 </div>
               ))

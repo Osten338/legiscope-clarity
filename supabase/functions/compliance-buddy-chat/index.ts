@@ -163,19 +163,16 @@ async function generateChatCompletion(messages: any[], context: string) {
     
     5. EXECUTIVE SUMMARY: Always conclude with a brief executive summary that condenses your key findings and recommendations in 3-4 sentences.
     
-    MANDATORY DOCUMENT-STYLE FORMATTING GUIDELINES:
-    - DO NOT use Markdown symbols like #, ##, or ### for headings
-    - For main section titles, use <strong> HTML tags to create bold text (e.g., "<strong>APPLICABLE LEGISLATION:</strong>")
-    - For subsection titles, also use <strong> tags but format them as part of the paragraph flow
+    MANDATORY FORMATTING GUIDELINES:
+    - Each main section must be preceded by two line breaks and followed by one line break
+    - Use ALL CAPS for section headings (e.g., "APPLICABLE LEGISLATION:")
     - Begin with a brief introduction (2-3 sentences) of your approach
-    - Write in a narrative flow using full paragraphs with clear topic sentences and transitions between sections
+    - Write in a narrative flow using full paragraphs with clear topic sentences
     - Keep paragraphs to 3-5 sentences each, with one blank line between paragraphs
-    - Limit line breaks - use only one blank line between sections
     - Use simple dash (-) for bullet points, not asterisks or plus signs
     - For legal references, use a consistent inline format (e.g., "GDPR, Article 9") within sentences
-    - For tables, create well-aligned, readable tables without Markdown formatting
-    - Use <strong> HTML tags for emphasis, not ** or * characters
     - All content MUST be left-aligned - never center text
+    - Do NOT use any HTML tags like <strong> or any other formatting tags
     - The final output should resemble a professional memo that could be presented to executives
     
     Structure your answer in these clear sections, always showing your reasoning process. Be factual and grounded in the provided legal documents.
@@ -210,6 +207,9 @@ async function generateChatCompletion(messages: any[], context: string) {
 
     const result = await response.json();
     console.log('Successfully generated completion');
+    
+    // Format the response to ensure proper line breaks are preserved
+    const content = result.choices[0].message.content;
     
     return result.choices[0].message;
   } catch (error) {

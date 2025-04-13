@@ -58,6 +58,17 @@ export function FullScreenChatDialog({
     }
   }, [messages]);
 
+  const formatMessageContent = (content: string) => {
+    if (!content) return "";
+    // Replace double line breaks with proper paragraph breaks
+    return content.split("\n").map((line, i) => (
+      <span key={i}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
+
   const sendMessage = async (content: string) => {
     try {
       setIsLoading(true);
@@ -197,11 +208,11 @@ export function FullScreenChatDialog({
                       className={cn(
                         "rounded-lg px-4 py-2 max-w-[90%]",
                         message.role === "assistant"
-                          ? "bg-sage-50 text-sage-900 prose prose-sm max-w-none"
+                          ? "bg-sage-50 text-sage-900 prose prose-sm max-w-none whitespace-pre-line"
                           : "bg-sage-600 text-white"
                       )}
                     >
-                      {message.content}
+                      {message.role === "assistant" ? formatMessageContent(message.content) : message.content}
                     </div>
                   </div>
                 ))
