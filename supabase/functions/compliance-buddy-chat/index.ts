@@ -3,13 +3,20 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { generateEmbedding } from "../shared/embeddingsUtils.ts"
 import { findSimilarDocuments } from "../shared/similarityUtils.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Simplified in-memory document store for demonstration
+// Create a Supabase client using the service role key (to bypass RLS)
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL') || '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+);
+
+// Simplified in-memory document store for fallback if database fails
 // In a real implementation, this would be stored in Supabase
 const complianceDocuments = [
   {
@@ -53,6 +60,32 @@ async function initializeDocumentEmbeddings(apiKey: string) {
   }
 }
 
+// Function to fetch relevant documents from the database
+async function fetchRelevantDocuments(queryEmbedding: number[], topK: number = 3) {
+  try {
+    // Create an RPC function call to find similar documents
+    const { data, error } = await supabaseAdmin.rpc('match_documents', {
+      query_embedding: queryEmbedding,
+      match_threshold: 0.5,
+      match_count: topK
+    });
+
+    if (error) {
+      console.error("Error fetching relevant documents:", error);
+      return null;
+    }
+
+    return data.map((doc: any) => ({
+      id: doc.id,
+      content: doc.content,
+      similarity: doc.similarity
+    }));
+  } catch (error) {
+    console.error("Error in fetchRelevantDocuments:", error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -75,11 +108,16 @@ serve(async (req) => {
     console.log("Generating embedding for user query");
     const queryEmbedding = await generateEmbedding(userQuery, openaiApiKey);
 
-    // Find relevant documents
-    console.log("Finding relevant documents");
-    const relevantDocs = findSimilarDocuments(queryEmbedding, complianceDocuments, 2);
+    // Try to fetch relevant documents from the database first
+    let relevantDocs = await fetchRelevantDocuments(queryEmbedding, 3);
     
-    const retrievedContext = relevantDocs.map(doc => doc.content).join("\n\n");
+    // If database fetch fails, fall back to in-memory documents
+    if (!relevantDocs) {
+      console.log("Falling back to in-memory document retrieval");
+      relevantDocs = findSimilarDocuments(queryEmbedding, complianceDocuments, 3);
+    }
+    
+    const retrievedContext = relevantDocs.map((doc: any) => doc.content).join("\n\n");
     console.log("Retrieved context:", retrievedContext);
 
     // Construct chain of thought prompt with RAG context
@@ -111,7 +149,7 @@ serve(async (req) => {
 
     console.log("Sending request to OpenAI");
     
-    // Call OpenAI API instead of Perplexity
+    // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -173,7 +211,7 @@ serve(async (req) => {
     // Store the interaction in the database using the calling context's Supabase client
     return new Response(JSON.stringify({
       ...sections,
-      retrievedContext: relevantDocs.map(doc => ({ content: doc.content, similarity: doc.similarity }))
+      retrievedContext: relevantDocs.map((doc: any) => ({ content: doc.content, similarity: doc.similarity }))
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

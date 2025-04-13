@@ -42,3 +42,58 @@ export async function batchGenerateEmbeddings(texts: string[], apiKey: string): 
 
   return embeddings;
 }
+
+export async function storeEmbedding(
+  client: any,
+  content: string,
+  embedding: number[],
+  metadata: any = {}
+): Promise<string | null> {
+  try {
+    const { data, error } = await client
+      .from('document_embeddings')
+      .insert({
+        content,
+        embedding,
+        metadata
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Error storing embedding:', error);
+      return null;
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error('Error in storeEmbedding:', error);
+    return null;
+  }
+}
+
+export async function getDocumentEmbedding(
+  client: any,
+  documentId: string
+): Promise<{ content: string; embedding: number[] } | null> {
+  try {
+    const { data, error } = await client
+      .from('document_embeddings')
+      .select('content, embedding')
+      .eq('id', documentId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error retrieving document embedding:', error);
+      return null;
+    }
+
+    return {
+      content: data.content,
+      embedding: data.embedding
+    };
+  } catch (error) {
+    console.error('Error in getDocumentEmbedding:', error);
+    return null;
+  }
+}
