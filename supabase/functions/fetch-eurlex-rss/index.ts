@@ -14,9 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    // EUR-Lex RSS feed URL - this is for recent legislation
-    // We're using the English feed for EU legislation
-    const rssUrl = "https://eur-lex.europa.eu/rss-feed.xml?typeOfAct=REGULATION&documentDateFrom=2023-01-01&documentDateTo=2024-12-31&departmentResp=ALL&lang=en";
+    // EUR-Lex RSS feed URL - updated to use the correct URL for regulations
+    const rssUrl = "https://eur-lex.europa.eu/search/feed.html?qid=1616411388877&type=named&name=all-all-eu-legislation";
     
     console.log("Fetching EUR-Lex RSS feed...");
     const response = await fetch(rssUrl);
@@ -42,7 +41,8 @@ serve(async (req) => {
         link: item.querySelector("link")?.textContent || "",
         description: item.querySelector("description")?.textContent || "",
         pubDate: item.querySelector("pubDate")?.textContent || "",
-        celex: item.querySelector("eurlex\\:celexNumber")?.textContent || "",
+        celex: item.querySelector("eurlex\\:celexNumber")?.textContent || 
+              item.querySelector("celexNumber")?.textContent || "",
       };
     });
     

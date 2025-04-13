@@ -6,6 +6,7 @@ import { WelcomeCard } from "@/components/dashboard/WelcomeCard";
 import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
 import { RegulationsList } from "@/components/dashboard/RegulationsList";
+import { DashboardLegislationFeed } from "@/components/dashboard/LegislationFeed";
 import { Layout } from "@/components/dashboard/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -139,7 +140,12 @@ const Dashboard = () => {
         ) : (
           <>
             <StatusOverview savedRegulations={savedRegulations || []} />
-            <UpcomingReviews savedRegulations={savedRegulations || []} />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <UpcomingReviews savedRegulations={savedRegulations || []} />
+              <DashboardLegislationFeed />
+            </div>
+            
             {isLoading ? (
               <div className="text-center p-12 bg-white rounded-lg border border-slate-200 shadow-sm">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sage-600 mx-auto mb-4"></div>
