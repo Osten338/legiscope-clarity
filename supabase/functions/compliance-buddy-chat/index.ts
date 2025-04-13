@@ -1,4 +1,12 @@
 
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { cleanContextForChat } from "../shared/contextUtils.ts";
+import { corsHeaders } from "../shared/cors.ts";
+
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
 const systemMessage = {
   role: 'system',
   content: `You are a legal compliance assistant that analyzes legal documents with a deep understanding of legal document structure, particularly EU legislation. 
@@ -63,7 +71,7 @@ When analyzing legal questions, follow this structured reasoning pattern:
 
 MANDATORY FORMATTING GUIDELINES:
 - Use two line breaks before section headings and one line break after
-- Use ALL CAPS for section headings
+- Use bold (**) for section headings, not HTML tags
 - Begin with a brief introduction (2-3 sentences) of your approach
 - Write in a narrative flow using full paragraphs with clear topic sentences
 - Keep paragraphs to 3-5 sentences each, with one blank line between paragraphs
@@ -78,5 +86,156 @@ Structure your answer in these clear sections, always showing your reasoning pro
 If you don't find useful information in the context, be honest and tell the user you can't answer based on the available documents.
 
 CONTEXT:
-${cleanedContext}`
+{context}`
 };
+
+// Create a custom fetch function that adds the Supabase service role key
+const fetchWithAuth = (url, options = {}) => {
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "apikey": SUPABASE_SERVICE_ROLE_KEY,
+    },
+  });
+};
+
+// Function to query document embeddings from Supabase
+async function queryDocumentEmbeddings(query) {
+  try {
+    // Generate embedding for user query
+    const embeddingResponse = await fetch("https://api.openai.com/v1/embeddings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "text-embedding-3-small",
+        input: query,
+      }),
+    });
+
+    if (!embeddingResponse.ok) {
+      console.error("Error generating embeddings:", await embeddingResponse.text());
+      throw new Error("Failed to generate embeddings");
+    }
+
+    const { data } = await embeddingResponse.json();
+    const embedding = data[0].embedding;
+
+    // Query Supabase for similar documents
+    const rpcUrl = `${SUPABASE_URL}/rest/v1/rpc/match_documents`;
+    const rpcResponse = await fetchWithAuth(rpcUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query_embedding: embedding,
+        match_threshold: 0.7,
+        match_count: 5,
+      }),
+    });
+
+    if (!rpcResponse.ok) {
+      console.error("Error matching documents:", await rpcResponse.text());
+      throw new Error("Failed to match documents");
+    }
+
+    const matches = await rpcResponse.json();
+    return matches;
+  } catch (error) {
+    console.error("Error querying document embeddings:", error);
+    throw error;
+  }
+}
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { messages, checklistItem } = await req.json();
+
+    // Get the latest user message
+    const latestUserMessage = messages.filter(msg => msg.role === "user").pop();
+    
+    // Query for relevant document embeddings
+    const relevantDocuments = await queryDocumentEmbeddings(
+      `${checklistItem} ${latestUserMessage.content}`
+    );
+
+    // Extract context from relevant documents
+    const context = relevantDocuments.map(doc => doc.content).join("\n\n");
+    
+    // Clean the context
+    const cleanedContext = cleanContextForChat(context);
+
+    // Update the system message with the retrieved context
+    const systemMessageWithContext = {
+      ...systemMessage,
+      content: systemMessage.content.replace("{context}", cleanedContext || "No relevant context found.")
+    };
+
+    // Prepare the messages array for OpenAI
+    const openaiMessages = [
+      systemMessageWithContext,
+      ...messages
+    ];
+
+    // Call OpenAI API
+    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: openaiMessages,
+        temperature: 0.1,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!openaiResponse.ok) {
+      console.error("Error from OpenAI API:", await openaiResponse.text());
+      throw new Error("Failed to generate response from OpenAI");
+    }
+
+    const result = await openaiResponse.json();
+    const reply = result.choices[0].message.content;
+
+    return new Response(
+      JSON.stringify({
+        reply,
+        retrievedContext: relevantDocuments.map(doc => ({
+          content: doc.content,
+          similarity: doc.similarity
+        }))
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error in compliance-buddy-chat function:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+});
