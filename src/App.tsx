@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,15 +23,14 @@ import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
 import Documents from "./pages/Documents";
 import ComplianceChat from "./pages/ComplianceChat";
+import AdminTools from "./pages/AdminTools";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
-// Configure query client with error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      // Using meta for error handling instead of onError
       meta: {
         onError: (error: Error) => {
           console.error("Query error:", error);
@@ -40,7 +38,6 @@ const queryClient = new QueryClient({
       }
     },
     mutations: {
-      // Using meta for error handling
       meta: {
         onError: (error: Error) => {
           console.error("Mutation error:", error);
@@ -69,7 +66,6 @@ const App = () => {
         setSession(session);
         setLoading(false);
         
-        // Add a small delay before showing the main app for better UX
         setTimeout(() => setAppInitialized(true), 1500);
       } catch (err) {
         console.error("Failed to initialize session:", err);
@@ -269,6 +265,7 @@ const App = () => {
                       )
                     }
                   />
+                  <Route path="/admin" element={<AdminTools />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
