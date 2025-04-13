@@ -14,9 +14,9 @@ export function ChatMessageFormatter({ content, role }: ChatMessageFormatterProp
 
   // Format the assistant's message for better readability
   const formattedContent = content
-    // Replace heading indicators with proper styling and reduced margin
+    // Replace heading indicators with proper styling and space above
     .replace(/^(APPLICABLE LEGISLATION|RELEVANT LEGAL ELEMENTS|APPLICATION TO QUESTION|LIMITATIONS|EXECUTIVE SUMMARY):/gm, 
-      '<strong class="text-lg block mb-1">$1:</strong>')
+      '<strong class="text-lg block mt-4 mb-0">$1:</strong>')
     
     // Replace numbered list items with properly formatted numbers and reduced spacing
     .replace(/^(\d+)\.\s+(.+)$/gm, '<div class="mb-1">$1. $2</div>')
@@ -37,7 +37,7 @@ export function ChatMessageFormatter({ content, role }: ChatMessageFormatterProp
   
   return (
     <div
-      className="prose prose-sage max-w-none text-left text-sm" // Added text-sm to reduce overall text size
+      className="prose prose-sage max-w-none text-left text-sm" 
       dangerouslySetInnerHTML={{ __html: formattedContent }}
     />
   );
