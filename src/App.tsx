@@ -23,6 +23,7 @@ import RiskAssessmentLanding from "./pages/RiskAssessmentLanding";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
 import Documents from "./pages/Documents";
+import ComplianceChat from "./pages/ComplianceChat";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Configure query client with error handling
@@ -203,6 +204,16 @@ const App = () => {
                     element={
                       session ? (
                         <ComplianceChecklist />
+                      ) : (
+                        <Navigate to="/auth" replace={true} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/compliance-chat"
+                    element={
+                      session ? (
+                        <ComplianceChat />
                       ) : (
                         <Navigate to="/auth" replace={true} />
                       )

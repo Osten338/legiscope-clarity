@@ -1,5 +1,5 @@
 
-import { BarChart, Bell, CheckSquare, FileText, LayoutDashboard } from "lucide-react";
+import { BarChart, Bell, CheckSquare, FileText, LayoutDashboard, Bot } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { SidebarNavItem } from "./SidebarNavItem";
 
@@ -13,6 +13,7 @@ export const SidebarNavigation = () => {
     { to: "/alerts", icon: Bell, label: "Alerts" },
     { to: "/compliance-checklist", icon: CheckSquare, label: "Compliance Checklist" },
     { to: "/documentation", icon: FileText, label: "Documentation" },
+    { to: "/compliance-chat", icon: Bot, label: "Compliance Chat" },
   ];
 
   return (
