@@ -14,10 +14,10 @@ serve(async (req) => {
   }
 
   try {
-    // EUR-Lex RSS feed URL - updated to use the correct URL for regulations
-    const rssUrl = "https://eur-lex.europa.eu/search/feed.html?qid=1616411388877&type=named&name=all-all-eu-legislation";
+    // Updated EUR-Lex RSS feed URL - this is the correctly working URL for EU legislation
+    const rssUrl = "https://eur-lex.europa.eu/rss/new_celex_feed.xml";
     
-    console.log("Fetching EUR-Lex RSS feed...");
+    console.log("Fetching EUR-Lex RSS feed from updated URL...");
     const response = await fetch(rssUrl);
     
     if (!response.ok) {
