@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
+import { ChatMessageFormatter } from "../compliance/ChatMessageFormatter";
 
 interface ReviewDocumentDialogProps {
   open: boolean;
@@ -35,7 +35,6 @@ export function ReviewDocumentDialog({
     try {
       setIsLoading(true);
       
-      // Call the ComplianceBuddy edge function to review the document
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -56,12 +55,10 @@ export function ReviewDocumentDialog({
 
       if (error) throw error;
       
-      // Store retrieved context if available
       if (data.retrievedContext) {
         setRetrievedContext(data.retrievedContext);
       }
 
-      // Save the review in the database
       const { error: insertError } = await supabase
         .from('document_reviews')
         .insert({
@@ -152,7 +149,7 @@ export function ReviewDocumentDialog({
           {review && (
             <ScrollArea className="h-full pr-4">
               <div className="prose prose-sage max-w-none">
-                {review}
+                <ChatMessageFormatter content={review} role="assistant" />
               </div>
             </ScrollArea>
           )}

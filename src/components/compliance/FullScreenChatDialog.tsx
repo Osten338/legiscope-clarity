@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
+import { ChatMessageFormatter } from "./ChatMessageFormatter";
 
 interface Message {
   role: "assistant" | "user";
@@ -41,7 +41,6 @@ export function FullScreenChatDialog({
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = window.innerWidth <= 640;
 
-  // Focus input when dialog opens
   useEffect(() => {
     if (open && inputRef.current) {
       setTimeout(() => {
@@ -50,7 +49,6 @@ export function FullScreenChatDialog({
     }
   }, [open]);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollAreaRef.current) {
       const scrollElement = scrollAreaRef.current;
@@ -60,7 +58,6 @@ export function FullScreenChatDialog({
 
   const formatMessageContent = (content: string) => {
     if (!content) return "";
-    // Replace double line breaks with proper paragraph breaks
     return content.split("\n").map((line, i) => (
       <span key={i}>
         {line}
@@ -83,30 +80,27 @@ export function FullScreenChatDialog({
         {
           body: {
             messages: newMessages,
-            checklistItem: "General compliance question", // Generic topic for the fullscreen chat
+            checklistItem: "General compliance question",
           },
         }
       );
 
       if (error) throw error;
 
-      // Calculate response time
       const endTime = performance.now();
       const responseTimeMs = Math.round(endTime - startTime);
 
-      // Store retrieved context
       if (data.retrievedContext) {
         setRetrievedContext(data.retrievedContext);
       }
 
-      // Store the interaction in the database
       const { data: userData } = await supabase.auth.getUser();
       const { error: dbError } = await supabase.from("ai_responses").insert({
         user_query: content,
         checklist_item: "General compliance question",
-        legal_analysis: "", // Add empty string for required fields
-        practical_implementation: "", // Add empty string for required fields
-        risk_assessment: "", // Add empty string for required fields
+        legal_analysis: "",
+        practical_implementation: "",
+        risk_assessment: "",
         combined_response: data.reply,
         response_time_ms: responseTimeMs,
         model_version: "gpt-4o-mini",
@@ -208,11 +202,11 @@ export function FullScreenChatDialog({
                       className={cn(
                         "rounded-lg px-4 py-2 max-w-[90%]",
                         message.role === "assistant"
-                          ? "bg-sage-50 text-sage-900 prose prose-sm max-w-none whitespace-pre-line"
+                          ? "bg-sage-50 text-sage-900"
                           : "bg-sage-600 text-white"
                       )}
                     >
-                      {message.role === "assistant" ? formatMessageContent(message.content) : message.content}
+                      <ChatMessageFormatter content={message.content} role={message.role} />
                     </div>
                   </div>
                 ))

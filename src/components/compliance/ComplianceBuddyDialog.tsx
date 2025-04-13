@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChatMessageFormatter } from "./ChatMessageFormatter";
 
 interface Message {
   role: "assistant" | "user";
@@ -40,24 +40,12 @@ export function ComplianceBuddyDialog({
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollAreaRef.current) {
       const scrollElement = scrollAreaRef.current;
       scrollElement.scrollTop = scrollElement.scrollHeight;
     }
   }, [messages]);
-
-  const formatMessageContent = (content: string) => {
-    if (!content) return "";
-    // Replace double line breaks with proper paragraph breaks
-    return content.split("\n").map((line, i) => (
-      <span key={i}>
-        {line}
-        <br />
-      </span>
-    ));
-  };
 
   const sendMessage = async (content: string) => {
     try {
@@ -80,16 +68,13 @@ export function ComplianceBuddyDialog({
 
       if (error) throw error;
 
-      // Calculate response time
       const endTime = performance.now();
       const responseTimeMs = Math.round(endTime - startTime);
 
-      // Store retrieved context
       if (data.retrievedContext) {
         setRetrievedContext(data.retrievedContext);
       }
 
-      // Store the interaction in the database
       const { data: userData } = await supabase.auth.getUser();
       const { error: dbError } = await supabase.from("ai_responses").insert({
         user_query: content,
@@ -200,11 +185,11 @@ export function ComplianceBuddyDialog({
                   <div
                     className={`rounded-lg px-4 py-2 max-w-[80%] ${
                       message.role === "assistant"
-                        ? "bg-sage-50 text-sage-900 prose prose-sm max-w-none whitespace-pre-line"
+                        ? "bg-sage-50 text-sage-900"
                         : "bg-sage-600 text-white"
                     }`}
                   >
-                    {message.role === "assistant" ? formatMessageContent(message.content) : message.content}
+                    <ChatMessageFormatter content={message.content} role={message.role} />
                   </div>
                 </div>
               ))
