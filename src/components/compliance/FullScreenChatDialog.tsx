@@ -93,6 +93,9 @@ export function FullScreenChatDialog({
       const { error: dbError } = await supabase.from("ai_responses").insert({
         user_query: content,
         checklist_item: "General compliance question",
+        legal_analysis: "", // Add empty string for required fields
+        practical_implementation: "", // Add empty string for required fields
+        risk_assessment: "", // Add empty string for required fields
         combined_response: data.reply,
         response_time_ms: responseTimeMs,
         model_version: "gpt-4o-mini",
