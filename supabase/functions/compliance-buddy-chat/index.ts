@@ -4,11 +4,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { generateEmbedding } from "../shared/embeddingsUtils.ts"
 import { findSimilarDocuments } from "../shared/similarityUtils.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from "../shared/cors.ts"
+import { cleanContextForChat } from "../shared/contextUtils.ts"
 
 // Create a Supabase client using the service role key (to bypass RLS)
 const supabaseAdmin = createClient(
@@ -86,6 +83,141 @@ async function fetchRelevantDocuments(queryEmbedding: number[], topK: number = 3
   }
 }
 
+// Function to generate chat completion with OpenAI
+async function generateChatCompletion(messages: any[], context: string) {
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    throw new Error('Messages must be a non-empty array');
+  }
+  
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!openaiApiKey) {
+    throw new Error('OpenAI API key not configured');
+  }
+  
+  // Clean the context for chat
+  const cleanedContext = cleanContextForChat(context);
+  
+  console.log('Generating chat completion with context length:', cleanedContext?.length || 0);
+  console.log('Messages count:', messages.length);
+  
+  // Updated system message with document-style formatting guidelines and legal sources handling
+  const systemMessage = {
+    role: 'system',
+    content: `You are a legal compliance assistant that analyzes legal documents with a deep understanding of legal document structure, particularly EU legislation. 
+
+    Use the following context from the uploaded legal documents to answer the user's question. If the context doesn't contain relevant information, clearly explain this.
+    
+    When analyzing EU legislation, understand that:
+    1. Articles contain the binding legal requirements and operative provisions
+    2. Recitals provide context and reasoning for the articles, helping interpret their purpose
+    3. Recitals are numbered differently (in parentheses) from Articles
+    4. Cross-references between articles are common and important for full understanding
+    
+    LEGAL SOURCE HIERARCHY AND CITATION METHODOLOGY:
+    
+    When analyzing legal questions, you must properly identify, categorize and cite different types of legal sources according to their hierarchy and authority:
+    
+    1. PRIMARY LEGISLATION:
+       - EU Treaties (e.g., TEU, TFEU): Cite by treaty name, article, and paragraph (e.g., "Article 16 TFEU")
+       - Regulations: Fully binding in all Member States; cite by regulation number, year and full name on first mention (e.g., "Regulation (EU) 2016/679 (GDPR)")
+       - Directives: Require national implementation; cite by directive number, year, and name (e.g., "Directive 2002/58/EC (ePrivacy Directive)")
+       - Decisions: Binding on those to whom they are addressed; cite by decision number and year
+    
+    2. CASE LAW:
+       - Court of Justice of the European Union (CJEU) judgments: Cite by case number, parties, and ECLI identifier
+       - National court judgments: Cite by jurisdiction, court, case reference, and date
+       - Apply the principle of precedent appropriately based on jurisdiction
+    
+    3. SECONDARY SOURCES:
+       - Regulatory guidance (e.g., EDPB guidelines): Lower authority but valuable for interpretation
+       - Industry codes of conduct: Relevant for sector-specific compliance
+       - Academic commentary: Useful for complex or evolving areas of law
+    
+    For each source, you MUST:
+       - Correctly identify the type and hierarchy of the source
+       - Apply the appropriate weight to each source based on its legal authority
+       - Distinguish between binding requirements and non-binding guidance
+       - Note any conflicts between sources and resolve using legal hierarchy principles
+       - Identify when a source has been amended, repealed or superseded by newer legislation
+    
+    When analyzing legal questions, follow this structured reasoning pattern:
+    
+    1. APPLICABLE LEGISLATION: First, identify which law(s), regulation(s), directive(s), or legal framework(s) are most likely relevant to the question, based on the provided context.
+       - For EU legislation, specify relevant Articles and their corresponding Recitals
+       - Note any cross-references between Articles that are relevant
+    
+    2. RELEVANT LEGAL ELEMENTS: From the applicable legislation, extract the specific:
+       - Binding requirements from Articles
+       - Interpretative guidance from corresponding Recitals
+       - Rights, obligations, conditions, or exceptions
+    
+    3. APPLICATION TO QUESTION: Use the extracted legal elements to reason through the scenario:
+       - Apply the binding requirements from Articles
+       - Use Recitals to understand the purpose and context
+       - Arrive at a clear answer with proper legal justification
+    
+    4. LIMITATIONS: If the context does not provide enough information:
+       - Explain what information is missing
+       - Specify which additional Articles or Recitals would be needed
+       - Indicate what would be required to make a complete legal assessment
+    
+    5. EXECUTIVE SUMMARY: Always conclude with a brief executive summary that condenses your key findings and recommendations in 3-4 sentences.
+    
+    MANDATORY DOCUMENT-STYLE FORMATTING GUIDELINES:
+    - DO NOT use Markdown symbols like #, ##, or ### for headings
+    - For main section titles, use <strong> HTML tags to create bold text (e.g., "<strong>APPLICABLE LEGISLATION:</strong>")
+    - For subsection titles, also use <strong> tags but format them as part of the paragraph flow
+    - Begin with a brief introduction (2-3 sentences) of your approach
+    - Write in a narrative flow using full paragraphs with clear topic sentences and transitions between sections
+    - Keep paragraphs to 3-5 sentences each, with one blank line between paragraphs
+    - Limit line breaks - use only one blank line between sections
+    - Use simple dash (-) for bullet points, not asterisks or plus signs
+    - For legal references, use a consistent inline format (e.g., "GDPR, Article 9") within sentences
+    - For tables, create well-aligned, readable tables without Markdown formatting
+    - Use <strong> HTML tags for emphasis, not ** or * characters
+    - All content MUST be left-aligned - never center text
+    - The final output should resemble a professional memo that could be presented to executives
+    
+    Structure your answer in these clear sections, always showing your reasoning process. Be factual and grounded in the provided legal documents.
+    
+    If you don't find useful information in the context, be honest and tell the user you can't answer based on the available documents.
+    
+    CONTEXT:
+    ${cleanedContext}`
+  };
+  
+  const updatedMessages = [systemMessage, ...messages];
+  
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: updatedMessages,
+        temperature: 0.3,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(errorData.error?.message || `Failed to generate completion: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Successfully generated completion');
+    
+    return result.choices[0].message;
+  } catch (error) {
+    console.error('Error in chat completion:', error);
+    throw error;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -120,97 +252,12 @@ serve(async (req) => {
     const retrievedContext = relevantDocs.map((doc: any) => doc.content).join("\n\n");
     console.log("Retrieved context:", retrievedContext);
 
-    // Construct chain of thought prompt with RAG context
-    const prompt = `As a compliance expert, analyze this requirement: "${checklistItem}"
-    
-    Consider the user's question: "${userQuery}"
-    
-    Here is relevant context from our compliance knowledge base:
-    ${retrievedContext}
-    
-    Using the context above and your expertise, provide a comprehensive response with these three sections:
-    
-    1. Legal Analysis: 
-       - Start by analyzing the legal implications
-       - Consider relevant regulations and precedents
-       - Explain how the requirement applies to the user's question
-    
-    2. Practical Implementation: 
-       - Provide step-by-step guidance
-       - Include specific actions with timelines
-       - Consider resource requirements and constraints
-    
-    3. Risk Assessment: 
-       - Identify potential compliance risks
-       - Rate risks by likelihood and impact
-       - Suggest specific mitigation strategies
-    
-    Format your response in a clear, organized way with sections. Explain your reasoning at each step.`;
-
-    console.log("Sending request to OpenAI");
-    
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a compliance expert assistant specializing in legal analysis and practical guidance. You analyze requirements thoroughly and provide detailed, structured responses.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.2,
-        max_tokens: 1500,
-      }),
-    });
-
-    const data = await response.json();
-    console.log("Received response from OpenAI");
-    
-    if (data.error) {
-      throw new Error(`OpenAI API error: ${data.error.message || JSON.stringify(data.error)}`);
-    }
-    
-    const fullResponse = data.choices[0].message.content;
-
-    // Parse the response into sections
-    const sections = {
-      legalAnalysis: "",
-      practicalSteps: "",
-      riskAssessment: "",
-      reply: fullResponse
-    };
-
-    // Extract sections (basic parsing)
-    if (fullResponse.includes("Legal Analysis:")) {
-      const start = fullResponse.indexOf("Legal Analysis:") + "Legal Analysis:".length;
-      const end = fullResponse.indexOf("Practical Implementation:") || fullResponse.length;
-      sections.legalAnalysis = fullResponse.slice(start, end).trim();
-    }
-
-    if (fullResponse.includes("Practical Implementation:")) {
-      const start = fullResponse.indexOf("Practical Implementation:") + "Practical Implementation:".length;
-      const end = fullResponse.indexOf("Risk Assessment:") || fullResponse.length;
-      sections.practicalSteps = fullResponse.slice(start, end).trim();
-    }
-
-    if (fullResponse.includes("Risk Assessment:")) {
-      const start = fullResponse.indexOf("Risk Assessment:") + "Risk Assessment:".length;
-      sections.riskAssessment = fullResponse.slice(start).trim();
-    }
+    // Generate chat completion using the retrieved context
+    const reply = await generateChatCompletion(messages, retrievedContext);
 
     // Store the interaction in the database using the calling context's Supabase client
     return new Response(JSON.stringify({
-      ...sections,
+      reply: reply.content,
       retrievedContext: relevantDocs.map((doc: any) => ({ content: doc.content, similarity: doc.similarity }))
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
