@@ -12,9 +12,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import Papa from "papaparse";
 
 export function EmbeddingsUploader() {
   const [file, setFile] = useState<File | null>(null);
+  const [fileFormat, setFileFormat] = useState<"json" | "csv">("json");
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [processingStats, setProcessingStats] = useState<{
     total: number;
@@ -27,18 +30,27 @@ export function EmbeddingsUploader() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
       setError(null);
+      
+      // Detect file format from extension
+      if (selectedFile.name.endsWith('.json')) {
+        setFileFormat("json");
+      } else if (selectedFile.name.endsWith('.csv')) {
+        setFileFormat("csv");
+      } else {
+        setError("Unsupported file format. Please upload a JSON or CSV file.");
+        setFile(null);
+      }
     }
   };
 
-  const validateEmbeddingsFormat = async (fileContents: string): Promise<boolean> => {
+  const validateEmbeddingsFormat = async (data: any[]): Promise<boolean> => {
     try {
-      const data = JSON.parse(fileContents);
-      
       // Check if it's an array
       if (!Array.isArray(data)) {
-        setError("JSON file should contain an array of embedding objects");
+        setError("Data should contain an array of embedding objects");
         return false;
       }
       
@@ -74,19 +86,91 @@ export function EmbeddingsUploader() {
       
       return true;
     } catch (e) {
-      setError("Invalid JSON format. Please check your file.");
+      setError("Invalid data format. Please check your file.");
       return false;
     }
   };
 
+  const parseCSV = async (fileContents: string): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      Papa.parse(fileContents, {
+        header: true,
+        dynamicTyping: true,
+        complete: (results) => {
+          try {
+            const embeddings = results.data
+              .filter(row => row && Object.keys(row).length > 0) // Filter out empty rows
+              .map((row: any) => {
+                // Find the content column (might be named 'content', 'text', etc.)
+                let content = row.content || row.text || row.Content || row.Text || '';
+                
+                // Find embedding column or parse from multiple columns
+                let embedding: number[] = [];
+                
+                // Case 1: If there's a column called 'embedding' that contains a stringified array
+                if (row.embedding && typeof row.embedding === 'string') {
+                  try {
+                    embedding = JSON.parse(row.embedding);
+                  } catch (e) {
+                    // Not a valid JSON string
+                  }
+                } 
+                // Case 2: Look for columns that might contain vector values (dimension_0, v_0, etc)
+                else {
+                  const embeddingColumns = Object.keys(row)
+                    .filter(key => 
+                      /^(embedding_|dimension_|dim_|v_|vector_|e_|emb_)\d+$/.test(key) || 
+                      /^\d+$/.test(key)
+                    )
+                    .sort((a, b) => {
+                      const numA = parseInt(a.match(/\d+/)?.[0] || "0");
+                      const numB = parseInt(b.match(/\d+/)?.[0] || "0");
+                      return numA - numB;
+                    });
+                  
+                  if (embeddingColumns.length > 0) {
+                    embedding = embeddingColumns.map(col => parseFloat(row[col]));
+                  }
+                }
+                
+                // Get metadata by excluding content and embedding keys
+                const metadata = { ...row };
+                delete metadata.content;
+                delete metadata.text;
+                delete metadata.Content;
+                delete metadata.Text;
+                delete metadata.embedding;
+                
+                // Remove embedding dimension columns from metadata
+                Object.keys(metadata).forEach(key => {
+                  if (/^(embedding_|dimension_|dim_|v_|vector_|e_|emb_)\d+$/.test(key) || /^\d+$/.test(key)) {
+                    delete metadata[key];
+                  }
+                });
+                
+                return {
+                  content,
+                  embedding,
+                  metadata
+                };
+              })
+              .filter(item => item.content && item.embedding && item.embedding.length > 0);
+              
+            resolve(embeddings);
+          } catch (error) {
+            reject(new Error("CSV parsing error: " + error.message));
+          }
+        },
+        error: (error) => {
+          reject(new Error("CSV parsing error: " + error));
+        }
+      });
+    });
+  };
+
   const processEmbeddings = async () => {
     if (!file) {
-      setError("Please select a JSON file to upload");
-      return;
-    }
-
-    if (!file.name.endsWith('.json')) {
-      setError("Only JSON files are supported");
+      setError("Please select a file to upload");
       return;
     }
 
@@ -96,16 +180,41 @@ export function EmbeddingsUploader() {
 
     try {
       const fileContents = await file.text();
+      let embeddings: any[] = [];
       
-      // Validate the JSON structure
-      const isValid = await validateEmbeddingsFormat(fileContents);
+      // Parse the file based on its format
+      if (fileFormat === "json") {
+        try {
+          embeddings = JSON.parse(fileContents);
+        } catch (e) {
+          setError("Invalid JSON format. Please check your file.");
+          setIsUploading(false);
+          return;
+        }
+      } else if (fileFormat === "csv") {
+        try {
+          embeddings = await parseCSV(fileContents);
+        } catch (e: any) {
+          setError(e.message || "Error parsing CSV file");
+          setIsUploading(false);
+          return;
+        }
+      }
+      
+      // Validate the embeddings format
+      const isValid = await validateEmbeddingsFormat(embeddings);
       if (!isValid) {
         setIsUploading(false);
         return;
       }
       
-      const embeddings = JSON.parse(fileContents);
       const total = embeddings.length;
+      
+      if (total === 0) {
+        setError("No valid embeddings found in the file");
+        setIsUploading(false);
+        return;
+      }
       
       setProcessingStats({
         total,
@@ -183,13 +292,17 @@ export function EmbeddingsUploader() {
   }
 ]`;
 
+  const exampleCsv = `content,embedding_0,embedding_1,embedding_2,source,category
+"This is the text content",0.123,0.456,0.789,"document1","important"
+"Another piece of content",0.321,0.654,0.987,"document2","normal"`;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         <div className="flex-1">
           <Input
             type="file"
-            accept=".json"
+            accept=".json,.csv"
             onChange={handleFileChange}
             disabled={isUploading}
           />
@@ -201,19 +314,43 @@ export function EmbeddingsUploader() {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-96">
-            <div className="space-y-2">
-              <h4 className="font-medium">Expected JSON Format</h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Your JSON file should contain an array of objects with the following structure:
-              </p>
-              <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-40">
-                {exampleJson}
-              </pre>
-              <p className="text-xs text-muted-foreground mt-2">
-                Each object must have a <code>content</code> field (text) and an <code>embedding</code> field (array of numbers).
-                The <code>metadata</code> field is optional.
-              </p>
-            </div>
+            <Tabs defaultValue="json">
+              <TabsList className="mb-2">
+                <TabsTrigger value="json">JSON Format</TabsTrigger>
+                <TabsTrigger value="csv">CSV Format</TabsTrigger>
+              </TabsList>
+              <TabsContent value="json">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Expected JSON Format</h4>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Your JSON file should contain an array of objects with the following structure:
+                  </p>
+                  <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-40">
+                    {exampleJson}
+                  </pre>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Each object must have a <code>content</code> field (text) and an <code>embedding</code> field (array of numbers).
+                    The <code>metadata</code> field is optional.
+                  </p>
+                </div>
+              </TabsContent>
+              <TabsContent value="csv">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Expected CSV Format</h4>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Your CSV file should have columns for content and embedding values:
+                  </p>
+                  <pre className="bg-slate-100 p-2 rounded text-xs overflow-auto max-h-40">
+                    {exampleCsv}
+                  </pre>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Include a <code>content</code> column and embedding dimensions as separate columns 
+                    (like <code>embedding_0</code>, <code>0</code>, <code>dim_0</code>, etc.).
+                    Any additional columns will be treated as metadata.
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
           </PopoverContent>
         </Popover>
         <Button 
@@ -236,8 +373,8 @@ export function EmbeddingsUploader() {
         <Info className="h-4 w-4 text-blue-600" />
         <AlertTitle className="text-blue-800">Embedding Format</AlertTitle>
         <AlertDescription className="text-blue-700">
-          Upload a JSON file containing an array of objects with <code className="bg-blue-100 px-1 rounded">content</code> and <code className="bg-blue-100 px-1 rounded">embedding</code> fields. 
-          Each embedding should be a vector of floating-point numbers.
+          Upload a JSON or CSV file containing embeddings data. For JSON, include <code className="bg-blue-100 px-1 rounded">content</code> and <code className="bg-blue-100 px-1 rounded">embedding</code> fields. 
+          For CSV, include a <code className="bg-blue-100 px-1 rounded">content</code> column and embedding dimensions as separate columns.
         </AlertDescription>
       </Alert>
       
