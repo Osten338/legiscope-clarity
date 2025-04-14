@@ -1,4 +1,3 @@
-
 import {
   FormControl,
   FormDescription,
@@ -14,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { UseFormReturn } from "react-hook-form";
 import { BusinessAssessmentForm } from "./types";
+import { AlertCircle } from "lucide-react";
 
 interface BusinessActivitiesProps {
   form: UseFormReturn<BusinessAssessmentForm>;
