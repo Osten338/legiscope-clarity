@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -106,7 +107,10 @@ export function BusinessAssessmentForm() {
       });
 
       const businessModel = customerTypeToBusinessModel(data.customerType);
+      console.log("Mapped business model:", businessModel);
+      
       const businessStructure = mapBusinessStructure(data.businessStructure);
+      console.log("Mapped business structure:", businessStructure);
 
       const { data: assessmentData, error } = await supabase
         .from('structured_business_assessments')
