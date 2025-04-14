@@ -31,15 +31,19 @@ export function GenerateDocumentDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [documentation, setDocumentation] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const generateDocumentation = async () => {
     try {
       setIsLoading(true);
+      setCurrentStep("Preparing to generate implementation guide...");
       
       // Get current user for tracking
       const { data: { user } } = await supabase.auth.getUser();
+      
+      setCurrentStep("Analyzing regulation and compliance requirements...");
       
       const { data, error } = await supabase.functions.invoke(
         'generate-documentation',
@@ -61,6 +65,7 @@ export function GenerateDocumentDialog({
         throw error;
       }
 
+      setCurrentStep("Implementation guide generated successfully!");
       setDocumentation(data.documentation);
       
     } catch (error: any) {
@@ -72,6 +77,7 @@ export function GenerateDocumentDialog({
       });
     } finally {
       setIsLoading(false);
+      setCurrentStep("");
     }
   };
 
@@ -162,7 +168,7 @@ export function GenerateDocumentDialog({
           {isLoading && (
             <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-sage-600" />
-              <p className="text-sage-600">Analyzing requirement and generating implementation guide...</p>
+              <p className="text-sage-600">{currentStep || "Analyzing requirement and generating implementation guide..."}</p>
               <div className="text-xs text-slate-500 max-w-md text-center">
                 We're applying EU legal methodology to create a comprehensive, practical implementation guide. This may take a few moments.
               </div>

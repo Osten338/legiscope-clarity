@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -21,28 +22,46 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 const businessAssessmentSchema = z.object({
+  // Core Company Information
   companyName: z.string().min(1, "Company name is required"),
-  businessStructure: z.enum(["limitedCompany", "plc", "partnership", "soleTrader", "other"]),
   employeeCount: z.string().min(1, "Employee count is required"),
   annualRevenue: z.string().optional(),
   yearEstablished: z.string().min(1, "Year established is required"),
-  primaryCountry: z.string().min(1, "Primary country is required"),
-  primaryState: z.string().min(1, "Primary state/province is required"),
+  
+  // Business Structure and Operations
+  businessStructure: z.enum(["limitedCompany", "plc", "partnership", "soleTrader", "other"]),
+  
+  // Geographical and Cross-Border Operations
+  primaryLocation: z.string().min(1, "Primary country is required"),
   operatingLocations: z.string().optional(),
+  crossBorderActivities: z.enum(["none", "euOnly", "global"]),
+  
+  // Core Business Activities and Sector
   industryClassification: z.string().min(1, "Industry classification is required"),
   subIndustry: z.string().optional(),
-  businessActivities: z.string().min(1, "Business activities description is required"),
-  businessModel: z.enum(["online", "offline", "hybrid"]),
+  coreBusinessActivities: z.string().min(1, "Core business activities description is required"),
+  
+  // Customer Type
+  customerType: z.enum(["b2b", "b2c", "both"]),
+  
+  // Data and Technology Usage
   handlesPersonalData: z.boolean(),
-  handlesFinancialData: z.boolean(),
-  handlesSensitiveData: z.boolean(),
-  hasThirdPartyVendors: z.boolean(),
-  dataStorage: z.enum(["onPremise", "cloud", "hybrid"]),
-  hasCyberSecurityPolicy: z.boolean(),
+  handlesSpecialCategoryData: z.boolean(),
+  dataVolume: z.enum(["small", "medium", "large", "veryLarge"]),
+  
+  // Specific Technologies and Materials
+  usesAI: z.boolean(),
+  usesChemicals: z.boolean(),
+  usesMedicalDevices: z.boolean(),
+  usesRegulatedProducts: z.boolean(),
+  
+  // Compliance Awareness
   knownRegulations: z.string().optional(),
-  existingAssessments: z.string().optional()
+  existingCompliance: z.string().optional()
 });
 
 type BusinessAssessmentForm = z.infer<typeof businessAssessmentSchema>;
@@ -55,25 +74,27 @@ export function BusinessAssessmentForm() {
   const form = useForm<BusinessAssessmentForm>({
     resolver: zodResolver(businessAssessmentSchema),
     defaultValues: {
-      handlesPersonalData: false,
-      handlesFinancialData: false,
-      handlesSensitiveData: false,
-      hasThirdPartyVendors: false,
-      hasCyberSecurityPolicy: false,
-      businessModel: "hybrid",
-      dataStorage: "cloud",
-      businessStructure: "limitedCompany",
       companyName: "",
       employeeCount: "",
+      annualRevenue: "",
       yearEstablished: "",
-      primaryCountry: "",
-      primaryState: "",
+      businessStructure: "limitedCompany",
+      primaryLocation: "",
       operatingLocations: "",
+      crossBorderActivities: "none",
       industryClassification: "",
       subIndustry: "",
-      businessActivities: "",
+      coreBusinessActivities: "",
+      customerType: "both",
+      handlesPersonalData: false,
+      handlesSpecialCategoryData: false,
+      dataVolume: "small",
+      usesAI: false,
+      usesChemicals: false,
+      usesMedicalDevices: false,
+      usesRegulatedProducts: false,
       knownRegulations: "",
-      existingAssessments: ""
+      existingCompliance: ""
     }
   });
 
@@ -101,21 +122,22 @@ export function BusinessAssessmentForm() {
           employee_count: parseInt(data.employeeCount),
           annual_revenue: data.annualRevenue ? parseFloat(data.annualRevenue) : null,
           year_established: parseInt(data.yearEstablished),
-          primary_country: data.primaryCountry,
-          primary_state: data.primaryState,
+          primary_country: data.primaryLocation,
           operating_locations: data.operatingLocations,
+          cross_border_activities: data.crossBorderActivities,
           industry_classification: data.industryClassification,
           sub_industry: data.subIndustry,
-          business_activities: data.businessActivities,
-          business_model: data.businessModel,
+          core_business_activities: data.coreBusinessActivities,
+          customer_type: data.customerType,
           handles_personal_data: data.handlesPersonalData,
-          handles_financial_data: data.handlesFinancialData,
-          handles_sensitive_data: data.handlesSensitiveData,
-          has_third_party_vendors: data.hasThirdPartyVendors,
-          data_storage: data.dataStorage,
-          has_cyber_security_policy: data.hasCyberSecurityPolicy,
+          handles_special_category_data: data.handlesSpecialCategoryData,
+          data_volume: data.dataVolume,
+          uses_ai: data.usesAI,
+          uses_chemicals: data.usesChemicals,
+          uses_medical_devices: data.usesMedicalDevices,
+          uses_regulated_products: data.usesRegulatedProducts,
           known_regulations: data.knownRegulations,
-          existing_assessments: data.existingAssessments
+          existing_compliance: data.existingCompliance
         })
         .select()
         .single();
@@ -129,17 +151,28 @@ export function BusinessAssessmentForm() {
         body: {
           assessment_id: assessmentData.id,
           description: `${data.companyName} is a ${data.businessStructure} company established in ${data.yearEstablished}, 
-            operating primarily in ${data.primaryCountry}. The company operates in the ${data.industryClassification} industry 
-            and has ${data.employeeCount} employees. Their main business activities include: ${data.businessActivities}. 
-            They operate with a ${data.businessModel} business model.
+            operating primarily in ${data.primaryLocation} with ${data.crossBorderActivities === 'none' ? 'no cross-border operations' : 
+            data.crossBorderActivities === 'euOnly' ? 'operations across EU countries' : 'global operations'}. 
             
-            Data handling characteristics:
-            - Handles personal data: ${data.handlesPersonalData}
-            - Handles financial data: ${data.handlesFinancialData}
-            - Handles sensitive data: ${data.handlesSensitiveData}
-            - Has third-party vendors: ${data.hasThirdPartyVendors}
-            - Data storage approach: ${data.dataStorage}
-            - Has cybersecurity policy: ${data.hasCyberSecurityPolicy}`,
+            The company operates in the ${data.industryClassification} industry ${data.subIndustry ? `(specifically ${data.subIndustry})` : ''} 
+            and has ${data.employeeCount} employees. 
+            
+            Their core business activities include: ${data.coreBusinessActivities}
+            
+            Customer base: ${data.customerType === 'b2b' ? 'Business-to-business only' : 
+                           data.customerType === 'b2c' ? 'Business-to-consumer only' : 
+                           'Both B2B and B2C services/products'}
+            
+            Data processing characteristics:
+            - Handles personal data: ${data.handlesPersonalData ? 'Yes' : 'No'}
+            - Handles special category (sensitive) data: ${data.handlesSpecialCategoryData ? 'Yes' : 'No'}
+            - Data processing volume: ${data.dataVolume}
+            
+            Specialized regulatory domains:
+            - Uses AI technology: ${data.usesAI ? 'Yes' : 'No'}
+            - Handles chemicals: ${data.usesChemicals ? 'Yes' : 'No'}
+            - Manufactures/distributes medical devices: ${data.usesMedicalDevices ? 'Yes' : 'No'}
+            - Deals with other regulated products: ${data.usesRegulatedProducts ? 'Yes' : 'No'}`,
         }
       });
 
@@ -169,7 +202,7 @@ export function BusinessAssessmentForm() {
     }
   };
 
-  const totalSteps = 6;
+  const totalSteps = 5;
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -191,9 +224,18 @@ export function BusinessAssessmentForm() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {/* Step 1: Core Company Information */}
           {currentStep === 1 && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">General Company Information</h2>
+              <h2 className="text-2xl font-semibold">Core Company Information</h2>
+              
+              <Alert className="bg-blue-50 text-blue-800 border-blue-200">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Important</AlertTitle>
+                <AlertDescription>
+                  This information helps establish your company's size and structure, which determines which EU regulations apply.
+                </AlertDescription>
+              </Alert>
               
               <FormField
                 control={form.control}
@@ -208,6 +250,39 @@ export function BusinessAssessmentForm() {
                   </FormItem>
                 )}
               />
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="employeeCount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Employees</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="Enter employee count" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Employee count affects applicability of certain EU directives (e.g., Whistleblower Protection)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="yearEstablished"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Year Established</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="Enter year" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
@@ -233,87 +308,93 @@ export function BusinessAssessmentForm() {
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="employeeCount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Employees</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="Enter employee count" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="yearEstablished"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Year Established</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="Enter year" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
             </div>
           )}
 
+          {/* Step 2: Geographical and Cross-Border Operations */}
           {currentStep === 2 && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">Geographical and Jurisdictional Data</h2>
+              <h2 className="text-2xl font-semibold">Geographical Scope</h2>
               
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="primaryCountry"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Primary Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter primary country" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="primaryState"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Primary State/Province</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter state/province" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <Alert className="bg-blue-50 text-blue-800 border-blue-200">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Important</AlertTitle>
+                <AlertDescription>
+                  Cross-border operations affect which EU rules apply and how. Many EU regulations have extraterritorial effect.
+                </AlertDescription>
+              </Alert>
+              
+              <FormField
+                control={form.control}
+                name="primaryLocation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Primary Country of Operation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter primary country" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
                 name="operatingLocations"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Operating Locations</FormLabel>
+                    <FormLabel>Additional Operating Locations</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="List additional locations where you conduct business" 
+                        placeholder="List other countries/regions where you conduct business" 
                         {...field} 
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="crossBorderActivities"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cross-Border Activities</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="grid grid-cols-1 gap-4"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="none" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            No cross-border activities (single country operation)
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="euOnly" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            EU cross-border only (operating in multiple EU states)
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="global" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Global operations (including EU and non-EU countries)
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
                     <FormDescription>
-                      Include all countries and regions where you have operations or customers
+                      Cross-border operations may invoke specific EU frameworks and obligations
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -322,16 +403,25 @@ export function BusinessAssessmentForm() {
             </div>
           )}
 
+          {/* Step 3: Core Business Activities and Customer Type */}
           {currentStep === 3 && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">Industry and Sector Details</h2>
+              <h2 className="text-2xl font-semibold">Business Activities and Customers</h2>
+              
+              <Alert className="bg-blue-50 text-blue-800 border-blue-200">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Important</AlertTitle>
+                <AlertDescription>
+                  Your core business activities and customer type are critical for determining which sector-specific EU regulations apply to your company.
+                </AlertDescription>
+              </Alert>
               
               <FormField
                 control={form.control}
                 name="industryClassification"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Primary Industry</FormLabel>
+                    <FormLabel>Primary Industry Sector</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -340,13 +430,21 @@ export function BusinessAssessmentForm() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="healthcare">Healthcare</SelectItem>
-                        <SelectItem value="finance">Finance</SelectItem>
-                        <SelectItem value="technology">Technology</SelectItem>
+                        <SelectItem value="finance">Financial Services</SelectItem>
+                        <SelectItem value="technology">Technology/IT</SelectItem>
                         <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                        <SelectItem value="retail">Retail</SelectItem>
+                        <SelectItem value="retail">Retail/E-commerce</SelectItem>
+                        <SelectItem value="telecom">Telecommunications</SelectItem>
+                        <SelectItem value="energy">Energy</SelectItem>
+                        <SelectItem value="transportation">Transportation/Logistics</SelectItem>
+                        <SelectItem value="food">Food & Beverage</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormDescription>
+                      Sector-specific EU legislation often applies based on your industry
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -354,18 +452,79 @@ export function BusinessAssessmentForm() {
 
               <FormField
                 control={form.control}
-                name="businessActivities"
+                name="subIndustry"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Business Activities</FormLabel>
+                    <FormLabel>Sub-industry/Specialization (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="E.g., Medical devices, Mobile apps, Organic food" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="coreBusinessActivities"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Core Business Activities</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Describe your core business activities" 
+                        placeholder="Describe in detail what your company does, its products, services, and main operations" 
                         {...field} 
+                        className="min-h-32"
                       />
                     </FormControl>
                     <FormDescription>
-                      Include main products/services and key operations
+                      Be specific about your company's activities as many EU laws apply based on specific business functions
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customerType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customer Type</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="b2b" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Business-to-Business (B2B) only
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="b2c" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Business-to-Consumer (B2C) only
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="both" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Both B2B and B2C
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormDescription>
+                      B2C operations trigger EU consumer protection laws that don't apply to pure B2B activities
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -374,53 +533,19 @@ export function BusinessAssessmentForm() {
             </div>
           )}
 
+          {/* Step 4: Data Processing and Technology Usage */}
           {currentStep === 4 && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">Operational Characteristics</h2>
+              <h2 className="text-2xl font-semibold">Data and Technology Information</h2>
               
-              <FormField
-                control={form.control}
-                name="businessModel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Business Model</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="grid grid-cols-3 gap-4"
-                      >
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="online" id="online" />
-                              <FormLabel htmlFor="online">Online</FormLabel>
-                            </div>
-                          </FormControl>
-                        </FormItem>
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="offline" id="offline" />
-                              <FormLabel htmlFor="offline">Offline</FormLabel>
-                            </div>
-                          </FormControl>
-                        </FormItem>
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="hybrid" id="hybrid" />
-                              <FormLabel htmlFor="hybrid">Hybrid</FormLabel>
-                            </div>
-                          </FormControl>
-                        </FormItem>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+              <Alert className="bg-blue-50 text-blue-800 border-blue-200">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Important</AlertTitle>
+                <AlertDescription>
+                  Data handling and specialized technologies trigger specific EU regulations like GDPR, AI Act, and sector-specific requirements.
+                </AlertDescription>
+              </Alert>
+              
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -430,7 +555,7 @@ export function BusinessAssessmentForm() {
                       <div className="space-y-0.5">
                         <FormLabel>Personal Data Handling</FormLabel>
                         <FormDescription>
-                          Does your company collect or process personal data?
+                          Does your company collect or process personal data of individuals?
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -445,13 +570,128 @@ export function BusinessAssessmentForm() {
 
                 <FormField
                   control={form.control}
-                  name="handlesFinancialData"
+                  name="handlesSpecialCategoryData"
                   render={({ field }) => (
                     <FormItem className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel>Financial Data Handling</FormLabel>
+                        <FormLabel>Special Category Data</FormLabel>
                         <FormDescription>
-                          Does your company process financial transactions or store financial data?
+                          Do you process sensitive data (health, biometric, political opinions, etc.)?
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dataVolume"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data Processing Volume</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select data volume" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="small">Small (limited data on few individuals)</SelectItem>
+                          <SelectItem value="medium">Medium (moderate data processing)</SelectItem>
+                          <SelectItem value="large">Large (extensive data on many individuals)</SelectItem>
+                          <SelectItem value="veryLarge">Very Large (massive scale data processing)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Large-scale data processing may trigger additional GDPR requirements
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Specialized Technologies and Materials</h3>
+                
+                <FormField
+                  control={form.control}
+                  name="usesAI"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel>Artificial Intelligence (AI)</FormLabel>
+                        <FormDescription>
+                          Does your company develop or use AI systems?
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="usesChemicals"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel>Chemical Substances</FormLabel>
+                        <FormDescription>
+                          Do you manufacture, import or use chemical substances?
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="usesMedicalDevices"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel>Medical Devices</FormLabel>
+                        <FormDescription>
+                          Does your business involve medical devices or healthcare products?
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="usesRegulatedProducts"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel>Other Regulated Products</FormLabel>
+                        <FormDescription>
+                          Do you deal with other heavily regulated products (cosmetics, food, electronics, etc.)?
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -467,75 +707,23 @@ export function BusinessAssessmentForm() {
             </div>
           )}
 
+          {/* Step 5: Existing Compliance Information */}
           {currentStep === 5 && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">IT Infrastructure and Security</h2>
-              
-              <FormField
-                control={form.control}
-                name="dataStorage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data Storage Approach</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select storage approach" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="onPremise">On-Premise</SelectItem>
-                        <SelectItem value="cloud">Cloud-Based</SelectItem>
-                        <SelectItem value="hybrid">Hybrid</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="hasCyberSecurityPolicy"
-                render={({ field }) => (
-                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel>Cybersecurity Policy</FormLabel>
-                      <FormDescription>
-                        Does your company have a formal cybersecurity policy?
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
-
-          {currentStep === 6 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold">Specific Compliance Concerns</h2>
+              <h2 className="text-2xl font-semibold">Existing Compliance Information</h2>
               
               <FormField
                 control={form.control}
                 name="knownRegulations"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Known Regulations</FormLabel>
+                    <FormLabel>Known Applicable Regulations</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="List any specific regulations you're aware of that apply to your business" 
+                        placeholder="List any specific EU regulations you're already aware of that apply to your business" 
                         {...field} 
                       />
                     </FormControl>
-                    <FormDescription>
-                      Include any regulatory requirements you're already aware of
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -543,13 +731,13 @@ export function BusinessAssessmentForm() {
 
               <FormField
                 control={form.control}
-                name="existingAssessments"
+                name="existingCompliance"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Existing Assessments</FormLabel>
+                    <FormLabel>Existing Compliance Measures</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Describe any existing compliance assessments or audits" 
+                        placeholder="Describe any compliance measures, certifications, or frameworks you already have in place" 
                         {...field} 
                       />
                     </FormControl>
