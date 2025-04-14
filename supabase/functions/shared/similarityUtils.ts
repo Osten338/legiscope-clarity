@@ -4,16 +4,29 @@
 /**
  * Calculate cosine similarity between two vectors
  */
-export function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
-  const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
-  const magB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
-  
-  if (magA === 0 || magB === 0) {
+export function cosineSimilarity(vecA: number[], vecB: any): number {
+  try {
+    // Convert vecB to array if it's not already one
+    const vecBArray = Array.isArray(vecB) ? vecB : Object.values(vecB || {});
+    
+    if (!Array.isArray(vecA) || vecBArray.length === 0 || vecA.length !== vecBArray.length) {
+      console.log(`Vector format issue: vecA is array: ${Array.isArray(vecA)}, vecA length: ${vecA?.length}, vecB length: ${vecBArray?.length}`);
+      return 0;
+    }
+    
+    const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecBArray[i], 0);
+    const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
+    const magB = Math.sqrt(vecBArray.reduce((sum, b) => sum + b * b, 0));
+    
+    if (magA === 0 || magB === 0) {
+      return 0;
+    }
+    
+    return dotProduct / (magA * magB);
+  } catch (error) {
+    console.error("Error in cosineSimilarity:", error);
     return 0;
   }
-  
-  return dotProduct / (magA * magB);
 }
 
 /**
@@ -21,15 +34,26 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
  */
 export function findSimilarDocuments(
   queryEmbedding: number[],
-  documentEmbeddings: { id: string; embedding: number[]; content: string }[],
+  documentEmbeddings: { id: string; embedding: any; content: string }[],
   topK: number = 3
 ): { id: string; similarity: number; content: string }[] {
   // Calculate similarity scores for each document
-  const similarities = documentEmbeddings.map(doc => ({
-    id: doc.id,
-    similarity: cosineSimilarity(queryEmbedding, doc.embedding),
-    content: doc.content
-  }));
+  const similarities = documentEmbeddings.map(doc => {
+    try {
+      return {
+        id: doc.id,
+        similarity: cosineSimilarity(queryEmbedding, doc.embedding),
+        content: doc.content
+      };
+    } catch (err) {
+      console.error(`Error processing document ${doc.id}:`, err);
+      return {
+        id: doc.id,
+        similarity: 0,
+        content: doc.content
+      };
+    }
+  });
   
   // Sort by similarity (descending)
   similarities.sort((a, b) => b.similarity - a.similarity);

@@ -25,8 +25,9 @@ export function EmbeddingsDebugger() {
   const [testSuccess, setTestSuccess] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expansionStates, setExpansionStates] = useState<Record<string, boolean>>({});
-  const [similarityThreshold, setSimilarityThreshold] = useState(0.3); // Lower default to 0.3 (30%)
+  const [similarityThreshold, setSimilarityThreshold] = useState(0.1); // Lower default to 0.1 (10%)
   const [resultsTab, setResultsTab] = useState("matches");
+  const [messageFromAPI, setMessageFromAPI] = useState<string | null>(null);
 
   useEffect(() => {
     loadEmbeddingsData();
@@ -52,6 +53,14 @@ export function EmbeddingsDebugger() {
       
       if (sampleError) throw sampleError;
       setEmbeddingsSample(sampleData || []);
+      
+      // Show success message if embeddings exist
+      if (count > 0) {
+        toast({
+          title: "Embeddings data loaded",
+          description: `Found ${count} embeddings in the database.`,
+        });
+      }
     } catch (err: any) {
       console.error("Error loading embeddings data:", err);
       setError(err.message || "Failed to load embeddings data");
@@ -72,6 +81,7 @@ export function EmbeddingsDebugger() {
       setManualMatches([]);
       setTestSuccess(null);
       setError(null);
+      setMessageFromAPI(null);
       
       // Call the edge function to test vector search
       const { data: embeddingData, error: embeddingError } = await supabase.functions.invoke(
@@ -94,19 +104,23 @@ export function EmbeddingsDebugger() {
       setTestResults(embeddingData.matches || []);
       setManualMatches(embeddingData.manualMatches || []);
       
+      if (embeddingData.message) {
+        setMessageFromAPI(embeddingData.message);
+      }
+      
       const totalMatches = (embeddingData.matches?.length || 0) + (embeddingData.manualMatches?.length || 0);
       
       // Show appropriate toast message
       if (embeddingData.success && totalMatches > 0) {
         toast({
           title: "Vector search successful",
-          description: `Found ${embeddingData.matches?.length || 0} matches via RPC and ${embeddingData.manualMatches?.length || 0} via manual calculation from ${embeddingsCount} total embeddings.`,
+          description: `Found ${embeddingData.matches?.length || 0} matches via RPC and ${embeddingData.manualMatches?.length || 0} via manual calculation from ${embeddingData.totalEmbeddings || embeddingsCount} total embeddings.`,
           variant: "default",
         });
       } else if (embeddingData.success && totalMatches === 0) {
         toast({
           title: "No matches found",
-          description: "The search was successful but no matches were found. Try a different query, lowering the similarity threshold, or check your embeddings.",
+          description: "The search was successful but no matches were found. Try a different query, lowering the similarity threshold (try 0.05), or check your embeddings.",
           variant: "default",
         });
       } else {
@@ -256,7 +270,7 @@ export function EmbeddingsDebugger() {
                 <Alert className="bg-blue-50 border-blue-200 mb-4">
                   <Info className="h-4 w-4 text-blue-600" />
                   <AlertDescription className="text-sm text-blue-600">
-                    Try lowering the similarity threshold to find more results. A threshold around 0.25-0.35 often works well for semantic searches.
+                    Try using a very low similarity threshold (5-10%) to find more results. The current implementation may need tuning to find semantic matches effectively.
                   </AlertDescription>
                 </Alert>
                 
@@ -276,15 +290,15 @@ export function EmbeddingsDebugger() {
                       Similarity Threshold: {(similarityThreshold * 100).toFixed()}%
                     </label>
                     <span className="text-xs text-slate-500">
-                      <span className="font-medium">Recommended:</span> 25-35% for semantic search
+                      <span className="font-medium">Recommended:</span> 5-15% for wider results
                     </span>
                   </div>
                   <Slider
                     value={[similarityThreshold]}
                     onValueChange={(values) => setSimilarityThreshold(values[0])}
-                    min={0.1}
-                    max={0.9}
-                    step={0.05}
+                    min={0.01}
+                    max={0.5}
+                    step={0.01}
                     className="py-4"
                   />
                 </div>
@@ -303,6 +317,15 @@ export function EmbeddingsDebugger() {
                     <div className="font-medium mb-2">
                       {testSuccess ? 'Search Successful' : 'Search Failed'}
                     </div>
+                    
+                    {messageFromAPI && (
+                      <Alert className="mb-4 bg-amber-50">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          {messageFromAPI}
+                        </AlertDescription>
+                      </Alert>
+                    )}
                     
                     {(testResults.length > 0 || manualMatches.length > 0) ? (
                       <div className="space-y-3">
@@ -330,7 +353,7 @@ export function EmbeddingsDebugger() {
                     ) : (
                       <div className="text-sm">
                         {testSuccess ? 
-                          "No matches found. Try a different query, lowering the similarity threshold (try 0.25), or check your embeddings." : 
+                          "No matches found. Try a different query, lowering the similarity threshold (try 0.05), or check your embeddings." : 
                           error || "An unknown error occurred."
                         }
                       </div>
@@ -345,6 +368,11 @@ export function EmbeddingsDebugger() {
           <Button variant="outline" onClick={loadEmbeddingsData} disabled={loading}>
             Refresh Data
           </Button>
+          {embeddingsCount === 0 && (
+            <div className="text-sm text-amber-600">
+              No embeddings found. Upload embeddings before testing.
+            </div>
+          )}
         </CardFooter>
       </Card>
     </div>

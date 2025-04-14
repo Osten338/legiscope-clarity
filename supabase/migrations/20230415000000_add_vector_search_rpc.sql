@@ -2,8 +2,8 @@
 -- Function to match documents using vector similarity
 CREATE OR REPLACE FUNCTION match_documents(
   query_embedding vector(1536),
-  match_threshold float DEFAULT 0.5,
-  match_count int DEFAULT 5
+  match_threshold float DEFAULT 0.1,
+  match_count int DEFAULT 50
 ) 
 RETURNS TABLE (
   id uuid,
