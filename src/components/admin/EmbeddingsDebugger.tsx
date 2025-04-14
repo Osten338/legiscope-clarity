@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Database, Search, AlertTriangle } from "lucide-react";
+import { Loader2, Database, Search, AlertTriangle, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function EmbeddingsDebugger() {
   const [loading, setLoading] = useState(false);
@@ -18,11 +20,13 @@ export function EmbeddingsDebugger() {
   const [embeddingsSample, setEmbeddingsSample] = useState<any[]>([]);
   const [testQuery, setTestQuery] = useState("What is the purpose of the AI regulation?");
   const [testResults, setTestResults] = useState<any[]>([]);
+  const [manualMatches, setManualMatches] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [testSuccess, setTestSuccess] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expansionStates, setExpansionStates] = useState<Record<string, boolean>>({});
-  const [similarityThreshold, setSimilarityThreshold] = useState(0.5); // Default to 0.5 (50%) for better matches
+  const [similarityThreshold, setSimilarityThreshold] = useState(0.3); // Lower default to 0.3 (30%)
+  const [resultsTab, setResultsTab] = useState("matches");
 
   useEffect(() => {
     loadEmbeddingsData();
@@ -65,6 +69,7 @@ export function EmbeddingsDebugger() {
     try {
       setSearchLoading(true);
       setTestResults([]);
+      setManualMatches([]);
       setTestSuccess(null);
       setError(null);
       
@@ -74,6 +79,7 @@ export function EmbeddingsDebugger() {
         {
           body: {
             query: testQuery,
+            threshold: similarityThreshold
           },
         }
       );
@@ -86,15 +92,18 @@ export function EmbeddingsDebugger() {
       
       setTestSuccess(embeddingData.success);
       setTestResults(embeddingData.matches || []);
+      setManualMatches(embeddingData.manualMatches || []);
+      
+      const totalMatches = (embeddingData.matches?.length || 0) + (embeddingData.manualMatches?.length || 0);
       
       // Show appropriate toast message
-      if (embeddingData.success && embeddingData.matches.length > 0) {
+      if (embeddingData.success && totalMatches > 0) {
         toast({
           title: "Vector search successful",
-          description: `Found ${embeddingData.matches.length} matches from ${embeddingsCount} total embeddings.`,
+          description: `Found ${embeddingData.matches?.length || 0} matches via RPC and ${embeddingData.manualMatches?.length || 0} via manual calculation from ${embeddingsCount} total embeddings.`,
           variant: "default",
         });
-      } else if (embeddingData.success && embeddingData.matches.length === 0) {
+      } else if (embeddingData.success && totalMatches === 0) {
         toast({
           title: "No matches found",
           description: "The search was successful but no matches were found. Try a different query, lowering the similarity threshold, or check your embeddings.",
@@ -126,6 +135,39 @@ export function EmbeddingsDebugger() {
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  const renderMatchResults = (results: any[], title: string) => {
+    return results.length > 0 ? (
+      <div className="space-y-3">
+        <div className="text-sm">
+          Found {results.length} {title}:
+        </div>
+        <ScrollArea className="h-64 border rounded bg-white">
+          <div className="p-1">
+            {results.map((result, idx) => (
+              <div key={`${title}-${result.id}-${idx}`} className="border rounded mb-2">
+                <div className="bg-slate-50 p-2 border-b flex justify-between items-center">
+                  <span className="font-medium">{title} #{idx + 1}</span>
+                  <Badge variant="outline">
+                    Similarity: {(result.similarity * 100).toFixed(1)}%
+                  </Badge>
+                </div>
+                <div className="p-2">
+                  <div className="whitespace-pre-wrap text-sm">
+                    {result.content}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    ) : (
+      <div className="text-sm py-4 text-center text-slate-500">
+        No {title.toLowerCase()} found
+      </div>
+    );
   };
 
   return (
@@ -210,6 +252,14 @@ export function EmbeddingsDebugger() {
 
               <div className="space-y-3 pt-2 border-t">
                 <h3 className="text-lg font-medium pt-3">Test Vector Search</h3>
+                
+                <Alert className="bg-blue-50 border-blue-200 mb-4">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-sm text-blue-600">
+                    Try lowering the similarity threshold to find more results. A threshold around 0.25-0.35 often works well for semantic searches.
+                  </AlertDescription>
+                </Alert>
+                
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-slate-700">Test Query</label>
                   <Textarea 
@@ -226,7 +276,7 @@ export function EmbeddingsDebugger() {
                       Similarity Threshold: {(similarityThreshold * 100).toFixed()}%
                     </label>
                     <span className="text-xs text-slate-500">
-                      Lower value = more matches but less relevant
+                      <span className="font-medium">Recommended:</span> 25-35% for semantic search
                     </span>
                   </div>
                   <Slider
@@ -253,35 +303,34 @@ export function EmbeddingsDebugger() {
                     <div className="font-medium mb-2">
                       {testSuccess ? 'Search Successful' : 'Search Failed'}
                     </div>
-                    {testResults.length > 0 ? (
+                    
+                    {(testResults.length > 0 || manualMatches.length > 0) ? (
                       <div className="space-y-3">
-                        <div className="text-sm">
-                          Found {testResults.length} matches:
-                        </div>
-                        <ScrollArea className="h-64 border rounded bg-white">
-                          <div className="p-1">
-                            {testResults.map((result, idx) => (
-                              <div key={result.id} className="border rounded mb-2">
-                                <div className="bg-slate-50 p-2 border-b flex justify-between items-center">
-                                  <span className="font-medium">Match #{idx + 1}</span>
-                                  <Badge variant="outline">
-                                    Similarity: {(result.similarity * 100).toFixed(1)}%
-                                  </Badge>
-                                </div>
-                                <div className="p-2">
-                                  <div className="whitespace-pre-wrap text-sm">
-                                    {result.content}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
+                        <Tabs 
+                          value={resultsTab} 
+                          onValueChange={setResultsTab}
+                          className="w-full"
+                        >
+                          <TabsList className="grid grid-cols-2 mb-2">
+                            <TabsTrigger value="matches">
+                              RPC Results ({testResults.length})
+                            </TabsTrigger>
+                            <TabsTrigger value="manual">
+                              Manual Calculation ({manualMatches.length})
+                            </TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="matches" className="mt-0">
+                            {renderMatchResults(testResults, "RPC Match")}
+                          </TabsContent>
+                          <TabsContent value="manual" className="mt-0">
+                            {renderMatchResults(manualMatches, "Manual Match")}
+                          </TabsContent>
+                        </Tabs>
                       </div>
                     ) : (
                       <div className="text-sm">
                         {testSuccess ? 
-                          "No matches found. Try a different query, lowering the similarity threshold, or check your embeddings." : 
+                          "No matches found. Try a different query, lowering the similarity threshold (try 0.25), or check your embeddings." : 
                           error || "An unknown error occurred."
                         }
                       </div>
