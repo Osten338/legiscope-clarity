@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -26,40 +25,32 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 const businessAssessmentSchema = z.object({
-  // Core Company Information
   companyName: z.string().min(1, "Company name is required"),
   employeeCount: z.string().min(1, "Employee count is required"),
   annualRevenue: z.string().optional(),
   yearEstablished: z.string().min(1, "Year established is required"),
   
-  // Business Structure and Operations
   businessStructure: z.enum(["limitedCompany", "plc", "partnership", "soleTrader", "other"]),
   
-  // Geographical and Cross-Border Operations
   primaryLocation: z.string().min(1, "Primary country is required"),
   operatingLocations: z.string().optional(),
   crossBorderActivities: z.enum(["none", "euOnly", "global"]),
   
-  // Core Business Activities and Sector
   industryClassification: z.string().min(1, "Industry classification is required"),
   subIndustry: z.string().optional(),
   coreBusinessActivities: z.string().min(1, "Core business activities description is required"),
   
-  // Customer Type
   customerType: z.enum(["b2b", "b2c", "both"]),
   
-  // Data and Technology Usage
   handlesPersonalData: z.boolean(),
   handlesSpecialCategoryData: z.boolean(),
   dataVolume: z.enum(["small", "medium", "large", "veryLarge"]),
   
-  // Specific Technologies and Materials
   usesAI: z.boolean(),
   usesChemicals: z.boolean(),
   usesMedicalDevices: z.boolean(),
   usesRegulatedProducts: z.boolean(),
   
-  // Compliance Awareness
   knownRegulations: z.string().optional(),
   existingCompliance: z.string().optional()
 });
@@ -124,20 +115,19 @@ export function BusinessAssessmentForm() {
           year_established: parseInt(data.yearEstablished),
           primary_country: data.primaryLocation,
           operating_locations: data.operatingLocations,
-          cross_border_activities: data.crossBorderActivities,
+          business_model: data.customerType,
           industry_classification: data.industryClassification,
           sub_industry: data.subIndustry,
-          core_business_activities: data.coreBusinessActivities,
-          customer_type: data.customerType,
+          business_activities: data.coreBusinessActivities,
           handles_personal_data: data.handlesPersonalData,
-          handles_special_category_data: data.handlesSpecialCategoryData,
-          data_volume: data.dataVolume,
-          uses_ai: data.usesAI,
-          uses_chemicals: data.usesChemicals,
-          uses_medical_devices: data.usesMedicalDevices,
-          uses_regulated_products: data.usesRegulatedProducts,
+          handles_sensitive_data: data.handlesSpecialCategoryData,
+          handles_financial_data: false,
+          has_third_party_vendors: false,
+          data_storage: "cloud",
+          has_cyber_security_policy: false,
+          primary_state: "",
           known_regulations: data.knownRegulations,
-          existing_compliance: data.existingCompliance
+          existing_assessments: data.existingCompliance
         })
         .select()
         .single();
@@ -224,7 +214,6 @@ export function BusinessAssessmentForm() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Step 1: Core Company Information */}
           {currentStep === 1 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold">Core Company Information</h2>
@@ -311,7 +300,6 @@ export function BusinessAssessmentForm() {
             </div>
           )}
 
-          {/* Step 2: Geographical and Cross-Border Operations */}
           {currentStep === 2 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold">Geographical Scope</h2>
@@ -403,7 +391,6 @@ export function BusinessAssessmentForm() {
             </div>
           )}
 
-          {/* Step 3: Core Business Activities and Customer Type */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold">Business Activities and Customers</h2>
@@ -533,7 +520,6 @@ export function BusinessAssessmentForm() {
             </div>
           )}
 
-          {/* Step 4: Data Processing and Technology Usage */}
           {currentStep === 4 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold">Data and Technology Information</h2>
@@ -707,7 +693,6 @@ export function BusinessAssessmentForm() {
             </div>
           )}
 
-          {/* Step 5: Existing Compliance Information */}
           {currentStep === 5 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold">Existing Compliance Information</h2>
