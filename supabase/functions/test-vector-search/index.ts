@@ -88,13 +88,13 @@ serve(async (req) => {
         
       console.log(`Total embeddings in database: ${totalEmbeddings}`);
       
-      // Call the RPC function to match documents
+      // Call the RPC function to match documents with a lower threshold (0.5 instead of 0.7)
       const { data: matches, error: matchError } = await supabase.rpc(
         'match_documents',
         {
           query_embedding: embedding,
-          match_threshold: 0.7,
-          match_count: 5
+          match_threshold: 0.5,  // Lower threshold to be more lenient with matches
+          match_count: 10        // Increase match count to find more potential matches
         }
       );
 

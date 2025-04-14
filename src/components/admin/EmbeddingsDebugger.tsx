@@ -10,17 +10,19 @@ import { Loader2, Database, Search, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Slider } from "@/components/ui/slider";
 
 export function EmbeddingsDebugger() {
   const [loading, setLoading] = useState(false);
   const [embeddingsCount, setEmbeddingsCount] = useState<number>(0);
   const [embeddingsSample, setEmbeddingsSample] = useState<any[]>([]);
-  const [testQuery, setTestQuery] = useState("compliance requirements for data protection");
+  const [testQuery, setTestQuery] = useState("What is the purpose of the AI regulation?");
   const [testResults, setTestResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [testSuccess, setTestSuccess] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expansionStates, setExpansionStates] = useState<Record<string, boolean>>({});
+  const [similarityThreshold, setSimilarityThreshold] = useState(0.5); // Default to 0.5 (50%) for better matches
 
   useEffect(() => {
     loadEmbeddingsData();
@@ -95,7 +97,7 @@ export function EmbeddingsDebugger() {
       } else if (embeddingData.success && embeddingData.matches.length === 0) {
         toast({
           title: "No matches found",
-          description: "The search was successful but no matches were found. Try a different query or check your embeddings.",
+          description: "The search was successful but no matches were found. Try a different query, lowering the similarity threshold, or check your embeddings.",
           variant: "default",
         });
       } else {
@@ -217,6 +219,26 @@ export function EmbeddingsDebugger() {
                     className="min-h-[80px]"
                   />
                 </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Similarity Threshold: {(similarityThreshold * 100).toFixed()}%
+                    </label>
+                    <span className="text-xs text-slate-500">
+                      Lower value = more matches but less relevant
+                    </span>
+                  </div>
+                  <Slider
+                    value={[similarityThreshold]}
+                    onValueChange={(values) => setSimilarityThreshold(values[0])}
+                    min={0.1}
+                    max={0.9}
+                    step={0.05}
+                    className="py-4"
+                  />
+                </div>
+                
                 <Button
                   onClick={testVectorSearch}
                   disabled={searchLoading || !testQuery.trim()}
@@ -259,7 +281,7 @@ export function EmbeddingsDebugger() {
                     ) : (
                       <div className="text-sm">
                         {testSuccess ? 
-                          "No matches found. Try a different query or check your embeddings." : 
+                          "No matches found. Try a different query, lowering the similarity threshold, or check your embeddings." : 
                           error || "An unknown error occurred."
                         }
                       </div>
