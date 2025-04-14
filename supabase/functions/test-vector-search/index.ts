@@ -27,7 +27,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query, threshold = 0.1 } = await req.json();
+    const { query, threshold = 0.05 } = await req.json();
     
     if (!query || typeof query !== 'string') {
       return new Response(
@@ -108,26 +108,29 @@ serve(async (req) => {
       }
       
       // Fetch sample embeddings for manual similarity calculation (for diagnostics)
+      console.log("Fetching sample embeddings for diagnostics...");
       const { data: sampleData, error: sampleError } = await supabase
         .from('document_embeddings')
         .select('id, content, embedding')
-        .limit(10) as any;
+        .limit(20) as any;
       
       if (sampleError) {
         console.error("Error fetching sample embeddings:", sampleError);
       } else if (!sampleData || sampleData.length === 0) {
         console.log("No sample data returned despite count being > 0");
       } else {
-        console.log(`First embedding sample format:`, typeof sampleData[0].embedding);
-        // Log a small part of the first embedding to check format
+        // Log the format of the first embedding to check structure
         const firstEmbedding = sampleData[0].embedding;
+        console.log(`First embedding sample format: ${typeof firstEmbedding}`);
+        console.log(`First embedding is null or undefined: ${firstEmbedding === null || firstEmbedding === undefined}`);
+        
         try {
           if (typeof firstEmbedding === 'object') {
-            console.log("First few values:", Object.values(firstEmbedding).slice(0, 5));
+            console.log("First few dimensions:", Object.values(firstEmbedding).slice(0, 5));
           } else if (Array.isArray(firstEmbedding)) {
-            console.log("First few values:", firstEmbedding.slice(0, 5));
-          } else {
-            console.log("Embedding value:", firstEmbedding);
+            console.log("First few dimensions:", firstEmbedding.slice(0, 5));
+          } else if (typeof firstEmbedding === 'string') {
+            console.log("First few characters:", firstEmbedding.substring(0, 50));
           }
         } catch (err) {
           console.error("Error parsing embedding:", err);
@@ -149,7 +152,9 @@ serve(async (req) => {
             
             // Calculate cosine similarity manually
             const similarity = cosineSimilarity(embedding, doc.embedding);
-            console.log(`Manual similarity for document "${doc.content.substring(0, 30)}...": ${similarity}`);
+            
+            const shortContent = doc.content?.substring(0, 30) + "...";
+            console.log(`Manual similarity for "${shortContent}": ${similarity}`);
             
             if (similarity > threshold) {
               manualMatches.push({
@@ -162,21 +167,43 @@ serve(async (req) => {
             console.error(`Error calculating manual similarity for document ${doc.id}:`, err);
           }
         }
+        
+        // Sort manual matches by similarity
+        manualMatches.sort((a, b) => b.similarity - a.similarity);
       }
       
+      console.log(`Found ${manualMatches.length} manual matches`);
       console.log("Now calling the RPC function with threshold:", threshold);
+      
       // Call the RPC function with the user-provided threshold
       const { data: matches, error: matchError } = await supabase.rpc(
         'match_documents',
         {
           query_embedding: embedding,
           match_threshold: threshold,
-          match_count: 20
+          match_count: 50
         }
       );
 
       if (matchError) {
         console.error("Error in match_documents RPC:", matchError);
+        
+        // Use manual matches if RPC fails
+        if (manualMatches.length > 0) {
+          console.log("Using manual matches as fallback");
+          return new Response(
+            JSON.stringify({ 
+              success: true,
+              matches: manualMatches,
+              manualMatches: [],
+              totalEmbeddings,
+              note: "Used manual calculation due to RPC error"
+            }),
+            { 
+              headers: { ...corsHeaders, "Content-Type": "application/json" } 
+            }
+          );
+        }
         
         // Attempt direct query as a fallback
         console.log("Attempting direct calculation as primary method failed...");
@@ -184,7 +211,7 @@ serve(async (req) => {
         const { data: allEmbeddings, error: directError } = await supabase
           .from('document_embeddings')
           .select('id, content, embedding')
-          .limit(30);
+          .limit(50);
           
         if (directError) {
           console.error("Direct embeddings query failed:", directError);
@@ -238,17 +265,32 @@ serve(async (req) => {
         );
       }
 
-      console.log(`Found ${matches ? matches.length : 0} matches`);
+      console.log(`Found ${matches ? matches.length : 0} matches via RPC`);
+      console.log(`Found ${manualMatches.length} matches via manual calculation`);
       
       if (matches && matches.length === 0 && manualMatches.length > 0) {
         console.log("WARNING: Found manual matches but RPC returned none. There might be an issue with the RPC function.");
+        
+        // If RPC returned no matches but we found manual matches, return those instead
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            matches: manualMatches,
+            manualMatches: [],
+            totalEmbeddings,
+            note: "Using manual matches as RPC found none"
+          }),
+          { 
+            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          }
+        );
       }
 
       return new Response(
         JSON.stringify({ 
           success: true, 
           matches: matches || [],
-          manualMatches, // Include manually calculated matches for comparison
+          manualMatches, 
           totalEmbeddings
         }),
         { 

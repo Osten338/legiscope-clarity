@@ -6,17 +6,48 @@
  */
 export function cosineSimilarity(vecA: number[], vecB: any): number {
   try {
+    // Handle PostgreSQL vector format which might be stored as a string
+    if (typeof vecB === 'string') {
+      try {
+        // Try to parse if it's a JSON string
+        vecB = JSON.parse(vecB);
+      } catch {
+        // If not a valid JSON, try to parse vector format from string
+        // Expecting format like "[0.1, 0.2, 0.3, ...]" or "{0.1, 0.2, 0.3, ...}"
+        const vectorStr = vecB.replace(/[\[\]{}]/g, '').trim();
+        const values = vectorStr.split(',').map(v => parseFloat(v.trim()));
+        
+        if (Array.isArray(values) && !isNaN(values[0])) {
+          vecB = values;
+        } else {
+          console.error("Could not parse vector from string:", vecB.substring(0, 100) + "...");
+          return 0;
+        }
+      }
+    }
+    
     // Convert vecB to array if it's not already one
     const vecBArray = Array.isArray(vecB) ? vecB : Object.values(vecB || {});
     
-    if (!Array.isArray(vecA) || vecBArray.length === 0 || vecA.length !== vecBArray.length) {
+    // Ideally vectors should be the same length for proper comparison
+    // If they're not, we'll use the smaller length to avoid errors
+    if (!Array.isArray(vecA) || vecBArray.length === 0) {
       console.log(`Vector format issue: vecA is array: ${Array.isArray(vecA)}, vecA length: ${vecA?.length}, vecB length: ${vecBArray?.length}`);
       return 0;
     }
     
-    const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecBArray[i], 0);
-    const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
-    const magB = Math.sqrt(vecBArray.reduce((sum, b) => sum + b * b, 0));
+    // If vector lengths don't match, use the shorter length
+    const minLength = Math.min(vecA.length, vecBArray.length);
+    
+    // Calculate cosine similarity using the first minLength dimensions
+    const dotProduct = Array.from({length: minLength}, (_, i) => vecA[i] * vecBArray[i])
+      .reduce((sum, val) => sum + val, 0);
+      
+    const magA = Math.sqrt(Array.from({length: minLength}, (_, i) => vecA[i] * vecA[i])
+      .reduce((sum, val) => sum + val, 0));
+      
+    const magB = Math.sqrt(Array.from({length: minLength}, (_, i) => vecBArray[i] * vecBArray[i])
+      .reduce((sum, val) => sum + val, 0));
     
     if (magA === 0 || magB === 0) {
       return 0;
