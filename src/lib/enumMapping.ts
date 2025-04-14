@@ -9,7 +9,7 @@ export const customerTypeToBusinessModel = (customerType: string): string => {
       return "b2b_b2c";
     default:
       return "b2b"; // Default fallback
-  };
+  }
 };
 
 export const businessStructureMap: Record<string, string> = {

@@ -80,6 +80,10 @@ export const BusinessDescription = () => {
         return;
       }
 
+      // Ensure we're passing the ID as string to avoid any potential type issues
+      const assessmentId = crypto.randomUUID();
+      console.log("Generated assessment ID:", assessmentId);
+
       const response = await fetch('https://vmyzceyvkkcgdbgmbbqf.supabase.co/functions/v1/analyze-business', {
         method: 'POST',
         headers: {
@@ -88,7 +92,7 @@ export const BusinessDescription = () => {
         },
         body: JSON.stringify({
           description,
-          assessment_id: crypto.randomUUID()
+          assessment_id: assessmentId
         })
       });
 

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -106,12 +105,14 @@ export function BusinessAssessmentForm() {
         ...data
       });
 
+      // Properly map the business model
       const businessModel = customerTypeToBusinessModel(data.customerType);
       console.log("Mapped business model:", businessModel);
       
       const businessStructure = mapBusinessStructure(data.businessStructure);
       console.log("Mapped business structure:", businessStructure);
 
+      // Make sure the database gets the correct enum value
       const { data: assessmentData, error } = await supabase
         .from('structured_business_assessments')
         .insert({
@@ -123,7 +124,7 @@ export function BusinessAssessmentForm() {
           year_established: parseInt(data.yearEstablished),
           primary_country: data.primaryLocation,
           operating_locations: data.operatingLocations,
-          business_model: businessModel,
+          business_model: businessModel, // Using the correctly mapped value
           industry_classification: data.industryClassification,
           sub_industry: data.subIndustry,
           business_activities: data.coreBusinessActivities,

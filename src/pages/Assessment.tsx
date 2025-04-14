@@ -14,12 +14,16 @@ const Assessment = () => {
   const [assessmentMethod, setAssessmentMethod] = useState<"form" | "description">("form");
 
   useEffect(() => {
+    console.log("Assessment page loaded, checking authentication...");
+    
     const checkAuth = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error || !session) {
         console.log("No active session, redirecting to auth");
         navigate("/auth");
+      } else {
+        console.log("User authenticated:", session.user.id);
       }
     };
 
@@ -27,6 +31,7 @@ const Assessment = () => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event);
       if (event === 'SIGNED_OUT' || !session) {
         navigate("/auth");
       }
