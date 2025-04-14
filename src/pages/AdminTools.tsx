@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Upload, AlertCircle } from "lucide-react";
+import { Upload, AlertCircle, Database } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { EmbeddingsUploader } from "@/components/admin/EmbeddingsUploader";
+import { EmbeddingsDebugger } from "@/components/admin/EmbeddingsDebugger";
 
 export default function AdminTools() {
   const [activeTab, setActiveTab] = useState<string>("embeddings");
@@ -29,6 +30,7 @@ export default function AdminTools() {
         <Tabs defaultValue="embeddings" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="embeddings">Embeddings Management</TabsTrigger>
+            <TabsTrigger value="debug">Debug Tools</TabsTrigger>
           </TabsList>
           
           <TabsContent value="embeddings">
@@ -43,6 +45,10 @@ export default function AdminTools() {
                 <EmbeddingsUploader />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="debug">
+            <EmbeddingsDebugger />
           </TabsContent>
         </Tabs>
       </div>
