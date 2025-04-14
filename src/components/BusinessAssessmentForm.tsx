@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -104,6 +105,23 @@ export function BusinessAssessmentForm() {
         ...data
       });
 
+      // Convert customerType to a valid business_model value
+      // The enum in the database likely expects "b2b_b2c" instead of "both"
+      let businessModel;
+      switch(data.customerType) {
+        case "b2b":
+          businessModel = "b2b";
+          break;
+        case "b2c":
+          businessModel = "b2c";
+          break;
+        case "both":
+          businessModel = "b2b_b2c"; // Assuming this is the valid enum value in the database
+          break;
+        default:
+          businessModel = "b2b"; // Default fallback
+      }
+
       const { data: assessmentData, error } = await supabase
         .from('structured_business_assessments')
         .insert({
@@ -115,7 +133,7 @@ export function BusinessAssessmentForm() {
           year_established: parseInt(data.yearEstablished),
           primary_country: data.primaryLocation,
           operating_locations: data.operatingLocations,
-          business_model: data.customerType,
+          business_model: businessModel, // Use the mapped value
           industry_classification: data.industryClassification,
           sub_industry: data.subIndustry,
           business_activities: data.coreBusinessActivities,
