@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
@@ -24,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { customerTypeToBusinessModel, mapBusinessStructure } from "@/lib/enumMapping";
 
 const businessAssessmentSchema = z.object({
   companyName: z.string().min(1, "Company name is required"),
@@ -105,35 +105,21 @@ export function BusinessAssessmentForm() {
         ...data
       });
 
-      // Convert customerType to a valid business_model value
-      // The enum in the database likely expects "b2b_b2c" instead of "both"
-      let businessModel;
-      switch(data.customerType) {
-        case "b2b":
-          businessModel = "b2b";
-          break;
-        case "b2c":
-          businessModel = "b2c";
-          break;
-        case "both":
-          businessModel = "b2b_b2c"; // Assuming this is the valid enum value in the database
-          break;
-        default:
-          businessModel = "b2b"; // Default fallback
-      }
+      const businessModel = customerTypeToBusinessModel(data.customerType);
+      const businessStructure = mapBusinessStructure(data.businessStructure);
 
       const { data: assessmentData, error } = await supabase
         .from('structured_business_assessments')
         .insert({
           user_id: user.id,
           company_name: data.companyName,
-          business_structure: data.businessStructure,
+          business_structure: businessStructure,
           employee_count: parseInt(data.employeeCount),
           annual_revenue: data.annualRevenue ? parseFloat(data.annualRevenue) : null,
           year_established: parseInt(data.yearEstablished),
           primary_country: data.primaryLocation,
           operating_locations: data.operatingLocations,
-          business_model: businessModel, // Use the mapped value
+          business_model: businessModel,
           industry_classification: data.industryClassification,
           sub_industry: data.subIndustry,
           business_activities: data.coreBusinessActivities,

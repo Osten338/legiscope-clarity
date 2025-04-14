@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BusinessAssessmentForm } from "@/components/BusinessAssessmentForm";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
@@ -7,9 +7,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { BusinessDescription } from "@/components/business-assessment/BusinessDescription";
 
 const Assessment = () => {
   const navigate = useNavigate();
+  const [assessmentMethod, setAssessmentMethod] = useState<"form" | "description">("form");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -65,7 +67,38 @@ const Assessment = () => {
             </motion.div>
             
             <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-lg p-6">
-              <BusinessAssessmentForm />
+              <div className="mb-6">
+                <div className="flex gap-4 mb-6">
+                  <button 
+                    onClick={() => setAssessmentMethod("form")}
+                    className={`px-4 py-2 rounded-lg ${assessmentMethod === "form" 
+                      ? "bg-neutral-800 text-white" 
+                      : "bg-white/50 border border-neutral-300 text-neutral-700"}`}
+                  >
+                    Structured Form
+                  </button>
+                  <button 
+                    onClick={() => setAssessmentMethod("description")}
+                    className={`px-4 py-2 rounded-lg ${assessmentMethod === "description" 
+                      ? "bg-neutral-800 text-white" 
+                      : "bg-white/50 border border-neutral-300 text-neutral-700"}`}
+                  >
+                    Free-form Description
+                  </button>
+                </div>
+                
+                <p className="text-sm text-neutral-600">
+                  {assessmentMethod === "form" 
+                    ? "Complete the structured form to provide detailed information about your business."
+                    : "Provide a free-form description of your business and our AI will analyze it."}
+                </p>
+              </div>
+              
+              {assessmentMethod === "form" ? (
+                <BusinessAssessmentForm />
+              ) : (
+                <BusinessDescription />
+              )}
             </div>
           </div>
         </div>
