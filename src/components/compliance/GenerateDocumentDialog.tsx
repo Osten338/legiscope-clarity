@@ -38,16 +38,21 @@ export function GenerateDocumentDialog({
     try {
       setIsLoading(true);
       
+      // Get current user for tracking
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.functions.invoke(
         'generate-documentation',
         {
           body: {
             regulation: {
               name: regulation.name,
-              description: regulation.description
+              description: regulation.description,
+              id: regulation.id,
             },
             checklistItem: regulation.checklist_items[0]
           },
+          headers: user ? { 'x-user-id': user.id } : undefined
         }
       );
 
