@@ -31,10 +31,10 @@ export function EmbeddingsDebugger() {
       setLoading(true);
       setError(null);
       
-      // Count total embeddings
+      // Count total embeddings using raw SQL count query
       const { count, error: countError } = await supabase
         .from('document_embeddings')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true }) as any;
       
       if (countError) throw countError;
       setEmbeddingsCount(count || 0);
@@ -42,8 +42,7 @@ export function EmbeddingsDebugger() {
       // Get a sample of embeddings (first 5)
       const { data: sampleData, error: sampleError } = await supabase
         .from('document_embeddings')
-        .select('id, content, created_at, metadata')
-        .limit(5);
+        .select('id, content, created_at, metadata') as any;
       
       if (sampleError) throw sampleError;
       setEmbeddingsSample(sampleData || []);
@@ -67,7 +66,7 @@ export function EmbeddingsDebugger() {
       setTestSuccess(null);
       setError(null);
       
-      // First, generate an embedding for the test query
+      // Call the edge function to test vector search
       const { data: embeddingData, error: embeddingError } = await supabase.functions.invoke(
         "test-vector-search",
         {

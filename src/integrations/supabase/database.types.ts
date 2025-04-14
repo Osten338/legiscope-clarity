@@ -1,4 +1,3 @@
-
 import { Database as OriginalDatabase } from './types';
 import type { Json } from './types';
 
@@ -635,12 +634,47 @@ export interface Database {
         };
         Relationships: [];
       };
+      document_embeddings: {
+        Row: {
+          id: string;
+          content: string;
+          embedding: any;
+          created_at: string | null;
+          metadata: Json | null;
+        };
+        Insert: {
+          id?: string;
+          content: string;
+          embedding?: any;
+          created_at?: string | null;
+          metadata?: Json | null;
+        };
+        Update: {
+          id?: string;
+          content?: string;
+          embedding?: any;
+          created_at?: string | null;
+          metadata?: Json | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      match_documents: {
+        Args: {
+          query_embedding: any;
+          match_threshold?: number;
+          match_count?: number;
+        };
+        Returns: {
+          id: string;
+          content: string;
+          similarity: number;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;
