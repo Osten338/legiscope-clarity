@@ -29,9 +29,27 @@ interface RegulationType {
 
 const ComplianceChecklist = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get the current user ID when component mounts
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUserId(user.id);
+          console.log("Current user ID:", user.id);
+        }
+      } catch (error) {
+        console.error("Error getting user:", error);
+      }
+    };
+    
+    getUserId();
+  }, []);
 
   const { data: regulations, isLoading, error, refetch } = useQuery({
-    queryKey: ["regulations"],
+    queryKey: ["regulations", userId],
     queryFn: async () => {
       try {
         // Get current user
@@ -51,20 +69,17 @@ const ComplianceChecklist = () => {
           throw savedError;
         }
         
-        // If no saved regulations, get all regulations
-        let regulationQuery;
-        if (savedRegs && savedRegs.length > 0) {
-          regulationQuery = supabase
-            .from("regulations")
-            .select("*")
-            .in("id", savedRegs.map(r => r.regulation_id));
-        } else {
-          regulationQuery = supabase
-            .from("regulations")
-            .select("*");
+        // If no saved regulations, return empty array (don't show any regulations)
+        if (!savedRegs || savedRegs.length === 0) {
+          console.log("No saved regulations found for user:", user.id);
+          return [];
         }
         
-        const { data: regulations, error: regulationsError } = await regulationQuery;
+        // Get regulations that match the user's saved regulation IDs
+        const { data: regulations, error: regulationsError } = await supabase
+          .from("regulations")
+          .select("*")
+          .in("id", savedRegs.map(r => r.regulation_id));
 
         if (regulationsError) {
           console.error("Error fetching regulations:", regulationsError);
@@ -105,12 +120,16 @@ const ComplianceChecklist = () => {
         throw error;
       }
     },
+    enabled: !!userId, // Only run query when userId is available
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    // Refresh data on mount
-    refetch();
-  }, [refetch]);
+    // Refresh data when userId changes
+    if (userId) {
+      refetch();
+    }
+  }, [userId, refetch]);
 
   if (isLoading) {
     return (
