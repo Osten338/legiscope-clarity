@@ -56,11 +56,15 @@ export function GenerateDocumentDialog({
         }
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error generating documentation:", error);
+        throw error;
+      }
 
       setDocumentation(data.documentation);
       
     } catch (error: any) {
+      console.error("Documentation generation error:", error);
       toast({
         title: "Error generating documentation",
         description: error.message,
@@ -87,7 +91,10 @@ export function GenerateDocumentDialog({
         .from('compliance_documents')
         .upload(`${user.id}/${fileName}`, blob);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("File upload error:", uploadError);
+        throw uploadError;
+      }
 
       // Save the document metadata
       const { error: insertError } = await supabase
@@ -101,7 +108,10 @@ export function GenerateDocumentDialog({
           user_id: user.id,
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error("Document metadata insert error:", insertError);
+        throw insertError;
+      }
 
       // Invalidate the compliance documents query to refresh the list
       queryClient.invalidateQueries({ queryKey: ['compliance-documents'] });
@@ -115,6 +125,7 @@ export function GenerateDocumentDialog({
       onOpenChange(false);
       
     } catch (error: any) {
+      console.error("Save documentation error:", error);
       toast({
         title: "Error saving documentation",
         description: error.message,
@@ -127,11 +138,11 @@ export function GenerateDocumentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-sage-600" />
-            Generate Implementation Documentation
+            Generate EU Compliance Implementation Guide
           </DialogTitle>
         </DialogHeader>
 
@@ -140,10 +151,10 @@ export function GenerateDocumentDialog({
             <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
               <Bot className="h-12 w-12 text-sage-400" />
               <p className="text-sage-600 text-center max-w-md">
-                Generate detailed documentation for implementing this compliance requirement using AI
+                Generate a comprehensive implementation guide for this compliance requirement using AI and EU legal methodology
               </p>
               <Button onClick={generateDocumentation}>
-                Generate Documentation
+                Generate Implementation Guide
               </Button>
             </div>
           )}
@@ -151,7 +162,10 @@ export function GenerateDocumentDialog({
           {isLoading && (
             <div className="flex flex-col items-center justify-center h-full gap-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-sage-600" />
-              <p className="text-sage-600">Generating documentation...</p>
+              <p className="text-sage-600">Analyzing requirement and generating implementation guide...</p>
+              <div className="text-xs text-slate-500 max-w-md text-center">
+                We're applying EU legal methodology to create a comprehensive, practical implementation guide. This may take a few moments.
+              </div>
             </div>
           )}
 
