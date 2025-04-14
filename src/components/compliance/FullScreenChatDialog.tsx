@@ -1,8 +1,9 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, Bot, ChevronDown, X } from "lucide-react";
+import { Loader2, Send, Bot, ChevronDown, X, Database } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -90,8 +91,24 @@ export function FullScreenChatDialog({
       const endTime = performance.now();
       const responseTimeMs = Math.round(endTime - startTime);
 
-      if (data.retrievedContext) {
+      // Show a toast notification when embeddings are successfully retrieved
+      if (data.retrievedContext && data.retrievedContext.length > 0) {
+        toast({
+          title: "Knowledge Base Access Successful",
+          description: `Found ${data.retrievedContext.length} relevant documents in your knowledge base.`,
+          variant: "default",
+        });
         setRetrievedContext(data.retrievedContext);
+        setShowContext(true);
+      } else {
+        setRetrievedContext([]);
+        if (content.trim().length > 20) { // Only show this for substantial questions
+          toast({
+            title: "No Relevant Documents Found",
+            description: "No matching documents were found in your knowledge base. Consider uploading more relevant content.",
+            variant: "default",
+          });
+        }
       }
 
       const { data: userData } = await supabase.auth.getUser();
@@ -157,6 +174,11 @@ export function FullScreenChatDialog({
               <div className="flex items-center">
                 <Bot className="h-5 w-5 text-sage-600 mr-2" />
                 <h2 className="font-medium text-sage-900">Compliance Buddy</h2>
+                {retrievedContext.length > 0 && (
+                  <Badge variant="outline" className="ml-2 bg-sage-50">
+                    <Database className="h-3 w-3 mr-1" /> {retrievedContext.length} sources
+                  </Badge>
+                )}
               </div>
               <Button 
                 variant="ghost" 
@@ -236,8 +258,8 @@ export function FullScreenChatDialog({
                 className="w-full flex items-center justify-between p-2 h-auto"
               >
                 <span className="flex items-center text-xs font-medium">
-                  <Bot className="h-3.5 w-3.5 mr-1.5" />
-                  Knowledge Sources
+                  <Database className="h-3.5 w-3.5 mr-1.5" />
+                  Knowledge Sources ({retrievedContext.length})
                 </span>
                 <ChevronDown 
                   className={cn(

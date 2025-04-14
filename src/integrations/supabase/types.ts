@@ -760,6 +760,18 @@ export type Database = {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: string
       }
+      match_documents: {
+        Args: {
+          query_embedding: string
+          match_threshold?: number
+          match_count?: number
+        }
+        Returns: {
+          id: string
+          content: string
+          similarity: number
+        }[]
+      }
       process_analysis_regulations: {
         Args: { p_analysis_id: string; p_regulations: Json }
         Returns: Json
