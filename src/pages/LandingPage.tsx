@@ -6,23 +6,21 @@ import { PricingPlans } from "@/components/landing/PricingPlans";
 import { KeyFeatures } from "@/components/landing/KeyFeatures";
 import { LegislationUpdates } from "@/components/landing/LegislationUpdates";
 import { LandingFooter } from "@/components/landing/LandingFooter";
-import { ParallaxBackground } from "@/components/landing/ParallaxBackground";
+import { ParallaxBackground } from "@/components/animations/ParallaxBackground";
 
 const LandingPage = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <ParallaxBackground />
-      <div className="relative z-10">
-        <LandingNavbar />
-        <main>
-          <LandingHero />
-          <FeatureCards />
-          <KeyFeatures />
-          <LegislationUpdates />
-          <PricingPlans />
-        </main>
-        <LandingFooter />
-      </div>
+      <LandingNavbar />
+      <main className="relative z-10">
+        <LandingHero />
+        <FeatureCards />
+        <KeyFeatures />
+        <LegislationUpdates />
+        <PricingPlans />
+      </main>
+      <LandingFooter />
     </div>
   );
 };
