@@ -32,11 +32,11 @@ const features = [
 
 export const FeatureCards = () => {
   return (
-    <section className="py-24 px-4 md:px-8 lg:px-20 bg-black" id="features">
+    <section className="py-16 px-4 md:px-8 lg:px-20 bg-black" id="features">
       <div className="max-w-7xl mx-auto">
         <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-white">
+          <div className="text-center mb-10">
+            <h2 className="text-4xl font-bold mb-3 text-white">
               Streamline Your Compliance Process
             </h2>
             <p className="text-lg text-white/80 max-w-2xl mx-auto">
@@ -46,7 +46,7 @@ export const FeatureCards = () => {
         </ScrollReveal>
         
         <ScrollReveal>
-          <div className="flex min-h-[400px] w-full items-center justify-center">
+          <div className="flex min-h-[300px] w-full items-center justify-center">
             <div className="w-full max-w-3xl">
               <DisplayCards cards={features} />
             </div>
@@ -56,3 +56,4 @@ export const FeatureCards = () => {
     </section>
   );
 };
+
