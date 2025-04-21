@@ -22,7 +22,7 @@ export function GradientText({
   return (
     <MotionComponent
       className={cn(
-        "relative inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500",
+        "relative inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700",
         className
       )}
       {...props}
