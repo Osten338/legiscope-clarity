@@ -1,8 +1,11 @@
+
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { Mockup, MockupFrame } from "@/components/ui/mockup";
-import { Glow } from "@/components/ui/glow";
+import { motion } from "framer-motion";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { GradientText } from "@/components/ui/gradient-text";
+import { WavyBackground } from "@/components/ui/wavy-background";
 import DisplayCards from "@/components/ui/display-cards";
 import { Check, FileText, Users } from "lucide-react";
 
@@ -34,48 +37,68 @@ const features = [
 ];
 
 export const LandingHero = () => {
-  return (
-    <section className="bg-background text-foreground py-12 sm:py-24 md:py-32 px-4 fade-bottom overflow-hidden pb-0">
-      <div className="mx-auto flex max-w-container flex-col gap-12 pt-16 sm:gap-24">
-        <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
-          <Badge variant="outline" className="animate-appear gap-2">
-            <span className="text-muted-foreground">Your Compliance Operations, Simplified</span>
-            <a href="#features" className="flex items-center gap-1">
-              See Features
-              <ArrowRight className="h-3 w-3" />
-            </a>
-          </Badge>
+  return <WavyBackground className="w-full" containerClassName="relative w-full min-h-[85vh]" colors={["#38bdf8", "#818cf8", "#c084fc", "#22d3ee"]} waveWidth={100} backgroundFill="black" blur={10} speed="slow" waveOpacity={0.5}>
+      <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh]">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 z-10 relative">
+          {/* Subtle abstract shape overlays */}
+          <div aria-hidden="true" className="absolute -top-16 -left-20 w-72 h-72 rounded-full blur-3xl opacity-30 bg-brand-blue" />
+          <div aria-hidden="true" className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-900" />
+          <div className="lg:w-1/2 text-white">
+            <ScrollReveal>
+              <span className="inline-block mb-6 px-4 py-1.5 rounded-full bg-white/10 text-brand-blue text-sm font-medium border border-white/10">
+                Your Compliance Operations, Simplified
+              </span>
+            </ScrollReveal>
 
-          <h1 className="relative z-10 inline-block animate-appear bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-4xl font-semibold leading-tight text-transparent drop-shadow-2xl sm:text-6xl sm:leading-tight md:text-8xl md:leading-tight">
-            Clarity for your compliance operations
-          </h1>
+            <ScrollReveal delay={0.1}>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-ibm-plex-sans font-bold leading-tight mb-6">
+                <GradientText className="font-ibm-plex-sans text-slate-50/[0.89]">
+                  Clarity for your compliance operations
+                </GradientText>
+              </h1>
+            </ScrollReveal>
 
-          <p className="text-md relative z-10 max-w-[550px] animate-appear font-medium text-muted-foreground opacity-0 delay-100 sm:text-xl">
-            Effortlessly manage regulatory requirements with an intuitive platform designed to simplify complex compliance tasks.
-          </p>
+            <ScrollReveal delay={0.2}>
+              <p className="text-lg md:text-xl max-w-xl mb-8 leading-relaxed text-white/80">
+                Effortlessly manage regulatory requirements with an intuitive platform designed to simplify complex compliance tasks.
+              </p>
+            </ScrollReveal>
 
-          <div className="relative z-10 flex animate-appear justify-center gap-4 opacity-0 delay-300">
-            <Button size="lg" className="bg-brand-blue hover:bg-brand-blue/90 px-8 py-6 text-base rounded-md shadow-md font-semibold text-white" asChild>
-              <a href="/auth" className="flex items-center gap-2">
-                Start Free Trial
-                <ArrowRight className="h-5 w-5" />
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" className="text-base bg-transparent border border-white/20 text-white hover:bg-white/10" asChild>
-              <a href="#features">See Features</a>
-            </Button>
+            <ScrollReveal delay={0.3}>
+              <div className="flex flex-wrap gap-4">
+                <Button asChild size="lg" className="bg-brand-blue hover:bg-brand-blue/90 px-8 py-6 text-base rounded-md shadow-md font-semibold text-white">
+                  <Link to="/auth" className="flex items-center">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="text-base bg-transparent border border-white/20 text-white hover:bg-white/10">
+                  <Link to="#features">See Features</Link>
+                </Button>
+              </div>
+            </ScrollReveal>
           </div>
 
-          <div className="relative pt-12">
-            <MockupFrame className="animate-appear opacity-0 delay-700" size="small">
-              <Mockup type="responsive">
-                <DisplayCards cards={features} />
-              </Mockup>
-            </MockupFrame>
-            <Glow variant="top" className="animate-appear-zoom opacity-0 delay-1000" />
-          </div>
+          <motion.div 
+            initial={{
+              opacity: 0,
+              scale: 0.95
+            }} 
+            animate={{
+              opacity: 1,
+              scale: 1
+            }} 
+            transition={{
+              duration: 0.5,
+              delay: 0.4
+            }} 
+            className="lg:w-1/2"
+          >
+            <div className="w-full">
+              <DisplayCards cards={features} />
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </section>
-  );
+      </section>
+    </WavyBackground>;
 };
