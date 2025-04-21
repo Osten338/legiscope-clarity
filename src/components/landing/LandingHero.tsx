@@ -7,7 +7,7 @@ import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 export const LandingHero = () => {
   return (
-    <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black/60 backdrop-blur-sm z-10">
+    <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black z-10">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative">
         <div className="lg:w-1/2 text-white">
           <ScrollReveal>
