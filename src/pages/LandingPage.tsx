@@ -13,7 +13,7 @@ const LandingPage = () => {
     <div className="min-h-screen relative">
       <ParallaxBackground />
       <LandingNavbar />
-      <main>
+      <main className="relative z-10">
         <LandingHero />
         <FeatureCards />
         <KeyFeatures />
