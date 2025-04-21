@@ -1,14 +1,14 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { GradientText } from "@/components/ui/gradient-text";
+import { Globe } from "@/components/ui/globe";
 
 export const LandingHero = () => {
   return (
-    <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black">
+    <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black overflow-hidden">
       {/* Subtle abstract shape overlays */}
       <div
         aria-hidden="true"
@@ -59,10 +59,10 @@ export const LandingHero = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="lg:w-1/2 flex justify-center"
+          className="lg:w-1/2 flex justify-center relative"
         >
-          {/* Modern dashboard preview */}
-          <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md">
+          <Globe className="absolute inset-0 opacity-50" />
+          <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md backdrop-blur-sm">
             <div className="text-white/90 flex items-center gap-2 mb-3">
               <span className="font-medium">Compliance Dashboard</span>
             </div>
