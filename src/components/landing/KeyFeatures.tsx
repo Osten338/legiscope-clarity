@@ -1,5 +1,7 @@
+
 import { BarChart3, Search, Bell } from "lucide-react";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { TextContainer, SectionTitle } from "@/components/ui/text-container";
 
 const keyFeatures = [
   {
@@ -24,9 +26,7 @@ export const KeyFeatures = () => {
     <section className="py-20 px-4 md:px-8 lg:px-0 bg-black">
       <ScrollReveal>
         <div className="max-w-5xl mx-auto text-center mb-12">
-          <div className="text-sm font-semibold text-brand-blue mb-4 tracking-wider uppercase">
-            Key Features
-          </div>
+          <SectionTitle className="text-brand-blue">Key Features</SectionTitle>
           <h2 className="text-3xl md:text-4xl font-bold mb-3 text-white">
             Everything you need for compliance management
           </h2>
@@ -39,13 +39,16 @@ export const KeyFeatures = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {keyFeatures.map((feature, index) => (
             <ScrollReveal key={index} delay={index * 0.1} direction={index % 2 === 0 ? "left" : "right"}>
-              <div className="border border-white/10 rounded-2xl bg-white/5 backdrop-blur-sm p-8 text-center shadow-lg hover:bg-white/10 transition-all duration-300">
+              <TextContainer 
+                hover
+                className="border border-white/10 bg-white/5 backdrop-blur-sm text-center shadow-lg hover:bg-white/10"
+              >
                 <div className="flex justify-center mb-5">
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">{feature.title}</h3>
                 <p className="text-white/70 text-base">{feature.description}</p>
-              </div>
+              </TextContainer>
             </ScrollReveal>
           ))}
         </div>

@@ -1,3 +1,4 @@
+
 import { type Config } from "tailwindcss";
 
 export default {
@@ -17,6 +18,12 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+        'dm-sans': ['"DM Sans"', 'sans-serif'],
+        'ibm-plex-sans': ['"IBM Plex Sans"', 'sans-serif'],
+        serif: ['Addington CF', 'serif'],
+      },
       colors: {
         sage: {
           '50': '#f6f7f6',
@@ -35,6 +42,18 @@ export default {
           slate: "#64748B",
           dark: "#111827",
           light: "#F9FAFB",
+        },
+        neutral: {
+          50: "#F9FAFB",
+          100: "#F3F4F6",
+          200: "#E5E7EB",
+          300: "#D1D5DB",
+          400: "#9CA3AF",
+          500: "#6B7280",
+          600: "#4B5563",
+          700: "#374151",
+          800: "#1F2937",
+          900: "#111827",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -74,10 +93,7 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-      },
-      fontFamily: {
-        serif: ['Addington CF', 'serif'],
-        'ibm-plex-sans': ['"IBM Plex Sans"', 'sans-serif'],
+        "2xl": "1rem",
       },
       keyframes: {
         "accordion-down": {
@@ -118,6 +134,11 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      boxShadow: {
+        'sm': '0 2px 8px rgba(0, 0, 0, 0.03)',
+        'md': '0 4px 20px rgba(0, 0, 0, 0.05)',
+        'lg': '0 10px 30px rgba(0, 0, 0, 0.08)',
       },
     },
   },

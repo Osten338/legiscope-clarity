@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { Shield, Book, CheckCircle } from "lucide-react";
+import { TextContainer } from "@/components/ui/text-container";
 
 const features = [
   {
@@ -33,15 +34,15 @@ export const Features = () => {
               transition={{ duration: 0.5, delay: index * 0.2 }}
               className="group h-full"
             >
-              <div className="p-8 bg-white/50 backdrop-blur-sm rounded-2xl transition-all duration-300 hover:bg-white/80 h-full flex flex-col">
+              <TextContainer hover className="h-full flex flex-col">
                 <div className="mb-6">{feature.icon}</div>
-                <h3 className="text-xl font-serif mb-4 text-neutral-900">
+                <h3 className="text-xl font-medium mb-4 text-neutral-900">
                   {feature.title}
                 </h3>
                 <p className="text-neutral-600 leading-relaxed">
                   {feature.description}
                 </p>
-              </div>
+              </TextContainer>
             </motion.div>
           ))}
         </div>

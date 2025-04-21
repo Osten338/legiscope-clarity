@@ -21,11 +21,11 @@ export const AlertCategoryCard = ({
   enabled,
 }: AlertCategoryCardProps) => {
   return (
-    <Card className="p-6">
+    <Card className="p-6 hover:shadow-md transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           {icon}
-          <h2 className="text-xl font-semibold text-sage-900">{title}</h2>
+          <h2 className="text-xl font-semibold text-neutral-900">{title}</h2>
         </div>
         <div className="flex items-center space-x-2">
           <Switch
@@ -37,9 +37,9 @@ export const AlertCategoryCard = ({
       </div>
       {enabled && (
         <div className="space-y-4">
-          <Alert>
-            <AlertTitle>{count} {count === 1 ? 'alert' : 'alerts'}</AlertTitle>
-            <AlertDescription>{description}</AlertDescription>
+          <Alert className="bg-slate-50 border border-slate-200">
+            <AlertTitle className="text-neutral-900 font-medium">{count} {count === 1 ? 'alert' : 'alerts'}</AlertTitle>
+            <AlertDescription className="text-neutral-600">{description}</AlertDescription>
           </Alert>
         </div>
       )}
