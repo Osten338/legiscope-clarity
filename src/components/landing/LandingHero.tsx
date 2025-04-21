@@ -21,7 +21,7 @@ export const LandingHero = () => {
 
             <ScrollReveal delay={0.1}>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-ibm-plex-sans font-bold leading-tight mb-6">
-                <GradientText className="font-ibm-plex-sans text-slate-50">
+                <GradientText className="font-ibm-plex-sans text-slate-50/[0.89]">
                   Clarity for your compliance operations
                 </GradientText>
               </h1>
