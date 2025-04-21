@@ -14,19 +14,19 @@ export const ParallaxBackground = () => {
       {/* Top-left circle */}
       <motion.div
         style={{ y: y1 }}
-        className="absolute -top-20 -left-20 w-[40rem] h-[40rem] rounded-full border border-white/10 bg-blue-900/20 blur-xl"
+        className="absolute -top-20 -left-20 w-[40rem] h-[40rem] rounded-full border border-white/20 bg-blue-900/40 blur-xl"
       />
       
       {/* Bottom-right circle */}
       <motion.div
         style={{ y: y2 }}
-        className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] rounded-full bg-blue-800/30 blur-lg"
+        className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] rounded-full bg-blue-700/50 blur-lg"
       />
       
       {/* Middle shape */}
       <motion.div
         style={{ x: x1 }}
-        className="absolute top-1/2 -left-20 w-[35rem] h-[35rem] rounded-full bg-blue-950/20 blur-xl"
+        className="absolute top-1/2 -left-20 w-[35rem] h-[35rem] rounded-full bg-blue-800/30 blur-xl"
       />
     </div>
   );
