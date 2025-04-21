@@ -10,17 +10,19 @@ import { ParallaxBackground } from "@/components/landing/ParallaxBackground";
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-hidden">
       <ParallaxBackground />
-      <LandingNavbar />
-      <main>
-        <LandingHero />
-        <FeatureCards />
-        <KeyFeatures />
-        <LegislationUpdates />
-        <PricingPlans />
-      </main>
-      <LandingFooter />
+      <div className="relative z-10">
+        <LandingNavbar />
+        <main>
+          <LandingHero />
+          <FeatureCards />
+          <KeyFeatures />
+          <LegislationUpdates />
+          <PricingPlans />
+        </main>
+        <LandingFooter />
+      </div>
     </div>
   );
 };

@@ -10,23 +10,23 @@ export const ParallaxBackground = () => {
   const x1 = useTransform(scrollY, [0, 2000], [0, 300]); // Moves right
   
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {/* Top-left circle */}
       <motion.div
         style={{ y: y1 }}
-        className="absolute -top-20 -left-20 w-[40rem] h-[40rem] rounded-full border border-white/5 blur-xl"
+        className="absolute -top-20 -left-20 w-[40rem] h-[40rem] rounded-full border border-white/10 bg-indigo-900/5 blur-xl"
       />
       
       {/* Bottom-right circle */}
       <motion.div
         style={{ y: y2 }}
-        className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] rounded-full bg-brand-blue/[0.03] blur-lg"
+        className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] rounded-full bg-brand-blue/10 blur-lg"
       />
       
       {/* Middle shape */}
       <motion.div
         style={{ x: x1 }}
-        className="absolute top-1/2 -left-20 w-[35rem] h-[35rem] rounded-full bg-indigo-600/[0.02] blur-xl"
+        className="absolute top-1/2 -left-20 w-[35rem] h-[35rem] rounded-full bg-indigo-600/5 blur-xl"
       />
     </div>
   );
