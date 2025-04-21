@@ -5,31 +5,10 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { GradientText } from "@/components/ui/gradient-text";
-import { WorldMap } from "@/components/ui/world-map";
 
 export const LandingHero = () => {
-  const dots = [
-    {
-      start: { lat: 40.7128, lng: -74.006 },
-      end: { lat: 51.5074, lng: -0.1278 }
-    },
-    {
-      start: { lat: 35.6762, lng: 139.6503 },
-      end: { lat: 22.3193, lng: 114.1694 }
-    },
-    {
-      start: { lat: 1.3521, lng: 103.8198 },
-      end: { lat: -33.8688, lng: 151.2093 }
-    }
-  ];
-
   return (
-    <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black overflow-hidden">
-      {/* Background world map */}
-      <div className="absolute inset-0 w-full h-full opacity-50">
-        <WorldMap dots={dots} lineColor="#3B82F6" />
-      </div>
-
+    <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black">
       {/* Subtle abstract shape overlays */}
       <div
         aria-hidden="true"
@@ -39,8 +18,6 @@ export const LandingHero = () => {
         aria-hidden="true"
         className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-900"
       />
-      
-      {/* Content */}
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 z-10 relative">
         <div className="lg:w-1/2 text-white">
           <ScrollReveal>
@@ -82,9 +59,10 @@ export const LandingHero = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="lg:w-1/2 flex justify-center relative"
+          className="lg:w-1/2 flex justify-center"
         >
-          <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md backdrop-blur-sm">
+          {/* Modern dashboard preview */}
+          <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md">
             <div className="text-white/90 flex items-center gap-2 mb-3">
               <span className="font-medium">Compliance Dashboard</span>
             </div>
