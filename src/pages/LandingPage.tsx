@@ -10,7 +10,7 @@ import { ParallaxBackground } from "@/components/animations/ParallaxBackground";
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-hidden">
       <ParallaxBackground />
       <LandingNavbar />
       <main className="relative z-10">

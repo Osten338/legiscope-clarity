@@ -10,6 +10,7 @@ export const ParallaxBackground = () => {
   const bottomRightY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
   const bottomRightX = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
   const centerY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
+  const centerRightY = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -19,7 +20,7 @@ export const ParallaxBackground = () => {
           y: topLeftY,
           x: topLeftX,
         }}
-        className="absolute -top-32 -left-32 w-[40rem] h-[40rem] rounded-full bg-brand-blue opacity-[0.07] blur-[80px]"
+        className="absolute -top-32 -left-32 w-[40rem] h-[40rem] rounded-full bg-brand-blue opacity-[0.15] blur-[60px]"
         aria-hidden="true"
       />
 
@@ -28,7 +29,16 @@ export const ParallaxBackground = () => {
         style={{
           y: centerY,
         }}
-        className="absolute top-1/3 right-1/4 w-[30rem] h-[30rem] rounded-full bg-purple-600 opacity-[0.05] blur-[60px]"
+        className="absolute top-1/3 right-1/4 w-[30rem] h-[30rem] rounded-full bg-purple-600 opacity-[0.12] blur-[50px]"
+        aria-hidden="true"
+      />
+
+      {/* Center right shape */}
+      <motion.div
+        style={{
+          y: centerRightY,
+        }}
+        className="absolute top-1/2 -right-36 w-[35rem] h-[35rem] rounded-full bg-blue-500 opacity-[0.1] blur-[70px]"
         aria-hidden="true"
       />
 
@@ -38,7 +48,7 @@ export const ParallaxBackground = () => {
           y: bottomRightY,
           x: bottomRightX,
         }}
-        className="absolute -bottom-64 -right-32 w-[50rem] h-[50rem] rounded-full bg-indigo-600 opacity-[0.08] blur-[100px]"
+        className="absolute -bottom-64 -right-32 w-[50rem] h-[50rem] rounded-full bg-indigo-600 opacity-[0.15] blur-[80px]"
         aria-hidden="true"
       />
     </div>
