@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRef } from "react";
@@ -45,10 +44,10 @@ export function WorldMap({
   };
 
   return (
-    <div className="w-full aspect-[2/1] rounded-lg relative font-sans">
+    <div className="w-full h-full rounded-lg relative font-sans">
       <img
         src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
-        className="h-full w-full opacity-30 [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
+        className="h-full w-full object-cover [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
         alt="world map"
         draggable={false}
       />
@@ -56,6 +55,7 @@ export function WorldMap({
         ref={svgRef}
         viewBox="0 0 800 400"
         className="w-full h-full absolute inset-0 pointer-events-none select-none"
+        preserveAspectRatio="xMidYMid slice"
       >
         {dots.map((dot, i) => {
           const startPoint = projectPoint(dot.start.lat, dot.start.lng);

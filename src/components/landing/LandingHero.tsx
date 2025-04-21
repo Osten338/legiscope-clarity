@@ -25,6 +25,11 @@ export const LandingHero = () => {
 
   return (
     <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black overflow-hidden">
+      {/* Background world map */}
+      <div className="absolute inset-0 w-full h-full opacity-50">
+        <WorldMap dots={dots} lineColor="#3B82F6" />
+      </div>
+
       {/* Subtle abstract shape overlays */}
       <div
         aria-hidden="true"
@@ -34,6 +39,8 @@ export const LandingHero = () => {
         aria-hidden="true"
         className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-900"
       />
+      
+      {/* Content */}
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 z-10 relative">
         <div className="lg:w-1/2 text-white">
           <ScrollReveal>
