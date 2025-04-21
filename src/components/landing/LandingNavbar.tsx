@@ -5,7 +5,7 @@ import { Shield } from "lucide-react";
 
 const LandingNavbar = () => {
   return (
-    <div className="border-b bg-gradient-to-b from-[#0f1f47cc] to-[#152f6bcc] backdrop-blur-xl shadow-sm">
+    <div className="border-b bg-gradient-to-b from-[#000000e6] to-[#0a0a0acc] backdrop-blur-xl shadow-sm"> {/* darker navbar background */}
       <div className="flex h-14 items-center px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-2 font-semibold text-white">
           <Shield className="h-6 w-6 text-sage-200" />
@@ -26,3 +26,4 @@ const LandingNavbar = () => {
 };
 
 export default LandingNavbar;
+
