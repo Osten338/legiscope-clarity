@@ -5,30 +5,13 @@ import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { GradientText } from "@/components/ui/gradient-text";
 import { WavyBackground } from "@/components/ui/wavy-background";
-
 export const LandingHero = () => {
-  return (
-    <WavyBackground
-      className="w-full"
-      containerClassName="relative w-full min-h-[85vh]"
-      colors={["#38bdf8", "#818cf8", "#c084fc", "#22d3ee"]}
-      waveWidth={100}
-      backgroundFill="black"
-      blur={10}
-      speed="slow"
-      waveOpacity={0.5}
-    >
+  return <WavyBackground className="w-full" containerClassName="relative w-full min-h-[85vh]" colors={["#38bdf8", "#818cf8", "#c084fc", "#22d3ee"]} waveWidth={100} backgroundFill="black" blur={10} speed="slow" waveOpacity={0.5}>
       <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh]">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 z-10 relative">
           {/* Subtle abstract shape overlays */}
-          <div
-            aria-hidden="true"
-            className="absolute -top-16 -left-20 w-72 h-72 rounded-full blur-3xl opacity-30 bg-brand-blue"
-          />
-          <div
-            aria-hidden="true"
-            className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-900"
-          />
+          <div aria-hidden="true" className="absolute -top-16 -left-20 w-72 h-72 rounded-full blur-3xl opacity-30 bg-brand-blue" />
+          <div aria-hidden="true" className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-900" />
           <div className="lg:w-1/2 text-white">
             <ScrollReveal>
               <span className="inline-block mb-6 px-4 py-1.5 rounded-full bg-white/10 text-brand-blue text-sm font-medium border border-white/10">
@@ -38,7 +21,7 @@ export const LandingHero = () => {
 
             <ScrollReveal delay={0.1}>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-ibm-plex-sans font-bold leading-tight mb-6">
-                <GradientText className="font-ibm-plex-sans">
+                <GradientText className="font-ibm-plex-sans text-slate-50">
                   Clarity for your compliance operations
                 </GradientText>
               </h1>
@@ -65,12 +48,16 @@ export const LandingHero = () => {
             </ScrollReveal>
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="lg:w-1/2 flex justify-center"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          scale: 0.95
+        }} animate={{
+          opacity: 1,
+          scale: 1
+        }} transition={{
+          duration: 0.5,
+          delay: 0.4
+        }} className="lg:w-1/2 flex justify-center">
             {/* Modern dashboard preview */}
             <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md">
               <div className="text-white/90 flex items-center gap-2 mb-3">
@@ -94,6 +81,5 @@ export const LandingHero = () => {
           </motion.div>
         </div>
       </section>
-    </WavyBackground>
-  );
+    </WavyBackground>;
 };
