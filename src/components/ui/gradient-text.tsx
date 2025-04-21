@@ -22,18 +22,12 @@ export function GradientText({
   return (
     <MotionComponent
       className={cn(
-        "relative inline-flex overflow-hidden bg-black",
+        "relative inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500",
         className
       )}
       {...props}
     >
       {children}
-      <span className="pointer-events-none absolute inset-0">
-        <span className="pointer-events-none absolute -top-1/2 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-1_12s_ease-in-out_infinite_alternate] bg-blue-500 opacity-30 blur-[1rem]"></span>
-        <span className="pointer-events-none absolute right-0 top-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-2_12s_ease-in-out_infinite_alternate] bg-indigo-500 opacity-30 blur-[1rem]"></span>
-        <span className="pointer-events-none absolute bottom-0 left-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-3_12s_ease-in-out_infinite_alternate] bg-purple-500 opacity-30 blur-[1rem]"></span>
-        <span className="pointer-events-none absolute -bottom-1/2 right-0 h-[30vw] w-[30vw] animate-[gradient-border_6s_ease-in-out_infinite,gradient-4_12s_ease-in-out_infinite_alternate] bg-blue-400 opacity-30 blur-[1rem]"></span>
-      </span>
     </MotionComponent>
   );
 }
