@@ -84,7 +84,6 @@ export const LandingHero = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="lg:w-1/2 flex justify-center relative"
         >
-          <WorldMap dots={dots} lineColor="#3B82F6" />
           <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md backdrop-blur-sm">
             <div className="text-white/90 flex items-center gap-2 mb-3">
               <span className="font-medium">Compliance Dashboard</span>
