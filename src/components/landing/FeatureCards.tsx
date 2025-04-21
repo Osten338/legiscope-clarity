@@ -7,20 +7,23 @@ const features = [
   {
     title: "Compliance Assessment",
     description: "Automate your process to spot compliance gaps and risks at a glance.",
-    icon: <Check className="size-4 text-blue-300" />,
-    iconClassName: "text-blue-500",
+    icon: <Check className="size-5 text-blue-600" />,
+    iconClassName: "bg-blue-50",
+    titleClassName: "text-gray-800",
   },
   {
     title: "Automated Reporting",
     description: "Generate audit trails and reports with just one click—no more manual red tape.",
-    icon: <FileText className="size-4 text-blue-300" />,
-    iconClassName: "text-blue-500",
+    icon: <FileText className="size-5 text-blue-600" />,
+    iconClassName: "bg-blue-50",
+    titleClassName: "text-gray-800",
   },
   {
     title: "User Roles",
     description: "Granular access for every role, from legal to leadership. Teamwork made simple.",
-    icon: <Users className="size-4 text-blue-300" />,
-    iconClassName: "text-blue-500",
+    icon: <Users className="size-5 text-blue-600" />,
+    iconClassName: "bg-blue-50",
+    titleClassName: "text-gray-800",
   },
 ];
 
@@ -46,4 +49,3 @@ export const FeatureCards = () => {
     </section>
   );
 };
-
