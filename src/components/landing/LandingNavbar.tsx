@@ -2,10 +2,39 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
+import { useEffect, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const LandingNavbar = () => {
+  const { scrollY } = useScroll();
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    return scrollY.onChange((latest) => {
+      setHasScrolled(latest > 50);
+    });
+  }, [scrollY]);
+
+  const backgroundColor = useTransform(
+    scrollY,
+    [0, 50],
+    ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.95)"]
+  );
+
+  const backdropBlur = useTransform(
+    scrollY,
+    [0, 50],
+    ["blur(0px)", "blur(8px)"]
+  );
+
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 border-b bg-black/95 backdrop-blur-xl shadow-sm"> 
+    <motion.div 
+      className="fixed top-0 left-0 right-0 z-50 border-b border-white/10"
+      style={{
+        backgroundColor,
+        backdropFilter: backdropBlur,
+      }}
+    >
       <div className="flex h-16 items-center px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-2 font-semibold text-white">
           <Shield className="h-6 w-6 text-brand-blue" />
@@ -22,7 +51,7 @@ const LandingNavbar = () => {
           </Button>
         </nav>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

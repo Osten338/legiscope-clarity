@@ -1,7 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
 
 export const LandingHero = () => {
   return (
@@ -17,28 +18,45 @@ export const LandingHero = () => {
       />
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 z-10 relative">
         <div className="lg:w-1/2 text-white">
-          <span className="inline-block mb-6 px-4 py-1.5 rounded-full bg-white/10 text-brand-blue text-sm font-medium border border-white/10">
-            Your Compliance Operations, Simplified
-          </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-ibm-plex-sans font-bold leading-tight mb-6">
-            Clarity for your compliance operations
-          </h1>
-          <p className="text-lg md:text-xl max-w-xl mb-8 leading-relaxed text-white/80">
-            Effortlessly manage regulatory requirements with an intuitive platform designed to simplify complex compliance tasks.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Button asChild size="lg" className="bg-brand-blue hover:bg-brand-blue/90 px-8 py-6 text-base rounded-md shadow-md font-semibold text-white">
-              <Link to="/auth" className="flex items-center">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="text-base bg-transparent border border-white/20 text-white hover:bg-white/10">
-              <Link to="#features">See Features</Link>
-            </Button>
-          </div>
+          <ScrollReveal>
+            <span className="inline-block mb-6 px-4 py-1.5 rounded-full bg-white/10 text-brand-blue text-sm font-medium border border-white/10">
+              Your Compliance Operations, Simplified
+            </span>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.1}>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-ibm-plex-sans font-bold leading-tight mb-6">
+              Clarity for your compliance operations
+            </h1>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.2}>
+            <p className="text-lg md:text-xl max-w-xl mb-8 leading-relaxed text-white/80">
+              Effortlessly manage regulatory requirements with an intuitive platform designed to simplify complex compliance tasks.
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.3}>
+            <div className="flex flex-wrap gap-4">
+              <Button asChild size="lg" className="bg-brand-blue hover:bg-brand-blue/90 px-8 py-6 text-base rounded-md shadow-md font-semibold text-white">
+                <Link to="/auth" className="flex items-center">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="text-base bg-transparent border border-white/20 text-white hover:bg-white/10">
+                <Link to="#features">See Features</Link>
+              </Button>
+            </div>
+          </ScrollReveal>
         </div>
-        <div className="lg:w-1/2 flex justify-center">
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="lg:w-1/2 flex justify-center"
+        >
           {/* Modern dashboard preview */}
           <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md">
             <div className="text-white/90 flex items-center gap-2 mb-3">
@@ -59,7 +77,7 @@ export const LandingHero = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
