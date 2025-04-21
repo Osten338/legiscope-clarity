@@ -22,19 +22,20 @@ export const FloatingNav = ({
   className?: string;
 }) => {
   const { scrollYProgress } = useScroll();
-  const [visible, setVisible] = useState(false);
+  // Initialize visible as true so it shows by default
+  const [visible, setVisible] = useState(true);
 
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     if (typeof current === "number") {
       let direction = current! - scrollYProgress.getPrevious()!;
 
       if (scrollYProgress.get() < 0.05) {
-        setVisible(false);
+        setVisible(true); // Always visible when at the top
       } else {
         if (direction < 0) {
-          setVisible(true);
+          setVisible(true); // Show when scrolling up
         } else {
-          setVisible(false);
+          setVisible(false); // Hide when scrolling down
         }
       }
     }
@@ -45,7 +46,7 @@ export const FloatingNav = ({
       <motion.div
         initial={{
           opacity: 1,
-          y: -100,
+          y: 0, // Start at normal position instead of -100
         }}
         animate={{
           y: visible ? 0 : -100,
