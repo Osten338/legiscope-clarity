@@ -56,36 +56,36 @@ const plans = [
 
 export const PricingPlans = () => {
   return (
-    <section className="py-16 px-4 md:px-6 lg:px-8 bg-sage-50" id="pricing">
+    <section className="py-16 px-4 md:px-6 lg:px-8 bg-black" id="pricing">
       <div className="max-w-5xl mx-auto text-center mb-12">
-        <h2 className="text-3xl font-serif font-medium mb-3">Simple, transparent pricing</h2>
-        <p className="text-slate-600">Choose the plan that's right for your business</p>
+        <h2 className="text-3xl font-bold text-white mb-3">Simple, transparent pricing</h2>
+        <p className="text-white/80">Choose the plan that's right for your business</p>
       </div>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
-            <div key={index} className="border rounded-lg bg-white p-6 relative">
+            <div key={index} className="border border-white/10 rounded-lg bg-white/5 backdrop-blur-sm p-6 relative hover:bg-white/10 transition-all duration-300">
               {plan.popular && (
-                <Badge className="absolute top-4 right-4 bg-sage-600">
+                <Badge className="absolute top-4 right-4 bg-brand-blue text-white border-none">
                   Most Popular
                 </Badge>
               )}
-              <h3 className="text-xl font-medium mb-2">{plan.name}</h3>
+              <h3 className="text-xl font-medium mb-2 text-white">{plan.name}</h3>
               <div className="mb-4">
-                <span className="text-3xl font-bold">{plan.price}</span>
-                <span className="text-slate-500">/month</span>
+                <span className="text-3xl font-bold text-white">{plan.price}</span>
+                <span className="text-white/70">/month</span>
               </div>
-              <p className="text-slate-600 text-sm mb-6">{plan.description}</p>
+              <p className="text-white/70 text-sm mb-6">{plan.description}</p>
               <ul className="mb-8 space-y-3">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start gap-2 text-sm">
-                    <Check className="h-5 w-5 text-sage-500 shrink-0 mt-0.5" />
-                    <span>{feature}</span>
+                    <Check className="h-5 w-5 text-brand-blue shrink-0 mt-0.5" />
+                    <span className="text-white/80">{feature}</span>
                   </li>
                 ))}
               </ul>
               <Button 
-                className={`w-full ${plan.popular ? 'bg-sage-600 hover:bg-sage-700' : 'bg-sage-600/90 hover:bg-sage-600'}`}
+                className={`w-full ${plan.popular ? 'bg-brand-blue hover:bg-brand-blue/90' : 'bg-white/10 hover:bg-white/20 border border-white/10'} transition-colors duration-300`}
                 asChild
               >
                 <a href={plan.buttonAction}>{plan.buttonText}</a>
