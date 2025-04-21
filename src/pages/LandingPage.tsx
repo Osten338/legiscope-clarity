@@ -6,10 +6,12 @@ import { PricingPlans } from "@/components/landing/PricingPlans";
 import { KeyFeatures } from "@/components/landing/KeyFeatures";
 import { LegislationUpdates } from "@/components/landing/LegislationUpdates";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { ParallaxBackground } from "@/components/animations/ParallaxBackground";
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <ParallaxBackground />
       <LandingNavbar />
       <main>
         <LandingHero />
