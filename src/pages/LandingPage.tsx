@@ -1,7 +1,6 @@
 
 import LandingNavbar from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
-import { FeatureCards } from "@/components/landing/FeatureCards";
 import { PricingPlans } from "@/components/landing/PricingPlans";
 import { KeyFeatures } from "@/components/landing/KeyFeatures";
 import { LegislationUpdates } from "@/components/landing/LegislationUpdates";
@@ -16,7 +15,6 @@ const LandingPage = () => {
         <LandingNavbar />
         <main>
           <LandingHero />
-          <FeatureCards />
           <KeyFeatures />
           <LegislationUpdates />
           <PricingPlans />
