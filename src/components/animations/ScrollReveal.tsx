@@ -36,11 +36,15 @@ export const ScrollReveal = ({
         x: 0,
         y: 0,
       }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ 
+        once: true, 
+        amount: 0.2,  // Trigger when at least 20% of the element is in view
+        margin: "-100px 0px" // Offset when animation triggers
+      }}
       transition={{
-        duration: 0.5,
+        duration: 0.7,
         delay,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.22, 1, 0.36, 1], // Custom easing function
       }}
       className={className}
     >

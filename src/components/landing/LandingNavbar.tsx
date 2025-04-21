@@ -10,9 +10,11 @@ const LandingNavbar = () => {
   const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
-    return scrollY.onChange((latest) => {
+    const unsubscribe = scrollY.on("change", (latest) => {
       setHasScrolled(latest > 50);
     });
+    
+    return () => unsubscribe();
   }, [scrollY]);
 
   const backgroundColor = useTransform(
