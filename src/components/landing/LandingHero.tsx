@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { GradientText } from "@/components/ui/gradient-text";
 
 export const LandingHero = () => {
   return (
@@ -27,7 +28,9 @@ export const LandingHero = () => {
 
           <ScrollReveal delay={0.1}>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-ibm-plex-sans font-bold leading-tight mb-6">
-              Clarity for your compliance operations
+              <GradientText className="font-ibm-plex-sans">
+                Clarity for your compliance operations
+              </GradientText>
             </h1>
           </ScrollReveal>
 
