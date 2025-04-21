@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -8,15 +7,6 @@ import { ScrollReveal } from "@/components/animations/ScrollReveal";
 export const LandingHero = () => {
   return (
     <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh] bg-black">
-      {/* Subtle abstract shape overlays */}
-      <div
-        aria-hidden="true"
-        className="absolute -top-16 -left-20 w-72 h-72 rounded-full blur-3xl opacity-30 bg-brand-blue"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-900"
-      />
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 z-10 relative">
         <div className="lg:w-1/2 text-white">
           <ScrollReveal>
@@ -58,7 +48,6 @@ export const LandingHero = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="lg:w-1/2 flex justify-center"
         >
-          {/* Modern dashboard preview */}
           <div className="relative bg-gradient-to-br from-black/70 to-black/40 border border-white/10 shadow-xl rounded-xl px-6 py-8 w-full max-w-md">
             <div className="text-white/90 flex items-center gap-2 mb-3">
               <span className="font-medium">Compliance Dashboard</span>
