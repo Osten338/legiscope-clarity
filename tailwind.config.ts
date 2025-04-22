@@ -1,4 +1,3 @@
-
 import { type Config } from "tailwindcss";
 
 export default {
@@ -134,11 +133,15 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        marquee: 'marquee var(--duration) linear infinite',
       },
       boxShadow: {
         'sm': '0 2px 8px rgba(0, 0, 0, 0.03)',
         'md': '0 4px 20px rgba(0, 0, 0, 0.05)',
         'lg': '0 10px 30px rgba(0, 0, 0, 0.08)',
+      },
+      maxWidth: {
+        container: "1280px",
       },
     },
   },
