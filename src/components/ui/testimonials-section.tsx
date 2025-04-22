@@ -21,7 +21,7 @@ export function TestimonialsSection({
 }: TestimonialsSectionProps) {
   return (
     <section className={cn(
-      "bg-black text-white", // Changed from bg-background to bg-black
+      "bg-background text-foreground",
       "py-12 sm:py-24 md:py-32 px-0",
       className
     )}>
