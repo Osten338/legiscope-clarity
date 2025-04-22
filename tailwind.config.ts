@@ -85,6 +85,11 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+        'ibm-plex': ['IBM Plex Sans', 'sans-serif'],
+        'dm-sans': ['DM Sans', 'sans-serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
