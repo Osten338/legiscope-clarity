@@ -1,4 +1,3 @@
-
 import { type Config } from "tailwindcss";
 
 export default {
@@ -95,6 +94,14 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         "2xl": "1rem",
       },
+      maxWidth: {
+        container: "1280px",
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        marquee: 'marquee var(--duration) linear infinite',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -130,15 +137,10 @@ export default {
           "50%": { bottom: "25%", right: "40%" },
           "90%": { bottom: "50%", right: "25%" },
         },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-      },
-      boxShadow: {
-        'sm': '0 2px 8px rgba(0, 0, 0, 0.03)',
-        'md': '0 4px 20px rgba(0, 0, 0, 0.05)',
-        'lg': '0 10px 30px rgba(0, 0, 0, 0.08)',
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(calc(-100% - var(--gap)))' }
+        },
       },
     },
   },

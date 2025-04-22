@@ -6,6 +6,7 @@ import { KeyFeatures } from "@/components/landing/KeyFeatures";
 import { LegislationUpdates } from "@/components/landing/LegislationUpdates";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { AuroraBackground } from "@/components/landing/AuroraBackground";
+import { LandingTestimonials } from "@/components/landing/LandingTestimonials";
 
 const LandingPage = () => {
   return (
@@ -17,6 +18,7 @@ const LandingPage = () => {
           <LandingHero />
           <KeyFeatures />
           <LegislationUpdates />
+          <LandingTestimonials />
           <PricingPlans />
         </main>
         <LandingFooter />
