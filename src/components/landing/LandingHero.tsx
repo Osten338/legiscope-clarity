@@ -7,7 +7,6 @@ import { GradientText } from "@/components/ui/gradient-text";
 import { WavyBackground } from "@/components/ui/wavy-background";
 import DisplayCards from "@/components/ui/display-cards";
 import { Check, FileText, Users } from "lucide-react";
-
 const features = [{
   title: "Compliance Assessment",
   description: "Automate your process to spot compliance gaps and risks at a glance.",
@@ -30,7 +29,6 @@ const features = [{
   titleClassName: "text-blue-500",
   className: "[grid-area:stack] translate-x-24 translate-y-20 hover:translate-y-10"
 }];
-
 export const LandingHero = () => {
   return <WavyBackground className="w-full" containerClassName="relative w-full min-h-[85vh]" colors={["#38bdf8", "#818cf8", "#c084fc", "#22d3ee"]} waveWidth={100} backgroundFill="black" blur={10} speed="slow" waveOpacity={0.5}>
       <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh]">
@@ -40,7 +38,7 @@ export const LandingHero = () => {
           <div aria-hidden="true" className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-20 bg-indigo-900" />
           <div className="lg:w-1/2 text-white">
             <ScrollReveal>
-              <span className="inline-block mb-6 px-4 py-1.5 rounded-full bg-white/10 text-brand-blue text-sm font-medium border border-white/10">
+              <span className="inline-block mb-6 px-4 py-1.5 rounded-full bg-white/10 text-sm font-medium border border-white/10 text-zinc-100">
                 Your Compliance Operations, Simplified
               </span>
             </ScrollReveal>
