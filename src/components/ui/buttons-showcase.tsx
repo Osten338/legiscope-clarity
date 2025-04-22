@@ -1,15 +1,36 @@
+
 "use client";
 import React from "react";
-import reactElementToJSXString from "react-element-to-jsx-string";
 import { ButtonsCard } from "@/components/ui/buttons-card";
 import { toast } from "sonner";
+
+// Try to import the package, but gracefully handle if it's not available
+let reactElementToJSXString: any;
+try {
+  reactElementToJSXString = require("react-element-to-jsx-string").default;
+} catch (error) {
+  console.error("Error importing react-element-to-jsx-string:", error);
+  // We'll handle the fallback in the copy function
+}
 
 const copy = (button: any) => {
   if (button.code) {
     copyToClipboard(button.code);
     return;
   }
-  let buttonString = reactElementToJSXString(button.component);
+  
+  let buttonString = "";
+  try {
+    if (reactElementToJSXString) {
+      buttonString = reactElementToJSXString(button.component);
+    } else {
+      // Fallback if the library isn't available
+      buttonString = "/* Unable to convert component to string. Please install react-element-to-jsx-string */";
+    }
+  } catch (err) {
+    console.error("Error converting element to string:", err);
+    buttonString = "/* Error converting component to string */";
+  }
 
   if (buttonString) {
     copyToClipboard(buttonString);
@@ -282,3 +303,4 @@ export function ButtonsShowcase() {
     </div>
   );
 }
+
