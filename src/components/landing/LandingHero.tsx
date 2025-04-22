@@ -1,5 +1,4 @@
 
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,6 +7,7 @@ import { GradientText } from "@/components/ui/gradient-text";
 import { WavyBackground } from "@/components/ui/wavy-background";
 import DisplayCards from "@/components/ui/display-cards";
 import { Check, FileText, Users } from "lucide-react";
+import { Typography, Lead } from "@/components/ui/typography";
 
 const features = [{
   title: "Compliance Assessment",
@@ -47,17 +47,17 @@ export const LandingHero = () => {
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-inter font-bold leading-tight mb-6">
-                <GradientText className="font-inter text-zinc-50 font-bold tracking-tighter">
+              <Typography variant="h1" className="mb-6 font-bold">
+                <GradientText className="font-bold tracking-tighter">
                   Clarity for your compliance operations
                 </GradientText>
-              </h1>
+              </Typography>
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <p className="text-lg md:text-xl max-w-xl mb-8 leading-relaxed text-white/80 font-inter">
+              <Lead className="max-w-xl mb-8 text-white/80">
                 Effortlessly manage regulatory requirements with an intuitive platform designed to simplify complex compliance tasks.
-              </p>
+              </Lead>
             </ScrollReveal>
 
             <ScrollReveal delay={0.3}>

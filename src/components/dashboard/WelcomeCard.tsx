@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+import { Heading2, Body } from "@/components/ui/typography";
 
 export const WelcomeCard = () => {
   return (
@@ -13,12 +14,12 @@ export const WelcomeCard = () => {
           <Shield className="w-8 h-8 text-brand" />
         </div>
         <div>
-          <h2 className="text-2xl font-medium text-neutral-900 mb-2">
+          <Heading2 className="mb-2">
             Welcome to Your Compliance Dashboard
-          </h2>
-          <p className="text-neutral-600 leading-relaxed">
+          </Heading2>
+          <Body className="text-foreground/70">
             Stay on top of your regulatory requirements and compliance status.
-          </p>
+          </Body>
         </div>
       </CardContent>
     </Card>

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
@@ -40,37 +41,77 @@
   }
 
   body {
-    @apply text-foreground font-inter antialiased;
+    @apply font-inter antialiased text-foreground;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  /* Typography System */
+  .typography-display {
+    @apply font-inter font-bold tracking-tighter text-foreground;
+  }
+  
+  .typography-heading {
     @apply font-inter font-semibold tracking-tight text-foreground;
   }
 
-  h1 {
-    @apply text-3xl md:text-4xl lg:text-5xl;
+  .typography-title {
+    @apply font-inter font-medium text-foreground;
   }
 
-  h2 {
-    @apply text-2xl md:text-3xl;
+  .typography-body {
+    @apply font-inter text-foreground/90 leading-relaxed;
+  }
+  
+  .typography-label {
+    @apply font-inter font-medium text-sm text-foreground/80;
+  }
+  
+  .typography-caption {
+    @apply font-inter text-xs text-foreground/70;
   }
 
-  h3 {
-    @apply text-xl md:text-2xl;
+  /* Heading Sizes */
+  h1, .h1 {
+    @apply typography-heading text-4xl md:text-5xl lg:text-6xl;
   }
 
-  h4 {
-    @apply text-lg md:text-xl;
+  h2, .h2 {
+    @apply typography-heading text-3xl md:text-4xl;
   }
 
-  p {
-    @apply text-base md:text-lg text-neutral-600 leading-relaxed;
+  h3, .h3 {
+    @apply typography-heading text-2xl md:text-3xl;
+  }
+
+  h4, .h4 {
+    @apply typography-heading text-xl md:text-2xl;
+  }
+
+  h5, .h5 {
+    @apply typography-title text-lg md:text-xl;
+  }
+
+  h6, .h6 {
+    @apply typography-title text-base md:text-lg;
+  }
+
+  /* Paragraph Styles */
+  p, .text-body {
+    @apply typography-body text-base md:text-lg;
+  }
+
+  .text-lead {
+    @apply typography-body text-lg md:text-xl font-medium;
+  }
+
+  .text-small {
+    @apply typography-body text-sm;
   }
 
   .text-muted {
-    @apply text-neutral-500;
+    @apply text-foreground/60;
   }
 
+  /* Keep the rest of the existing CSS */
   .glass-panel {
     @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-lg;
   }
@@ -107,11 +148,11 @@
   }
 
   .section-header {
-    @apply uppercase text-xs font-medium tracking-wider text-neutral-500 mb-2;
+    @apply uppercase text-xs font-medium tracking-wider text-foreground/60 mb-2;
   }
 
   .content-divider {
-    @apply border-b border-neutral-200 my-6;
+    @apply border-b border-white/10 my-6;
   }
 
   .delay-100 {
