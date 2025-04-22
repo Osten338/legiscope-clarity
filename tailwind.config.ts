@@ -1,3 +1,4 @@
+
 import { type Config } from "tailwindcss";
 
 export default {
@@ -17,13 +18,9 @@ export default {
       },
     },
     extend: {
-      fontFamily: {
-        inter: ['Inter', 'sans-serif'],
-        'dm-sans': ['"DM Sans"', 'sans-serif'],
-        'ibm-plex-sans': ['"IBM Plex Sans"', 'sans-serif'],
-        serif: ['Addington CF', 'serif'],
-      },
       colors: {
+        brand: "hsl(var(--brand))",
+        "brand-foreground": "hsl(var(--brand-foreground))",
         sage: {
           '50': '#f6f7f6',
           '100': '#e3e5e3',
@@ -102,6 +99,8 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         marquee: 'marquee var(--duration) linear infinite',
         shimmer: "shimmer 2s linear infinite",
+        appear: "appear 0.5s ease-out forwards",
+        "appear-zoom": "appear-zoom 0.5s ease-out forwards"
       },
       keyframes: {
         "accordion-down": {
@@ -150,6 +149,14 @@ export default {
             backgroundPosition: "-200% 0"
           }
         },
+        appear: {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" }
+        },
+        "appear-zoom": {
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "100%": { opacity: "1", transform: "scale(1)" }
+        }
       },
     },
   },

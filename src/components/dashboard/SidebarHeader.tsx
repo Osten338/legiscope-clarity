@@ -1,5 +1,7 @@
 
 import { X } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
+import { Button } from "@/components/ui/button";
 
 interface SidebarHeaderProps {
   mobile?: boolean;
@@ -10,30 +12,24 @@ export const SidebarHeader = ({ mobile, onClose }: SidebarHeaderProps) => {
   if (!mobile) {
     return (
       <div className="flex h-16 shrink-0 items-center">
-        <img
-          alt="Your Company"
-          src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-          className="h-8 w-auto"
-        />
+        <Icons.logo className="h-8 w-8 text-brand" />
       </div>
     );
   }
 
   return (
     <div className="flex h-16 shrink-0 items-center justify-between">
-      <img
-        alt="Your Company"
-        src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-        className="h-8 w-auto"
-      />
+      <Icons.logo className="h-8 w-8 text-brand" />
       {onClose && (
-        <button
-          type="button"
-          className="text-slate-600 hover:text-slate-700"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
+          className="rounded-full"
         >
-          <X className="h-6 w-6" />
-        </button>
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close sidebar</span>
+        </Button>
       )}
     </div>
   );

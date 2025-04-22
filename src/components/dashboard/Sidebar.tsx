@@ -10,6 +10,7 @@ import { Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/ui/icons";
 
 interface Links {
   label: string;
@@ -96,7 +97,7 @@ export const DesktopSidebarContent = () => {
   
   return (
     <motion.div
-      className="h-full flex flex-col gap-y-5 overflow-y-auto border-r border-slate-200 bg-white px-6 pb-4"
+      className="h-full flex flex-col gap-y-5 overflow-y-auto border-r border-neutral-200 bg-card/80 backdrop-blur-md px-6 pb-4"
       animate={{
         width: animate ? (open ? "18rem" : "5rem") : "18rem",
       }}
@@ -115,9 +116,9 @@ export const DesktopSidebarContent = () => {
               link={{
                 label: "Settings",
                 href: "/settings",
-                icon: <Settings className="h-6 w-6 shrink-0 text-slate-400 group-hover:text-indigo-600" />
+                icon: <Settings className="h-6 w-6 shrink-0 text-neutral-400 group-hover:text-brand" />
               }}
-              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600" 
+              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 hover:text-brand" 
             />
             <button
               onClick={handleSignOut}
@@ -153,8 +154,24 @@ export const MobileSidebarContent = ({ onClose }: { onClose?: () => void }) => {
   };
   
   return (
-    <div className="flex h-full w-72 flex-col gap-y-5 overflow-y-auto border-r border-slate-200 bg-white px-6 pb-4">
-      <SidebarHeader mobile onClose={onClose} />
+    <div className="flex h-full w-72 flex-col gap-y-5 overflow-y-auto border-r border-neutral-200 bg-card px-6 pb-4">
+      <div className="flex h-16 shrink-0 items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icons.logo className="h-8 w-8 text-brand" />
+          <span className="font-semibold text-lg">Dashboard</span>
+        </div>
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="rounded-full"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close sidebar</span>
+          </Button>
+        )}
+      </div>
       
       <nav className="flex flex-1 flex-col">
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -164,16 +181,16 @@ export const MobileSidebarContent = ({ onClose }: { onClose?: () => void }) => {
           <li className="mt-auto space-y-2">
             <Link
               to="/settings"
-              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+              className="group flex gap-x-3 rounded-md p-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 hover:text-brand"
             >
               <Settings
-                className="h-6 w-6 shrink-0 text-slate-400 group-hover:text-indigo-600"
+                className="h-6 w-6 shrink-0 text-neutral-400 group-hover:text-brand"
               />
               Settings
             </Link>
             <button
               onClick={handleSignOut}
-              className="group -mx-2 flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+              className="group flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold text-red-600 hover:bg-red-50"
             >
               <LogOut
                 className="h-6 w-6 shrink-0 text-red-400 group-hover:text-red-600"
@@ -210,7 +227,7 @@ export const SidebarLink = ({
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="text-slate-700 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
+        className="text-neutral-700 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
       >
         {link.label}
       </motion.span>

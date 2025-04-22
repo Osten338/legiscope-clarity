@@ -29,6 +29,13 @@
     --input: 220 13% 91%;
     --ring: 155 15% 45%;
     --radius: 1rem;
+    --brand: 27 96% 61%;
+    --brand-foreground: 31 97% 72%;
+  }
+
+  .dark {
+    --brand: 31 97% 72%;
+    --brand-foreground: 27 96% 61%
   }
 
   html, body {
@@ -111,7 +118,19 @@
   }
 
   .content-divider {
-    @apply border-b border-slate-200 my-6;
+    @apply border-b border-neutral-200 my-6;
+  }
+
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  .delay-700 {
+    animation-delay: 700ms;
+  }
+  .delay-1000 {
+    animation-delay: 1000ms;
   }
 }
-

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 type ChecklistItem = {
   id: string;
@@ -95,16 +96,16 @@ export const RegulationsList = ({
 
   if (!uniqueRegulations || uniqueRegulations.length === 0) {
     return (
-      <Card>
+      <Card className="animate-appear delay-300 bg-card/80 backdrop-blur-md border-neutral-200">
         <CardHeader>
-          <CardTitle className="font-serif">Active Regulations</CardTitle>
-          <CardDescription className="font-serif">
+          <CardTitle className="text-lg font-medium">Active Regulations</CardTitle>
+          <CardDescription>
             No regulations have been saved to your dashboard yet
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex justify-center my-8">
-            <Button asChild>
+            <Button asChild className="bg-brand hover:bg-brand/90">
               <a href="/assessment">Perform Business Analysis</a>
             </Button>
           </div>
@@ -114,47 +115,70 @@ export const RegulationsList = ({
   }
 
   return (
-    <Card>
+    <Card className="animate-appear delay-300 bg-card/80 backdrop-blur-md border-neutral-200">
       <CardHeader>
-        <CardTitle className="font-serif">Active Regulations</CardTitle>
-        <CardDescription className="font-serif">
-          Detailed view of all your compliance requirements
-        </CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-lg font-medium">Active Regulations</CardTitle>
+            <CardDescription>
+              Detailed view of all your compliance requirements
+            </CardDescription>
+          </div>
+          <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20">
+            {uniqueRegulations.length} active
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {uniqueRegulations.map(saved => {
+          {uniqueRegulations.map((saved, index) => {
             if (!saved.regulations) return null;
             const StatusIcon = statusIcons[saved.status as keyof typeof statusIcons]?.icon || Clock;
-            const statusColor = statusIcons[saved.status as keyof typeof statusIcons]?.class || "text-slate-400";
+            const statusColor = statusIcons[saved.status as keyof typeof statusIcons]?.class || "text-neutral-400";
+            const badgeColor = saved.status === 'compliant' ? 'bg-emerald-500' : 
+                             saved.status === 'in_progress' ? 'bg-amber-500' : 
+                             saved.status === 'not_compliant' ? 'bg-red-500' : 'bg-blue-500';
+            
             return (
-              <div key={saved.id} className="space-y-2">
+              <div 
+                key={saved.id} 
+                className="space-y-2 animate-appear"
+                style={{ animationDelay: `${300 + (index * 100)}ms` }}
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <div className="flex items-center gap-2 flex-1">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <StatusIcon className={cn("w-5 h-5", statusColor)} />
+                          <div className="flex items-center gap-1.5">
+                            <Badge className={cn("w-2 h-2 p-0 rounded-full", badgeColor)} />
+                            <StatusIcon className={cn("w-4 h-4", statusColor)} />
+                          </div>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>{getStatusText(saved.status)}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                    <div className="h-2 flex-1 bg-slate-100 rounded-full">
+                    <div className="h-2 flex-1 bg-neutral-100 rounded-full">
                       <div 
-                        className="h-2 bg-sage-500 rounded-full transition-all duration-500" 
+                        className={cn(
+                          "h-2 rounded-full transition-all duration-500",
+                          saved.status === 'compliant' ? 'bg-emerald-500' : 
+                          saved.status === 'in_progress' ? 'bg-amber-500' : 
+                          saved.status === 'not_compliant' ? 'bg-red-500' : 'bg-blue-500'
+                        )}
                         style={{
                           width: `${saved.progress}%`
                         }} 
                       />
                     </div>
-                    <span className="text-sm text-slate-600">{saved.progress}%</span>
+                    <span className="text-sm text-neutral-600">{saved.progress}%</span>
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <X className="h-4 w-4 text-slate-500 hover:text-slate-900" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                        <X className="h-4 w-4 text-neutral-500 hover:text-neutral-900" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -166,7 +190,7 @@ export const RegulationsList = ({
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleRemoveRegulation(saved.id)}>
+                        <AlertDialogAction onClick={() => handleRemoveRegulation(saved.id)} className="bg-red-500 hover:bg-red-600">
                           Remove
                         </AlertDialogAction>
                       </AlertDialogFooter>
