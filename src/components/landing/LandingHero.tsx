@@ -7,6 +7,7 @@ import { GradientText } from "@/components/ui/gradient-text";
 import { WavyBackground } from "@/components/ui/wavy-background";
 import DisplayCards from "@/components/ui/display-cards";
 import { Check, FileText, Users } from "lucide-react";
+
 const features = [{
   title: "Compliance Assessment",
   description: "Automate your process to spot compliance gaps and risks at a glance.",
@@ -29,6 +30,7 @@ const features = [{
   titleClassName: "text-blue-500",
   className: "[grid-area:stack] translate-x-24 translate-y-20 hover:translate-y-10"
 }];
+
 export const LandingHero = () => {
   return <WavyBackground className="w-full" containerClassName="relative w-full min-h-[85vh]" colors={["#38bdf8", "#818cf8", "#c084fc", "#22d3ee"]} waveWidth={100} backgroundFill="black" blur={10} speed="slow" waveOpacity={0.5}>
       <section className="relative w-full pt-32 pb-20 px-4 md:px-8 lg:px-0 flex items-center min-h-[85vh]">
@@ -59,15 +61,13 @@ export const LandingHero = () => {
 
             <ScrollReveal delay={0.3}>
               <div className="flex flex-wrap gap-4">
-                <Button asChild size="lg" className="bg-brand-blue hover:bg-brand-blue/90 px-8 py-6 text-base rounded-md shadow-md font-semibold text-white">
-                  <Link to="/auth" className="flex items-center">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="text-base bg-transparent border border-white/20 text-white hover:bg-white/10">
-                  <Link to="#features">See Features</Link>
-                </Button>
+                <Link to="/auth" className="relative inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-8 font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 hover:bg-slate-800">
+                  <span>Start Free Trial</span>
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+                <Link to="#features" className="px-8 py-3 rounded-md border border-white/20 bg-white/5 text-white hover:bg-white/10 transition-colors duration-200">
+                  See Features
+                </Link>
               </div>
             </ScrollReveal>
           </div>

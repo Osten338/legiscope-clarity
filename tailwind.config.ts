@@ -101,6 +101,7 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         marquee: 'marquee var(--duration) linear infinite',
+        shimmer: "shimmer 2s linear infinite",
       },
       keyframes: {
         "accordion-down": {
@@ -140,6 +141,14 @@ export default {
         marquee: {
           from: { transform: 'translateX(0)' },
           to: { transform: 'translateX(calc(-100% - var(--gap)))' }
+        },
+        shimmer: {
+          from: {
+            backgroundPosition: "0 0"
+          },
+          to: {
+            backgroundPosition: "-200% 0"
+          }
         },
       },
     },
