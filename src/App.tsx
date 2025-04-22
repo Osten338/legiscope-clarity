@@ -123,11 +123,11 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50">
+          <div className="min-h-screen bg-background text-foreground">
             <TooltipProvider>
               <Toaster />
               <Sonner />
