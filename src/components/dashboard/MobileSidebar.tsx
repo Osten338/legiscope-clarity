@@ -1,13 +1,23 @@
 
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { Icons } from "@/components/ui/icons";
+import { SidebarNavigation } from "./SidebarNavigation";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const MobileSidebar = ({ onClose }: { onClose?: () => void }) => {
   const { open, setOpen } = useSidebar();
+  const navigate = useNavigate();
+  
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth");
+  };
   
   return (
     <>

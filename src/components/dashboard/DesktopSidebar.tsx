@@ -5,12 +5,16 @@ import { cn } from "@/lib/utils";
 import { Settings, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SidebarNavigation } from "./SidebarNavigation";
+import { Icons } from "@/components/ui/icons";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const DesktopSidebar = ({
   className,
   ...props
 }: React.ComponentProps<typeof motion.div>) => {
   const { open, setOpen, animate } = useSidebar();
+  const navigate = useNavigate();
   
   const handleSignOut = async () => {
     await supabase.auth.signOut();
