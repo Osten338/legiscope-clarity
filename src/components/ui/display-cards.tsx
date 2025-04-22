@@ -1,3 +1,4 @@
+
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -33,10 +34,10 @@ function DisplayCard({
         <span className="relative inline-block rounded-full bg-blue-800 p-1">
           {icon}
         </span>
-        <p className={cn("text-lg font-medium truncate", titleClassName)}>{title}</p>
+        <p className={cn("text-lg font-medium", titleClassName)}>{title}</p>
       </div>
-      <p className="whitespace-nowrap text-lg truncate">{description}</p>
-      <p className="text-muted-foreground truncate">{date}</p>
+      <p className="whitespace-nowrap text-lg">{description}</p>
+      <p className="text-muted-foreground">{date}</p>
     </div>
   );
 }
