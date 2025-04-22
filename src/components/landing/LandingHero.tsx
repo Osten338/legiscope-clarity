@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -46,15 +47,15 @@ export const LandingHero = () => {
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-ibm-plex-sans font-bold leading-tight mb-6">
-                <GradientText className="font-ibm-plex-sans text-zinc-50">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-inter font-bold leading-tight mb-6">
+                <GradientText className="font-inter text-zinc-50 font-bold tracking-tighter">
                   Clarity for your compliance operations
                 </GradientText>
               </h1>
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <p className="text-lg md:text-xl max-w-xl mb-8 leading-relaxed text-white/80">
+              <p className="text-lg md:text-xl max-w-xl mb-8 leading-relaxed text-white/80 font-inter">
                 Effortlessly manage regulatory requirements with an intuitive platform designed to simplify complex compliance tasks.
               </p>
             </ScrollReveal>
