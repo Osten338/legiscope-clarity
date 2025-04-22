@@ -1,6 +1,6 @@
-
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 
 export interface TestimonialAuthor {
   name: string
@@ -27,15 +27,17 @@ export function TestimonialCard({
     <Card
       {...(href ? { href } : {})}
       className={cn(
-        "flex flex-col rounded-lg border-t",
+        "relative flex flex-col rounded-lg",
         "bg-gradient-to-b from-muted/50 to-muted/10",
         "p-4 text-start sm:p-6",
         "hover:from-muted/60 hover:to-muted/20",
         "max-w-[320px] sm:max-w-[320px]",
         "transition-colors duration-300",
+        "overflow-hidden",
         className
       )}
     >
+      <GlowingEffect glow variant="white" borderWidth={1} />
       <div className="flex items-center gap-3">
         <Avatar className="h-12 w-12">
           <AvatarImage src={author.avatar} alt={author.name} />
