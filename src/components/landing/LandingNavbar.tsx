@@ -20,13 +20,13 @@ const LandingNavbar = () => {
   const backgroundColor = useTransform(
     scrollY,
     [0, 50],
-    ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.95)"]
+    ["rgba(17, 24, 39, 0.8)", "rgba(17, 24, 39, 0.95)"] // Using a very dark gray (neutral-900)
   );
 
   const backdropBlur = useTransform(
     scrollY,
     [0, 50],
-    ["blur(0px)", "blur(8px)"]
+    ["blur(0px)", "blur(12px)"]
   );
 
   return (
@@ -43,11 +43,11 @@ const LandingNavbar = () => {
           <span className="text-xl">Compli AI</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-7 items-center">
-          <Link to="#features" className="text-sm text-white/90 hover:text-brand-blue transition-colors">Features</Link>
-          <Link to="#pricing" className="text-sm text-white/90 hover:text-brand-blue transition-colors">Pricing</Link>
-          <Link to="/#testimonials" className="text-sm text-white/90 hover:text-brand-blue transition-colors">Testimonials</Link>
-          <Link to="/documentation" className="text-sm text-white/90 hover:text-brand-blue transition-colors">Docs</Link>
-          <Link to="/auth" className="text-sm text-white/90 hover:text-brand-blue transition-colors">Login</Link>
+          <Link to="#features" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Features</Link>
+          <Link to="#pricing" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Pricing</Link>
+          <Link to="/#testimonials" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Testimonials</Link>
+          <Link to="/documentation" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Docs</Link>
+          <Link to="/auth" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Login</Link>
           <Button asChild className="bg-brand-blue hover:bg-brand-blue/90 shadow-md px-6 font-medium text-base rounded-full text-white">
             <Link to="/auth">Book a Demo</Link>
           </Button>
