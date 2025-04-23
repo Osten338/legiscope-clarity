@@ -10,6 +10,7 @@ import { DashboardLegislationFeed } from "@/components/dashboard/LegislationFeed
 import { Layout } from "@/components/dashboard/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 
 // Define types for the data structure
 type ChecklistItem = {
@@ -122,17 +123,22 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto p-8 max-w-7xl">
+      <div className="mx-auto max-w-7xl">
         <WelcomeCard />
         {error ? (
-          <div className="p-6 bg-red-50 border border-red-100 rounded-lg mb-8">
-            <h3 className="text-lg font-medium text-red-800 mb-2">Could not load your data</h3>
-            <p className="text-red-700 mb-4">
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md mb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <h3 className="text-base font-medium text-destructive">Could not load your data</h3>
+            </div>
+            <p className="text-sm text-destructive/80 mb-4">
               We're having trouble connecting to our database. This might be due to network issues or temporary service disruption.
             </p>
             <Button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              variant="destructive"
+              size="sm"
+              className="text-xs"
             >
               Try Again
             </Button>
@@ -141,15 +147,15 @@ const Dashboard = () => {
           <>
             <StatusOverview savedRegulations={savedRegulations || []} />
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <UpcomingReviews savedRegulations={savedRegulations || []} />
               <DashboardLegislationFeed />
             </div>
             
             {isLoading ? (
-              <div className="text-center p-12 bg-white rounded-lg border border-slate-200 shadow-sm">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sage-600 mx-auto mb-4"></div>
-                <p className="text-slate-600">Loading your regulations...</p>
+              <div className="text-center p-8 bg-card rounded-md border border-border shadow-sm">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-sm text-muted-foreground">Loading your regulations...</p>
               </div>
             ) : savedRegulations && savedRegulations.length > 0 ? (
               <RegulationsList
@@ -158,21 +164,21 @@ const Dashboard = () => {
                 setOpenRegulation={setOpenRegulation}
               />
             ) : (
-              <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg shadow-sm">
-                <h3 className="text-lg font-medium text-slate-800 mb-2">No saved regulations found</h3>
-                <p className="text-slate-600 mb-4">
+              <div className="p-6 bg-card border border-border rounded-md">
+                <h3 className="text-base font-medium mb-2">No saved regulations found</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   You haven't saved any regulations to your dashboard yet. To add regulations:
                 </p>
-                <ol className="list-decimal ml-5 mb-6 text-slate-600 space-y-2">
+                <ol className="list-decimal ml-5 mb-6 text-sm text-muted-foreground space-y-2">
                   <li>Perform a business analysis to get personalized regulations</li>
                   <li>Save regulations to your dashboard from the analysis results</li>
                   <li>Browse regulations in the Legislation section</li>
                 </ol>
                 <div className="flex gap-3">
-                  <Button asChild variant="default">
+                  <Button asChild size="sm">
                     <a href="/assessment">Perform Business Analysis</a>
                   </Button>
-                  <Button asChild variant="outline">
+                  <Button asChild variant="outline" size="sm">
                     <a href="/legislation">Browse Regulations</a>
                   </Button>
                 </div>

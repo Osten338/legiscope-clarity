@@ -16,18 +16,18 @@ export const SidebarNavItem = ({ to, icon: Icon, children, isActive }: SidebarNa
       <Link
         to={to}
         className={cn(
-          "group flex gap-x-3 rounded-md p-2 text-sm font-medium transition-colors",
+          "group flex gap-x-3 rounded-sm px-2.5 py-2 text-sm font-medium transition-colors",
           isActive
-            ? "bg-neutral-100 text-brand"
-            : "text-neutral-700 hover:bg-neutral-50 hover:text-brand"
+            ? "bg-primary/10 text-primary"
+            : "text-neutral-400 hover:bg-muted hover:text-neutral-200"
         )}
       >
         <Icon
           className={cn(
             "h-5 w-5 shrink-0",
             isActive
-              ? "text-brand"
-              : "text-neutral-400 group-hover:text-brand"
+              ? "text-primary"
+              : "text-neutral-400 group-hover:text-neutral-300"
           )}
         />
         {children}

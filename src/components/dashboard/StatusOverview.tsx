@@ -7,40 +7,32 @@ import { Badge } from "@/components/ui/badge";
 const statusCards = {
   compliant: {
     icon: CheckCircle2,
-    class: "text-brand",
-    gradient: "bg-card/80 backdrop-blur-md",
-    badge: "bg-emerald-500"
+    class: "text-emerald-500",
+    gradient: "bg-emerald-500/10",
+    badge: "bg-emerald-500",
+    label: "Compliant"
   },
   in_progress: {
     icon: Clock,
     class: "text-amber-500",
-    gradient: "bg-card/80 backdrop-blur-md",
-    badge: "bg-amber-500"
+    gradient: "bg-amber-500/10",
+    badge: "bg-amber-500",
+    label: "In Progress"
   },
   not_compliant: {
     icon: AlertTriangle,
     class: "text-red-500",
-    gradient: "bg-card/80 backdrop-blur-md",
-    badge: "bg-red-500"
+    gradient: "bg-red-500/10",
+    badge: "bg-red-500",
+    label: "Not Compliant"
   },
   under_review: {
     icon: HelpCircle,
     class: "text-blue-500",
-    gradient: "bg-card/80 backdrop-blur-md",
-    badge: "bg-blue-500"
+    gradient: "bg-blue-500/10",
+    badge: "bg-blue-500",
+    label: "Under Review"
   }
-};
-
-const getStatusText = (status: string) => {
-  const statusMap: {
-    [key: string]: string;
-  } = {
-    compliant: "Compliant",
-    in_progress: "In Progress",
-    not_compliant: "Not Compliant",
-    under_review: "Under Review"
-  };
-  return statusMap[status] || status;
 };
 
 interface StatusOverviewProps {
@@ -49,24 +41,24 @@ interface StatusOverviewProps {
 
 export const StatusOverview = ({ savedRegulations }: StatusOverviewProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      {Object.entries(statusCards).map(([status, { icon: Icon, class: colorClass, gradient, badge }], index) => {
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {Object.entries(statusCards).map(([status, { icon: Icon, class: colorClass, gradient, badge, label }], index) => {
         const count = savedRegulations?.filter(reg => reg.status === status).length || 0;
         return (
           <Card 
             key={status} 
-            className={cn("border-neutral-200 shadow-sm", gradient, "animate-appear")}
-            style={{ animationDelay: `${index * 100}ms` }}
+            className={cn("border-border", gradient, "animate-appear")}
+            style={{ animationDelay: `${index * 50}ms` }}
           >
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 p-3 md:p-4">
               <div className="flex justify-between items-center">
-                <CardDescription className="flex items-center gap-2 text-sm">
-                  <Badge className={cn("w-2 h-2 p-0 rounded-full", badge)} />
-                  <span className="font-medium text-neutral-600">{getStatusText(status)}</span>
+                <CardDescription className="flex items-center gap-1.5 text-xs">
+                  <Badge className={cn("w-1.5 h-1.5 p-0 rounded-full", badge)} />
+                  <span className="font-medium">{label}</span>
                 </CardDescription>
-                <Icon className={cn("w-5 h-5", colorClass)} />
+                <Icon className={cn("w-4 h-4", colorClass)} />
               </div>
-              <CardTitle className="text-2xl font-medium text-neutral-900">{count}</CardTitle>
+              <CardTitle className="text-lg font-medium mono">{count}</CardTitle>
             </CardHeader>
           </Card>
         );

@@ -11,13 +11,13 @@ export const SidebarNavigation = () => {
     { to: "/risk-assessment", icon: BarChart, label: "Risk Assessment" },
     { to: "/documents", icon: FileText, label: "Documents" },
     { to: "/alerts", icon: Bell, label: "Alerts" },
-    { to: "/compliance-checklist", icon: CheckSquare, label: "Compliance Checklist" },
+    { to: "/compliance-checklist", icon: CheckSquare, label: "Compliance" },
     { to: "/documentation", icon: FileText, label: "Documentation" },
-    { to: "/compliance-chat", icon: Bot, label: "Compliance Chat" },
+    { to: "/compliance-chat", icon: Bot, label: "AI Assistant" },
   ];
 
   return (
-    <ul role="list" className="-mx-2 space-y-1">
+    <ul role="list" className="-mx-1 space-y-0.5 py-2">
       {navigationItems.map((item) => (
         <SidebarNavItem
           key={item.to}

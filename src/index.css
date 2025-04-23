@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,14 +10,14 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 10% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 155 15% 45%;
-    --primary-foreground: 155 10% 97%;
+    --primary: 220 70% 50%;
+    --primary-foreground: 210 20% 98%;
     --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 220.9 39.3% 11%;
     --muted: 220 14.3% 95.9%;
@@ -27,15 +28,34 @@
     --destructive-foreground: 210 20% 98%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 155 15% 45%;
-    --radius: 1rem;
-    --brand: 27 96% 61%;
-    --brand-foreground: 31 97% 72%;
+    --ring: 220 70% 50%;
+    --radius: 0.5rem;
+    --brand: 220 80% 50%;
+    --brand-foreground: 210 20% 98%;
   }
 
   .dark {
-    --brand: 31 97% 72%;
-    --brand-foreground: 27 96% 61%
+    --background: 222 47% 11%;
+    --foreground: 210 20% 98%;
+    --card: 222 47% 8%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 217 30% 20%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 217 30% 16%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 30% 20%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 217 30% 18%;
+    --input: 217 30% 18%;
+    --ring: 224 76% 48%;
+    --brand: 217 91% 60%;
+    --brand-foreground: 31 97% 72%;
   }
 
   html, body {
@@ -51,7 +71,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-inter font-semibold tracking-tight text-neutral-900;
+    @apply font-inter font-semibold tracking-tight text-neutral-900 dark:text-neutral-100;
   }
 
   h1 {
@@ -71,15 +91,15 @@
   }
 
   p {
-    @apply text-base md:text-lg text-neutral-600 leading-relaxed;
+    @apply text-base text-neutral-600 dark:text-neutral-300 leading-relaxed;
   }
 
   .text-muted {
-    @apply text-neutral-500;
+    @apply text-neutral-500 dark:text-neutral-400;
   }
 
   .glass-panel {
-    @apply backdrop-blur-md bg-white/30 border border-white/40 shadow-lg;
+    @apply backdrop-blur-md bg-white/30 dark:bg-black/30 border border-white/40 dark:border-white/10 shadow-lg;
   }
 
   .glass-dark {
@@ -102,23 +122,23 @@
   }
 
   .modern-card {
-    @apply bg-slate-50 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow duration-300;
+    @apply bg-card rounded-md p-4 md:p-6 border border-border shadow-sm hover:shadow-md transition-shadow duration-300;
   }
 
   .text-container {
-    @apply bg-slate-50 rounded-2xl p-6 md:p-8 max-w-3xl mx-auto;
+    @apply bg-card rounded-md p-4 md:p-6 max-w-3xl mx-auto border border-border;
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-md;
+    @apply transition-all duration-300 hover:scale-[1.01] hover:shadow-md;
   }
 
   .section-header {
-    @apply uppercase text-xs font-medium tracking-wider text-neutral-500 mb-2;
+    @apply uppercase text-xs font-medium tracking-wider text-neutral-500 dark:text-neutral-400 mb-2;
   }
 
   .content-divider {
-    @apply border-b border-neutral-200 my-6;
+    @apply border-b border-border my-4;
   }
 
   .delay-100 {
@@ -132,5 +152,9 @@
   }
   .delay-1000 {
     animation-delay: 1000ms;
+  }
+
+  .mono {
+    @apply font-['JetBrains_Mono'] tabular-nums;
   }
 }

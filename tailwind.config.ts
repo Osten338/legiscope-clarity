@@ -89,6 +89,7 @@ export default {
         inter: ['Inter', 'sans-serif'],
         'ibm-plex': ['IBM Plex Sans', 'sans-serif'],
         'dm-sans': ['DM Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -104,8 +105,8 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         marquee: 'marquee var(--duration) linear infinite',
         shimmer: "shimmer 2s linear infinite",
-        appear: "appear 0.5s ease-out forwards",
-        "appear-zoom": "appear-zoom 0.5s ease-out forwards"
+        appear: "appear 0.3s ease-out forwards",
+        "appear-zoom": "appear-zoom 0.3s ease-out forwards"
       },
       keyframes: {
         "accordion-down": {
@@ -155,11 +156,11 @@ export default {
           }
         },
         appear: {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "0%": { opacity: "0", transform: "translateY(5px)" },
           "100%": { opacity: "1", transform: "translateY(0)" }
         },
         "appear-zoom": {
-          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "0%": { opacity: "0", transform: "scale(0.98)" },
           "100%": { opacity: "1", transform: "scale(1)" }
         }
       },
