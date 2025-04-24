@@ -31,11 +31,11 @@ export const Layout = ({ children }: LayoutProps) => {
               >
                 <MenuIcon className="w-6 h-6" />
               </button>
-              <Navbar.Brand href="/dashboard">
+              <div className="flex items-center">
                 <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
                   Dashboard
                 </span>
-              </Navbar.Brand>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="hidden lg:flex lg:w-96">
