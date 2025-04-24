@@ -1,20 +1,10 @@
 
 import { useState, ReactNode } from "react";
-import { Sidebar } from "./Sidebar";
+import { FlowbiteSidebar } from "./FlowbiteSidebar";
 import { Bell, LogOut, Menu as MenuIcon, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button, Navbar, Dropdown, Avatar } from 'flowbite-react';
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { Icons } from "@/components/ui/icons";
 
 interface LayoutProps {
   children: ReactNode;
@@ -30,103 +20,83 @@ export const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="relative min-h-screen bg-background dark">
-      {/* Mobile sidebar */}
-      <Dialog open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <DialogContent className="p-0 sm:max-w-[280px] bg-card/95 backdrop-blur-md border-neutral-800 data-[state=open]:duration-300">
-          <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
-          <Sidebar mobile onClose={() => setSidebarOpen(false)} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col">
-        <Sidebar />
-      </div>
-
-      <div className="lg:pl-64">
-        <div className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-x-3 border-b border-border bg-background/95 backdrop-blur-md px-3 shadow-sm sm:gap-x-4 sm:px-4 lg:px-6">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="-m-2 p-2 text-neutral-400 hover:text-neutral-300 lg:hidden"
-          >
-            <span className="sr-only">Open sidebar</span>
-            <MenuIcon className="h-5 w-5" />
-          </button>
-
-          {/* Separator */}
-          <div aria-hidden="true" className="h-5 w-px bg-border lg:hidden" />
-
-          <div className="flex flex-1 gap-x-3 self-stretch lg:gap-x-4">
-            <div className="relative flex flex-1 items-center">
-              <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-              <input
-                type="search"
-                placeholder="Search..."
-                className="h-9 w-full rounded-md border border-input bg-background/50 pl-9 pr-4 text-sm outline-none focus:ring-1 focus:ring-ring transition-all"
-              />
+    <div className="relative min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar fluid className="fixed z-30 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="w-full p-3 lg:px-5 lg:pl-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="inline-flex items-center p-2 text-sm rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+              >
+                <MenuIcon className="w-6 h-6" />
+              </button>
+              <Navbar.Brand href="/dashboard">
+                <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
+                  Dashboard
+                </span>
+              </Navbar.Brand>
             </div>
-
-            <div className="flex items-center gap-x-3 lg:gap-x-4">
-              <Button variant="outline" size="icon" className="rounded-md border-input bg-background/50">
-                <Badge className="absolute -right-1 -top-1 h-4 w-4 p-0 text-xs bg-red-500">3</Badge>
-                <span className="sr-only">View notifications</span>
-                <Bell className="h-4 w-4" />
-              </Button>
-
-              {/* Separator */}
-              <div aria-hidden="true" className="hidden lg:block lg:h-5 lg:w-px lg:bg-border" />
-
-              {/* Profile dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 p-1 hover:bg-transparent">
-                    <span className="sr-only">Open user menu</span>
-                    <div className="h-8 w-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
-                      <span className="text-sm font-medium">TC</span>
-                    </div>
-                    <span className="hidden lg:flex lg:items-center">
-                      <span className="ml-2 text-sm font-medium text-foreground">
-                        Tom Cook
-                      </span>
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <div className="p-2 flex flex-col gap-1">
-                    <div className="px-2 py-1.5">
-                      <p className="text-sm font-medium">Tom Cook</p>
-                      <p className="text-xs text-muted-foreground">tom@example.com</p>
-                    </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden lg:flex lg:w-96">
+                <div className="relative w-full">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="flex gap-2 cursor-pointer"
-                    onClick={() => navigate("/settings")}
-                  >
-                    <Icons.radix className="w-4 h-4" />
-                    Your profile
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleSignOut} 
-                    className="flex gap-2 text-red-600 cursor-pointer"
-                  >
-                    <LogOut className="h-4 w-4" />
+                  <input
+                    type="text"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="Search..."
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button color="gray" size="sm">
+                  <Bell className="w-4 h-4" />
+                </Button>
+                <Dropdown
+                  arrowIcon={false}
+                  inline
+                  label={
+                    <Avatar
+                      alt="User"
+                      img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                      rounded
+                    />
+                  }
+                >
+                  <Dropdown.Header>
+                    <span className="block text-sm">Tom Cook</span>
+                    <span className="block truncate text-sm font-medium">tom@example.com</span>
+                  </Dropdown.Header>
+                  <Dropdown.Item onClick={() => navigate("/settings")}>
+                    Settings
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleSignOut}>
                     Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </Dropdown.Item>
+                </Dropdown>
+              </div>
             </div>
           </div>
         </div>
+      </Navbar>
 
-        <main className="py-6 animate-appear">
-          <div className="px-4 sm:px-6 lg:px-8">
+      <div className="flex pt-16">
+        <aside
+          className={`fixed top-0 left-0 z-20 flex-col flex-shrink-0 w-64 h-full pt-16 duration-75 lg:flex transition-width transition-transform ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
+          aria-label="Sidebar"
+        >
+          <FlowbiteSidebar />
+        </aside>
+        <div className="flex-1 h-full lg:ml-64">
+          <main className="h-full p-4 lg:p-6">
             {children}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
