@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, BarChart, FileText, Bell, CheckSquare, Bot } from 'lucide-react';
 
-// Import the specific components from flowbite-react instead of the top-level Sidebar
+// Import specific components from flowbite-react
 import { Sidebar } from 'flowbite-react';
 
 export function FlowbiteSidebar() {
