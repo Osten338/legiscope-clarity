@@ -1,12 +1,9 @@
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Sidebar } from 'flowbite-react';
 import { LayoutDashboard, BarChart, FileText, Bell, CheckSquare, Bot } from 'lucide-react';
 
-// Since we're having issues with the Flowbite Sidebar component,
-// let's create our own sidebar component using Tailwind CSS
-// which will give us more control
-
-// Create simple nav items array for cleaner rendering
+// Define the navigation items
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: BarChart, label: "Risk Assessment", path: "/risk-assessment" },
@@ -19,24 +16,30 @@ const navItems = [
 
 export function FlowbiteSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
 
   return (
-    <div className="w-full h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-      <div className="h-full px-3 py-4 overflow-y-auto">
-        <ul className="space-y-2 font-medium">
+    <Sidebar aria-label="Dashboard sidebar" className="w-full h-full">
+      <Sidebar.Items>
+        <Sidebar.ItemGroup>
           {navItems.map((item) => (
-            <li key={item.path}>
-              <button
-                onClick={() => navigate(item.path)}
-                className="flex items-center w-full p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-              >
-                <item.icon className="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-                <span className="ms-3">{item.label}</span>
-              </button>
-            </li>
+            <Sidebar.Item 
+              key={item.path}
+              icon={() => <item.icon className="w-5 h-5" />}
+              onClick={() => handleNavigation(item.path)}
+              active={location.pathname === item.path || 
+                (item.path !== '/dashboard' && location.pathname.includes(item.path))}
+              className="cursor-pointer"
+            >
+              {item.label}
+            </Sidebar.Item>
           ))}
-        </ul>
-      </div>
-    </div>
+        </Sidebar.ItemGroup>
+      </Sidebar.Items>
+    </Sidebar>
   );
 }

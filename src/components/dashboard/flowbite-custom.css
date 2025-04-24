@@ -1,0 +1,30 @@
+
+/* Custom styles to enhance Flowbite components */
+
+/* Sidebar customization */
+.flowbite-sidebar .sidebar-item {
+  @apply transition-colors duration-150;
+}
+
+.flowbite-sidebar .sidebar-item:hover {
+  @apply bg-gray-100 dark:bg-gray-700;
+}
+
+.flowbite-sidebar .sidebar-item.active {
+  @apply bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300;
+}
+
+/* Dropdown customization */
+.flowbite-dropdown {
+  @apply shadow-lg border border-gray-200 dark:border-gray-700;
+}
+
+/* Ensure dropdown menus are not transparent */
+div[data-testid="dropdown-content"] {
+  @apply bg-white dark:bg-gray-800 z-50;
+}
+
+/* Navbar customization */
+.flowbite-navbar {
+  @apply shadow-sm;
+}

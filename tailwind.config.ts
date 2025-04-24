@@ -1,5 +1,6 @@
 
 import { type Config } from "tailwindcss";
+import flowbitePlugin from 'flowbite/plugin';
 
 export default {
   darkMode: ["class"],
@@ -169,7 +170,8 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
-    // Replace the flowbite plugin with a function that adds the required utilities
+    flowbitePlugin,
+    // Add custom base styles as a separate plugin
     function({ addBase, theme }) {
       addBase({
         'html': { fontSize: '16px' },
