@@ -31,11 +31,9 @@ export const Layout = ({ children }: LayoutProps) => {
           >
             <MenuIcon className="w-6 h-6" />
           </button>
-          <Navbar.Link href="/dashboard" className="ml-2">
-            <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
-              Dashboard
-            </span>
-          </Navbar.Link>
+          <a href="/dashboard" className="ml-2 self-center text-xl font-semibold whitespace-nowrap dark:text-white">
+            Dashboard
+          </a>
         </div>
         
         <div className="flex md:order-2 items-center gap-3">
@@ -71,13 +69,27 @@ export const Layout = ({ children }: LayoutProps) => {
               <span className="block text-sm">Tom Cook</span>
               <span className="block text-sm font-medium truncate">tom@example.com</span>
             </div>
-            <Dropdown.Divider />
-            <Dropdown.Item icon={Settings} onClick={() => navigate("/settings")}>
-              Settings
-            </Dropdown.Item>
-            <Dropdown.Item icon={LogOut} onClick={handleSignOut}>
-              Sign out
-            </Dropdown.Item>
+            <hr className="my-1 border-gray-100 dark:border-gray-700" />
+            <ul>
+              <li>
+                <a 
+                  onClick={() => navigate("/settings")}
+                  className="flex items-center py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </a>
+              </li>
+              <li>
+                <a 
+                  onClick={handleSignOut}
+                  className="flex items-center py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </a>
+              </li>
+            </ul>
           </Dropdown>
         </div>
       </Navbar>
