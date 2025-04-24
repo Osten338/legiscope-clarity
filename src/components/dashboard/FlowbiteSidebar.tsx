@@ -26,18 +26,23 @@ export function FlowbiteSidebar() {
     <Sidebar aria-label="Dashboard sidebar" className="w-full h-full">
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          {navItems.map((item) => (
-            <Sidebar.Item 
-              key={item.path}
-              icon={() => <item.icon className="w-5 h-5" />}
-              onClick={() => handleNavigation(item.path)}
-              active={location.pathname === item.path || 
-                (item.path !== '/dashboard' && location.pathname.includes(item.path))}
-              className="cursor-pointer"
-            >
-              {item.label}
-            </Sidebar.Item>
-          ))}
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path || 
+              (item.path !== '/dashboard' && location.pathname.includes(item.path));
+            
+            return (
+              <div 
+                key={item.path}
+                onClick={() => handleNavigation(item.path)}
+                className={`flex items-center w-full p-2 text-base text-gray-900 rounded-lg cursor-pointer dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                  isActive ? 'bg-gray-100 dark:bg-gray-700' : ''
+                }`}
+              >
+                <item.icon className="w-5 h-5 transition duration-75 text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" />
+                <span className="ml-3">{item.label}</span>
+              </div>
+            );
+          })}
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>

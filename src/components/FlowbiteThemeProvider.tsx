@@ -1,9 +1,9 @@
 
-import { Flowbite } from 'flowbite-react';
 import { ReactNode } from 'react';
+import { CustomFlowbiteTheme, ThemeModeScript } from 'flowbite-react';
 
 // Custom Flowbite theme configuration
-const flowbiteTheme = {
+const flowbiteTheme: CustomFlowbiteTheme = {
   sidebar: {
     root: {
       base: "h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700",
@@ -39,8 +39,11 @@ interface FlowbiteThemeProviderProps {
 
 export const FlowbiteThemeProvider = ({ children }: FlowbiteThemeProviderProps) => {
   return (
-    <Flowbite theme={{ theme: flowbiteTheme }}>
-      {children}
-    </Flowbite>
+    <>
+      <ThemeModeScript />
+      <div className="flowbite-theme" data-theme={flowbiteTheme}>
+        {children}
+      </div>
+    </>
   );
 };

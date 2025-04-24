@@ -4,7 +4,7 @@ import { FlowbiteSidebar } from "./FlowbiteSidebar";
 import { Bell, LogOut, Menu as MenuIcon, Search, Settings, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar, Dropdown } from 'flowbite-react';
+import { Navbar, Dropdown, Avatar } from 'flowbite-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -31,11 +31,11 @@ export const Layout = ({ children }: LayoutProps) => {
           >
             <MenuIcon className="w-6 h-6" />
           </button>
-          <Navbar.Brand href="/dashboard" className="ml-2">
+          <Navbar.Link href="/dashboard" className="ml-2">
             <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
               Dashboard
             </span>
-          </Navbar.Brand>
+          </Navbar.Link>
         </div>
         
         <div className="flex md:order-2 items-center gap-3">
@@ -60,17 +60,18 @@ export const Layout = ({ children }: LayoutProps) => {
             arrowIcon={false}
             inline
             label={
-              <img
+              <Avatar
                 alt="User"
-                src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                className="w-8 h-8 rounded-full"
+                img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                rounded
               />
             }
           >
-            <Dropdown.Header>
+            <div className="px-4 py-3">
               <span className="block text-sm">Tom Cook</span>
               <span className="block text-sm font-medium truncate">tom@example.com</span>
-            </Dropdown.Header>
+            </div>
+            <Dropdown.Divider />
             <Dropdown.Item icon={Settings} onClick={() => navigate("/settings")}>
               Settings
             </Dropdown.Item>
