@@ -169,6 +169,15 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("flowbite/plugin")
+    // Replace the flowbite plugin with a function that adds the required utilities
+    function({ addBase, theme }) {
+      addBase({
+        'html': { fontSize: '16px' },
+        'body': {
+          fontFamily: theme('fontFamily.inter'),
+          lineHeight: '1.5',
+        },
+      });
+    }
   ],
 } satisfies Config;
