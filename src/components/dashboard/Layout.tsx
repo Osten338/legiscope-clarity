@@ -31,7 +31,6 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="relative min-h-screen bg-background dark">
-      
       {/* Mobile sidebar */}
       <Dialog open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <DialogContent className="p-0 sm:max-w-[280px] bg-card/95 backdrop-blur-md border-neutral-800 data-[state=open]:duration-300">
