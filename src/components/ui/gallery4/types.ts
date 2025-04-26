@@ -11,4 +11,6 @@ export interface Gallery4Props {
   title?: string;
   description?: string;
   items: Gallery4Item[];
+  titleClassName?: string;
+  descriptionClassName?: string;
 }

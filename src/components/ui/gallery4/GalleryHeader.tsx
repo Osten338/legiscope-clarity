@@ -1,35 +1,56 @@
 
-import { GalleryNavigation } from "./GalleryNavigation";
-import { CarouselApi } from "@/components/ui/carousel";
+import React from 'react';
+import type { CarouselApi } from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface GalleryHeaderProps {
-  title?: string;
-  description?: string;
-  carouselApi: CarouselApi | null;
+  title: string;
+  description: string;
+  carouselApi?: CarouselApi;
   canScrollPrev: boolean;
   canScrollNext: boolean;
+  titleClassName?: string;
+  descriptionClassName?: string;
 }
 
-export const GalleryHeader = ({
+export function GalleryHeader({
   title,
   description,
   carouselApi,
   canScrollPrev,
   canScrollNext,
-}: GalleryHeaderProps) => {
+  titleClassName = "text-black",
+  descriptionClassName = "text-gray-600"
+}: GalleryHeaderProps) {
   return (
-    <div className="mb-8 flex items-end justify-between md:mb-14 lg:mb-16">
-      <div className="flex flex-col gap-4">
-        <h2 className="text-3xl font-medium md:text-4xl lg:text-5xl text-white">
+    <div className="flex items-center justify-between mb-8">
+      <div className="space-y-2">
+        <h2 className={`text-2xl font-semibold ${titleClassName}`}>
           {title}
         </h2>
-        <p className="max-w-lg text-white">{description}</p>
+        <p className={`text-base ${descriptionClassName}`}>
+          {description}
+        </p>
       </div>
-      <GalleryNavigation 
-        carouselApi={carouselApi}
-        canScrollPrev={canScrollPrev}
-        canScrollNext={canScrollNext}
-      />
+      <div className="flex space-x-2">
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={!canScrollPrev}
+          onClick={() => carouselApi?.scrollPrev()}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={!canScrollNext}
+          onClick={() => carouselApi?.scrollNext()}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
-};
+}

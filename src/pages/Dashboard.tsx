@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -156,6 +157,8 @@ const Dashboard = () => {
           title="Compliance Resources"
           description="Access key compliance tools and resources to help your business stay compliant with all relevant regulations."
           items={galleryItems}
+          titleClassName="text-black"
+          descriptionClassName="text-gray-600"
         />
       </div>
     </DashboardLayout>
