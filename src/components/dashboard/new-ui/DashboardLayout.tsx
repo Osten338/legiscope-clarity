@@ -1,31 +1,23 @@
 
-import { ReactNode, useState } from "react";
-import { DashboardHeader } from "./DashboardHeader";
-import { DashboardSidebar } from "./DashboardSidebar";
+import { ReactNode } from "react";
+import { Sidebar, SidebarProvider } from "@/components/ui/sidebar-new";
+import { AppSidebar } from "./AppSidebar";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex h-full">
-        <DashboardSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-        
-        <div className="flex-1 flex flex-col">
-          <DashboardHeader 
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-          />
-          
-          <main className="flex-1">
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar />
+        <div className="flex-1">
+          <main>
             {children}
           </main>
         </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
