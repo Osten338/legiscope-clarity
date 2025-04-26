@@ -1,10 +1,9 @@
+
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/new-ui";
-import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Gallery4, Gallery4Item } from "@/components/ui/gallery4";
 
 type ChecklistItem = {
@@ -153,12 +152,19 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="p-6">
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-medium text-white mb-4">
+            Welcome back
+          </h1>
+          <p className="text-xl text-white/80 max-w-2xl">
+            Explore your compliance resources and stay ahead of regulatory requirements with our comprehensive tools and insights.
+          </p>
+        </div>
         <Gallery4 
           title="Compliance Resources"
           description="Access key compliance tools and resources to help your business stay compliant with all relevant regulations."
           items={galleryItems}
         />
-        {/* Your new components will go here */}
       </div>
     </DashboardLayout>
   );
