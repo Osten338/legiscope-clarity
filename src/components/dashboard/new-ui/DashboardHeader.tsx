@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Bell, 
   Search, 
@@ -30,7 +30,32 @@ export function DashboardHeader({ sidebarOpen, setSidebarOpen }: DashboardHeader
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [user, setUser] = useState(() => supabase.auth.getUser());
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch the current user when the component mounts
+    const getUserEmail = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          console.error("Error fetching user:", error);
+          return;
+        }
+        
+        if (user) {
+          setUserEmail(user.email);
+        }
+      } catch (error) {
+        console.error("Unexpected error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    getUserEmail();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -98,14 +123,14 @@ export function DashboardHeader({ sidebarOpen, setSidebarOpen }: DashboardHeader
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="" alt="User" />
-                  <AvatarFallback>U</AvatarFallback>
+                  <AvatarFallback>{userEmail ? userEmail[0].toUpperCase() : 'U'}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
               <div className="flex items-center gap-2 p-2">
                 <div className="flex flex-col space-y-0.5 leading-none">
-                  <p className="text-sm font-medium">{user.data.user?.email}</p>
+                  <p className="text-sm font-medium">{isLoading ? 'Loading...' : userEmail || 'User'}</p>
                   <p className="text-xs text-muted-foreground">User</p>
                 </div>
               </div>
