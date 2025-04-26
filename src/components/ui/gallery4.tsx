@@ -104,10 +104,10 @@ const Gallery4 = ({
       <div className="container mx-auto">
         <div className="mb-8 flex items-end justify-between md:mb-14 lg:mb-16">
           <div className="flex flex-col gap-4">
-            <h2 className="text-3xl font-medium md:text-4xl lg:text-5xl">
+            <h2 className="text-3xl font-medium md:text-4xl lg:text-5xl text-white">
               {title}
             </h2>
-            <p className="max-w-lg text-muted-foreground">{description}</p>
+            <p className="max-w-lg text-white">{description}</p>
           </div>
           <div className="hidden shrink-0 gap-2 md:flex">
             <Button
@@ -164,10 +164,10 @@ const Gallery4 = ({
                       <div className="mb-2 pt-4 text-xl font-semibold md:mb-3 md:pt-4 lg:pt-4 text-white">
                         {item.title}
                       </div>
-                      <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9">
+                      <div className="mb-8 line-clamp-2 md:mb-12 lg:mb-9 text-white">
                         {item.description}
                       </div>
-                      <div className="flex items-center text-sm">
+                      <div className="flex items-center text-sm text-white">
                         Read more{" "}
                         <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
                       </div>
