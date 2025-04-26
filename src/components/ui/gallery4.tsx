@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -101,7 +100,7 @@ const Gallery4 = ({
   }, [carouselApi]);
 
   return (
-    <section className="py-32 w-[calc(100%-var(--sidebar-width,0px))]">
+    <section className="py-32">
       <div className="container px-6 lg:px-8 mx-auto">
         <div className="mb-8 flex items-end justify-between md:mb-14 lg:mb-16">
           <div className="flex flex-col gap-4">
