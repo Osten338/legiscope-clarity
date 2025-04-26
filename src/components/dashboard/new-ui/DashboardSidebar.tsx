@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -57,12 +56,9 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
   };
 
   return (
-    <div
-      className={cn(
-        "fixed inset-y-0 left-0 z-20 flex h-full bg-card transition-all duration-300 ease-in-out dark:bg-gray-900 border-r border-border",
-        open ? "w-64" : "w-16"
-      )}
-    >
+    <div className={`fixed inset-y-0 left-0 z-20 w-64 transform bg-background border-r transition-transform duration-200 ease-in-out lg:transform-none lg:translate-x-0 ${
+      open ? "translate-x-0" : "-translate-x-full"
+    }`}>
       {/* Logo area */}
       <div className="flex h-full w-full flex-col">
         <div className="flex h-16 items-center justify-between px-4 border-b border-border">

@@ -21,10 +21,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             setSidebarOpen={setSidebarOpen}
           />
           
-          <main className="flex-1 overflow-y-auto transition-[padding] duration-300">
-            <div className={`mx-auto max-w-7xl p-6 ${sidebarOpen ? 'lg:pl-8' : 'lg:pl-24'}`}>
-              {children}
-            </div>
+          <main className="flex-1">
+            {children}
           </main>
         </div>
       </div>
