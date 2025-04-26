@@ -3,9 +3,19 @@
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { ImageIcon, FileUp, Figma, MonitorIcon, CircleUserRound, ArrowUpIcon, Paperclip, PlusIcon } from "lucide-react";
+import {
+    FileText,
+    ShieldCheck,
+    Book,
+    ClipboardCheck,
+    CircleUserRound,
+    ArrowUpIcon,
+    Paperclip,
+    PlusIcon,
+} from "lucide-react";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 import { ActionButton } from "./action-button";
+
 export function VercelV0Chat() {
   const [value, setValue] = useState("");
   const {
@@ -15,6 +25,7 @@ export function VercelV0Chat() {
     minHeight: 60,
     maxHeight: 200
   });
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -24,8 +35,11 @@ export function VercelV0Chat() {
       }
     }
   };
+
   return <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
-            <h1 className="text-4xl font-bold text-black dark:text-white">What can I help you with today?</h1>
+            <h1 className="text-4xl font-bold text-black dark:text-white">
+                Compliance Assistant
+            </h1>
 
             <div className="w-full">
                 <div className="relative bg-neutral-900 rounded-xl border border-neutral-800">
@@ -61,11 +75,26 @@ export function VercelV0Chat() {
                 </div>
 
                 <div className="flex items-center justify-center gap-3 mt-4">
-                    <ActionButton icon={<ImageIcon className="w-4 h-4" />} label="Clone a Screenshot" />
-                    <ActionButton icon={<Figma className="w-4 h-4" />} label="Import from Figma" />
-                    <ActionButton icon={<FileUp className="w-4 h-4" />} label="Upload a Project" />
-                    <ActionButton icon={<MonitorIcon className="w-4 h-4" />} label="Landing Page" />
-                    <ActionButton icon={<CircleUserRound className="w-4 h-4" />} label="Sign Up Form" />
+                    <ActionButton
+                        icon={<FileText className="w-4 h-4" />}
+                        label="Policy Review"
+                    />
+                    <ActionButton
+                        icon={<ShieldCheck className="w-4 h-4" />}
+                        label="Compliance Check"
+                    />
+                    <ActionButton
+                        icon={<Book className="w-4 h-4" />}
+                        label="Regulation Guidance"
+                    />
+                    <ActionButton
+                        icon={<ClipboardCheck className="w-4 h-4" />}
+                        label="Risk Assessment"
+                    />
+                    <ActionButton
+                        icon={<CircleUserRound className="w-4 h-4" />}
+                        label="Privacy Consultation"
+                    />
                 </div>
             </div>
         </div>;
