@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { RiskMatrix } from "@/components/risk-assessment/RiskMatrix";
 import { RiskList } from "@/components/risk-assessment/RiskList";
 import { AddRiskDialog } from "@/components/risk-assessment/AddRiskDialog";
@@ -9,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-// Define Risk type to match RiskMatrix and RiskList component expectations
 interface Risk {
   id: string;
   title: string;
@@ -35,7 +33,7 @@ const RiskAssessment = () => {
       impact: 5, 
       likelihood: 4, 
       level: "high",
-      category: "security" as "compliance", // Cast to comply with the type
+      category: "security" as "compliance",
       status: "open",
       due_date: null,
       is_generated: false
@@ -73,7 +71,6 @@ const RiskAssessment = () => {
     setIsAddRiskDialogOpen(false);
   };
   
-  // Helper function to calculate risk level
   const calculateRiskLevel = (likelihood: number, impact: number): "low" | "medium" | "high" => {
     const score = likelihood * impact;
     if (score <= 6) return "low";
@@ -82,7 +79,7 @@ const RiskAssessment = () => {
   };
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <Card>
           <CardHeader>
@@ -113,7 +110,7 @@ const RiskAssessment = () => {
           onOpenChange={setIsAddRiskDialogOpen}
         />
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

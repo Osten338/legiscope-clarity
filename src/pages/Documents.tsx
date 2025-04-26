@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { DocumentsHeader } from "@/components/documents/DocumentsHeader";
 import { DocumentsList } from "@/components/documents/DocumentsList";
 import { UploadDocumentDialog } from "@/components/documents/UploadDocumentDialog";
@@ -37,7 +36,7 @@ const Documents = () => {
   };
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <DocumentsHeader 
           onUpload={handleOpenUploadDialog} 
@@ -62,7 +61,7 @@ const Documents = () => {
           />
         )}
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

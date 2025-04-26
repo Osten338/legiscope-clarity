@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +14,7 @@ export default function AdminTools() {
   const [activeTab, setActiveTab] = useState<string>("embeddings");
   
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container py-6 max-w-5xl">
         <h1 className="text-2xl font-semibold mb-6">Admin Tools</h1>
         
@@ -52,6 +51,6 @@ export default function AdminTools() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 }

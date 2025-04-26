@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAnalysis } from "../hooks/useAnalysis";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { AnalysisLoading } from "@/components/analysis/AnalysisLoading";
 import { AnalysisNotFound } from "@/components/analysis/AnalysisNotFound";
 import { AnalysisContent } from "@/components/analysis/AnalysisContent";
@@ -40,7 +39,7 @@ const Analysis = () => {
   }
 
   return (
-    <Layout>
+    <DashboardLayout>
       <AnalysisContent 
         data={data}
         saved={saved}
@@ -49,7 +48,7 @@ const Analysis = () => {
         goToDashboard={goToDashboard}
         refetch={refetch}
       />
-    </Layout>
+    </DashboardLayout>
   );
 };
 

@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +8,7 @@ export const AnalysisNotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto p-8">
         <div className="text-center">
           <p className="text-slate-600">No analysis data available.</p>
@@ -17,6 +17,6 @@ export const AnalysisNotFound = () => {
           </Button>
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };

@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { FullScreenChatDialog } from "@/components/compliance/FullScreenChatDialog";
 import { Button } from "@/components/ui/button";
 import { Bot, MessageSquare } from "lucide-react";
@@ -9,7 +8,7 @@ export default function ComplianceChat() {
   const [chatOpen, setChatOpen] = useState(true);
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="flex flex-col h-full items-center justify-center p-6">
         <div className="max-w-lg w-full text-center">
           <div className="mb-6 flex justify-center">
@@ -39,6 +38,6 @@ export default function ComplianceChat() {
         open={chatOpen}
         onOpenChange={setChatOpen}
       />
-    </Layout>
+    </DashboardLayout>
   );
 }

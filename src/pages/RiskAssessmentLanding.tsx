@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, ArrowRight, ShieldCheck, FileSpreadsheet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 
 const RiskAssessmentLanding = () => {
   const [selectedAssessment, setSelectedAssessment] = useState<string | null>(null);
@@ -33,7 +32,7 @@ const RiskAssessmentLanding = () => {
   };
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <h1 className="text-2xl font-semibold mb-6">Risk Assessment Tools</h1>
         
@@ -74,7 +73,7 @@ const RiskAssessmentLanding = () => {
           </Button>
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

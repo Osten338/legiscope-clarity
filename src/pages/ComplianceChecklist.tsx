@@ -1,15 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { ChecklistItem } from "@/components/compliance/ChecklistItem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-// Define proper types for the data
 interface ChecklistItemType {
   id: string;
   description: string;
@@ -31,7 +29,6 @@ const ComplianceChecklist = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Get the current user ID when component mounts
   useEffect(() => {
     const getUserId = async () => {
       try {
@@ -52,14 +49,12 @@ const ComplianceChecklist = () => {
     queryKey: ["regulations", userId],
     queryFn: async () => {
       try {
-        // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
           throw new Error("User not authenticated");
         }
         
-        // First get saved regulations for the user
         const { data: savedRegs, error: savedError } = await supabase
           .from("saved_regulations")
           .select("regulation_id")
@@ -69,13 +64,11 @@ const ComplianceChecklist = () => {
           throw savedError;
         }
         
-        // If no saved regulations, return empty array (don't show any regulations)
         if (!savedRegs || savedRegs.length === 0) {
           console.log("No saved regulations found for user:", user.id);
           return [];
         }
         
-        // Get regulations that match the user's saved regulation IDs
         const { data: regulations, error: regulationsError } = await supabase
           .from("regulations")
           .select("*")
@@ -87,7 +80,6 @@ const ComplianceChecklist = () => {
           throw regulationsError;
         }
 
-        // For each regulation, fetch its checklist items
         const regulationsWithItems = await Promise.all(
           regulations.map(async (regulation) => {
             const { data: checklistItems, error: itemsError } = await supabase
@@ -120,12 +112,11 @@ const ComplianceChecklist = () => {
         throw error;
       }
     },
-    enabled: !!userId, // Only run query when userId is available
+    enabled: !!userId,
     refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    // Refresh data when userId changes
     if (userId) {
       refetch();
     }
@@ -133,20 +124,20 @@ const ComplianceChecklist = () => {
 
   if (isLoading) {
     return (
-      <Layout>
+      <DashboardLayout>
         <div className="container mx-auto py-8">
           <div className="text-center p-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sage-600 mx-auto mb-4"></div>
             <p className="text-slate-600">Loading regulations...</p>
           </div>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <Layout>
+      <DashboardLayout>
         <div className="container mx-auto py-8">
           <div className="p-6 bg-red-50 border border-red-100 rounded-lg">
             <h3 className="text-lg font-medium text-red-800 mb-2">Error loading regulations</h3>
@@ -154,12 +145,12 @@ const ComplianceChecklist = () => {
             <Button onClick={() => refetch()}>Try Again</Button>
           </div>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <Card>
           <CardHeader>
@@ -245,7 +236,7 @@ const ComplianceChecklist = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

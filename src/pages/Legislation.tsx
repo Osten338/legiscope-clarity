@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { RegulationTab } from "@/components/compliance/RegulationTab";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -74,26 +73,26 @@ const Legislation = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <DashboardLayout>
         <div className="flex justify-center items-center h-full">
           <p>Loading...</p>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   if (!regulation) {
     return (
-      <Layout>
+      <DashboardLayout>
         <div className="flex justify-center items-center h-full">
           <p>Regulation not found.</p>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
@@ -147,7 +146,7 @@ const Legislation = () => {
           <Button onClick={() => window.history.back()}>Back</Button>
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

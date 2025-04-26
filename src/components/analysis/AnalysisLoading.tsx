@@ -1,9 +1,9 @@
 
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 
 export const AnalysisLoading = () => {
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mx-auto mb-4"></div>
@@ -11,6 +11,6 @@ export const AnalysisLoading = () => {
           <p className="text-sage-600 text-sm mt-2">This may take a moment as we generate a detailed compliance analysis</p>
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };

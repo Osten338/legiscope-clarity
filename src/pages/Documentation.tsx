@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentationCard } from "@/components/documentation/DocumentationCard";
@@ -8,7 +7,6 @@ import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDi
 import { GenerateDocumentDialog } from "@/components/compliance/GenerateDocumentDialog";
 import { FileText, Shield, CheckSquare, GraduationCap, AlertTriangle, FileText as FileTextIcon } from "lucide-react";
 
-// Define dummy checklist item and regulation for the required props
 const dummyChecklistItem = {
   id: "dummy-id",
   description: "Dummy checklist item",
@@ -32,7 +30,7 @@ const Documentation = () => {
   const [isGenerateDocumentOpen, setIsGenerateDocumentOpen] = useState(false);
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Documentation &amp; Compliance</h1>
@@ -83,7 +81,7 @@ const Documentation = () => {
           </DocumentationCard>
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

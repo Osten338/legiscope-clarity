@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layout } from "@/components/dashboard/Layout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { AccountSettings } from "@/components/settings/AccountSettings";
@@ -10,7 +10,7 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState("account");
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <h1 className="text-2xl font-semibold mb-6">Settings</h1>
 
@@ -39,7 +39,7 @@ const Settings = () => {
           </Tabs>
         </Card>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

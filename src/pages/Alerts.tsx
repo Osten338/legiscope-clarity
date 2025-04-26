@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Layout } from "@/components/dashboard/Layout"; 
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { AlertsHeader } from "@/components/alerts/AlertsHeader";
 import { AlertCategoryCard } from "@/components/alerts/AlertCategoryCard";
 import { Button } from "@/components/ui/button";
@@ -55,7 +54,7 @@ const Alerts = () => {
   };
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="container mx-auto py-8">
         <AlertsHeader 
           alertsEnabled={alertsEnabled}
@@ -84,7 +83,7 @@ const Alerts = () => {
           </div>
         )}
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 
