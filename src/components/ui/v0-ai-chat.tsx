@@ -20,7 +20,7 @@ import { ActionButton } from "./action-button";
 import { ScrollArea } from "./scroll-area";
 import { ChatMessageFormatter } from "../compliance/ChatMessageFormatter";
 import { useToast } from "@/hooks/use-toast";
-import { useClient } from "@supabase/auth-helpers-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   role: "assistant" | "user";
@@ -32,7 +32,6 @@ export function VercelV0Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const supabase = useClient();
   
   const {
     textareaRef,
