@@ -1,26 +1,16 @@
-
 "use client";
 
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import {
-    FileText,
-    ShieldCheck,
-    Book,
-    ClipboardCheck,
-    CircleUserRound,
-    ArrowUpIcon,
-    Paperclip,
-    PlusIcon,
-    Loader2,
-} from "lucide-react";
+import { FileText, ShieldCheck, Book, ClipboardCheck, CircleUserRound, ArrowUpIcon, Paperclip, PlusIcon, Loader2 } from "lucide-react";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 import { ActionButton } from "./action-button";
 import { ScrollArea } from "./scroll-area";
 import { ChatMessageFormatter } from "../compliance/ChatMessageFormatter";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { TextGenerateEffect } from "./text-generate-effect";
 
 interface Message {
   role: "assistant" | "user";
@@ -44,7 +34,6 @@ export function VercelV0Chat() {
   const sendMessage = async (text: string, checklistItem?: string) => {
     if (!text.trim()) return;
 
-    // Add user message to chat
     const userMessage = { role: "user" as const, content: text };
     setMessages(prev => [...prev, userMessage]);
     setValue("");
@@ -61,7 +50,6 @@ export function VercelV0Chat() {
 
       if (error) throw error;
 
-      // Add AI response to chat
       setMessages(prev => [...prev, {
         role: "assistant",
         content: data.reply
@@ -92,6 +80,50 @@ export function VercelV0Chat() {
     sendMessage(prompt);
   };
 
+  const renderMessages = () => (
+    <div className="space-y-4 pb-4">
+      {messages.map((message, i) => (
+        <div
+          key={i}
+          className={cn(
+            "flex w-full",
+            message.role === "assistant" ? "justify-start" : "justify-end"
+          )}
+        >
+          <div
+            className={cn(
+              "rounded-lg px-4 py-2 max-w-[80%]",
+              message.role === "assistant" 
+                ? "bg-neutral-800 text-white" 
+                : "bg-blue-600 text-white"
+            )}
+          >
+            {message.role === "assistant" ? (
+              <TextGenerateEffect 
+                words={message.content} 
+                filter={false} 
+                duration={1}
+                className="text-sm font-normal"
+              />
+            ) : (
+              <ChatMessageFormatter 
+                content={message.content} 
+                role={message.role} 
+              />
+            )}
+          </div>
+        </div>
+      ))}
+      {isLoading && (
+        <div className="flex justify-start">
+          <div className="bg-neutral-800 rounded-lg px-4 py-2">
+            <Loader2 className="w-4 h-4 animate-spin text-white" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
             <h1 className="text-4xl font-bold text-black dark:text-white">
                 Compliance Assistant
@@ -99,33 +131,7 @@ export function VercelV0Chat() {
 
             <div className="w-full">
                 <ScrollArea className="h-[400px] rounded-t-xl border border-b-0 border-neutral-800 bg-neutral-900 p-4">
-                    <div className="space-y-4 pb-4">
-                        {messages.map((message, i) => (
-                            <div key={i} className={cn(
-                                "flex w-full",
-                                message.role === "assistant" ? "justify-start" : "justify-end"
-                            )}>
-                                <div className={cn(
-                                    "rounded-lg px-4 py-2 max-w-[80%]",
-                                    message.role === "assistant" 
-                                        ? "bg-neutral-800 text-white" 
-                                        : "bg-blue-600 text-white"
-                                )}>
-                                    <ChatMessageFormatter 
-                                        content={message.content} 
-                                        role={message.role} 
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                        {isLoading && (
-                            <div className="flex justify-start">
-                                <div className="bg-neutral-800 rounded-lg px-4 py-2">
-                                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    {renderMessages()}
                 </ScrollArea>
 
                 <div className="relative bg-neutral-900 rounded-b-xl border border-t-0 border-neutral-800">
