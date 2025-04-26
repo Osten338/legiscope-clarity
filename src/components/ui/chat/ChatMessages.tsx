@@ -29,19 +29,10 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
                 : "bg-blue-600 text-white"
             )}
           >
-            {message.role === "assistant" ? (
-              <TextGenerateEffect 
-                words={message.content} 
-                filter={false} 
-                duration={1}
-                className="text-sm font-normal"
-              />
-            ) : (
-              <ChatMessageFormatter 
-                content={message.content} 
-                role={message.role} 
-              />
-            )}
+            <ChatMessageFormatter 
+              content={message.content} 
+              role={message.role} 
+            />
           </div>
         </div>
       ))}
