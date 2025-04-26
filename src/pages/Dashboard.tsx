@@ -1,10 +1,10 @@
-
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Gallery4, Gallery4Item } from "@/components/ui/gallery4";
+import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 
 type ChecklistItem = {
   id: string;
@@ -110,7 +110,6 @@ const Dashboard = () => {
     refetch();
   }, [refetch]);
 
-  // Sample gallery items to pass to the Gallery4 component
   const galleryItems: Gallery4Item[] = [
     {
       id: "compliance-overview",
@@ -138,7 +137,7 @@ const Dashboard = () => {
       title: "Compliance Assistant",
       description: "Get instant answers to your compliance questions with our AI-powered compliance assistant.",
       href: "/compliance-chat",
-      image: "https://images.unsplash.com/photo-1551250928-e4a05afaed1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2NDI3NzN8MHwxfGFsbHwxMjR8fHx8fHwyfHwxNzIzNjM0NDc0fA&ixlib=rb-4.0.3&q=80&w=1080"
+      image: "https://images.unsplash.com/photo-1551250928-e4a05afaed1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w2NDI3NzN8MHwxfGFsbHwxMjR8fHx8fHwyfHwxNzIzODA2OTM5fA&ixlib=rb-4.0.3&q=80&w=1080"
     },
     {
       id: "upcoming-reviews",
@@ -152,14 +151,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="p-6">
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-medium text-white mb-4">
-            Welcome back
-          </h1>
-          <p className="text-xl text-white/80 max-w-2xl">
-            Explore your compliance resources and stay ahead of regulatory requirements with our comprehensive tools and insights.
-          </p>
-        </div>
+        <WelcomeSection />
         <Gallery4 
           title="Compliance Resources"
           description="Access key compliance tools and resources to help your business stay compliant with all relevant regulations."
