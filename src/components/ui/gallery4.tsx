@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -100,7 +101,7 @@ const Gallery4 = ({
   }, [carouselApi]);
 
   return (
-    <section className="py-32">
+    <section className="py-32 w-full overflow-hidden">
       <div className="container mx-auto">
         <div className="mb-8 flex items-end justify-between md:mb-14 lg:mb-16">
           <div className="flex flex-col gap-4">
@@ -139,6 +140,7 @@ const Gallery4 = ({
         <Carousel
           setApi={setCarouselApi}
           opts={{
+            containScroll: "trimSnaps",
             breakpoints: {
               "(max-width: 768px)": {
                 dragFree: true,
@@ -146,7 +148,7 @@ const Gallery4 = ({
             },
           }}
         >
-          <CarouselContent className="ml-0 2xl:ml-[max(8rem,calc(50vw-700px))] 2xl:mr-[max(0rem,calc(50vw-700px))]">
+          <CarouselContent className="ml-0 sm:ml-4 md:ml-6 lg:ml-8 2xl:ml-[max(8rem,calc(50vw-700px))] 2xl:mr-[max(0rem,calc(50vw-700px))]">
             {items.map((item) => (
               <CarouselItem
                 key={item.id}
