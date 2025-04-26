@@ -32,7 +32,7 @@ function SidebarLink({ to, icon: Icon, children, active, subItem }: SidebarLinkP
     <Link
       to={to}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative",
         subItem ? "pl-10" : "pl-3",
         active 
           ? "bg-primary/10 text-primary" 
@@ -40,7 +40,7 @@ function SidebarLink({ to, icon: Icon, children, active, subItem }: SidebarLinkP
       )}
     >
       <Icon className={cn("h-5 w-5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
-      <span>{children}</span>
+      <span className="truncate">{children}</span>
     </Link>
   );
 }
@@ -59,102 +59,108 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
   return (
     <div
       className={cn(
-        "fixed inset-y-0 left-0 z-20 flex w-64 flex-col bg-card transition-transform duration-300 ease-in-out dark:bg-gray-900 border-r border-border",
-        open ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:w-16"
+        "fixed inset-y-0 left-0 z-20 flex h-full bg-card transition-all duration-300 ease-in-out dark:bg-gray-900 border-r border-border",
+        open ? "w-64" : "w-16"
       )}
     >
       {/* Logo area */}
-      <div className="flex h-16 items-center justify-between border-b border-border px-4">
-        <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-            <span className="font-bold text-primary-foreground">C</span>
-          </div>
-          {open && <span className="font-semibold">ComplianceOS</span>}
-        </Link>
-      </div>
+      <div className="flex h-full w-full flex-col">
+        <div className="flex h-16 items-center justify-between px-4 border-b border-border">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center shrink-0">
+              <span className="font-bold text-primary-foreground">C</span>
+            </div>
+            {open && <span className="font-semibold">ComplianceOS</span>}
+          </Link>
+        </div>
 
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-4">
-        <nav className="space-y-1 px-2">
-          <SidebarLink to="/dashboard" icon={LayoutDashboard} active={isActive("/dashboard")}>
-            {open && "Dashboard"}
-          </SidebarLink>
-
-          <div className="py-0.5">
-            <button
-              onClick={() => setRepositoryOpen(!repositoryOpen)}
-              className={cn(
-                "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive("/repository") 
-                  ? "bg-primary/10 text-primary" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-2">
+          <div className="space-y-1">
+            <SidebarLink 
+              to="/dashboard" 
+              icon={LayoutDashboard} 
+              active={isActive("/dashboard")}
             >
-              <div className="flex items-center gap-3">
-                <FolderGit className={cn(
-                  "h-5 w-5 shrink-0", 
-                  isActive("/repository") ? "text-primary" : "text-muted-foreground"
-                )} />
-                {open && <span>Repository</span>}
-              </div>
-              {open && (
-                <ChevronDown 
-                  className={cn(
-                    "h-4 w-4 transition-transform", 
-                    repositoryOpen && "transform rotate-180"
-                  )} 
-                />
-              )}
-            </button>
-            {open && repositoryOpen && (
-              <div className="mt-1 space-y-1">
-                <SidebarLink 
-                  to="/repository/contracts" 
-                  icon={FileText} 
-                  active={isActive("/repository/contracts")}
-                  subItem
-                >
-                  Contracts
-                </SidebarLink>
-                <SidebarLink 
-                  to="/repository/regulations" 
-                  icon={FileText} 
-                  active={isActive("/repository/regulations")}
-                  subItem
-                >
-                  Regulations
-                </SidebarLink>
-              </div>
-            )}
-          </div>
+              Dashboard
+            </SidebarLink>
 
-          <SidebarLink to="/risk-assessment" icon={BarChart3} active={isActive("/risk-assessment")}>
-            {open && "Insights"}
-          </SidebarLink>
-          
-          <SidebarLink to="/compliance-checklist" icon={CheckSquare} active={isActive("/compliance-checklist")}>
-            {open && "Tasks"}
-          </SidebarLink>
-          
-          <SidebarLink to="/documents" icon={FileText} active={isActive("/documents")}>
-            {open && "Templates"}
-          </SidebarLink>
-          
-          <SidebarLink to="/alerts" icon={Bell} active={isActive("/alerts")}>
-            {open && "Alerts"}
-          </SidebarLink>
-          
-          <SidebarLink to="/documentation" icon={BookOpen} active={isActive("/documentation")}>
-            {open && "Knowledge Hub"}
-          </SidebarLink>
+            <div className="py-0.5">
+              <button
+                onClick={() => setRepositoryOpen(!repositoryOpen)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  isActive("/repository") 
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <FolderGit className={cn(
+                    "h-5 w-5 shrink-0", 
+                    isActive("/repository") ? "text-primary" : "text-muted-foreground"
+                  )} />
+                  {open && <span>Repository</span>}
+                </div>
+                {open && (
+                  <ChevronDown 
+                    className={cn(
+                      "h-4 w-4 transition-transform", 
+                      repositoryOpen && "transform rotate-180"
+                    )} 
+                  />
+                )}
+              </button>
+              {open && repositoryOpen && (
+                <div className="mt-1 space-y-1">
+                  <SidebarLink 
+                    to="/repository/contracts" 
+                    icon={FileText} 
+                    active={isActive("/repository/contracts")}
+                    subItem
+                  >
+                    Contracts
+                  </SidebarLink>
+                  <SidebarLink 
+                    to="/repository/regulations" 
+                    icon={FileText} 
+                    active={isActive("/repository/regulations")}
+                    subItem
+                  >
+                    Regulations
+                  </SidebarLink>
+                </div>
+              )}
+            </div>
+
+            <SidebarLink to="/risk-assessment" icon={BarChart3} active={isActive("/risk-assessment")}>
+              Insights
+            </SidebarLink>
+            
+            <SidebarLink to="/compliance-checklist" icon={CheckSquare} active={isActive("/compliance-checklist")}>
+              Tasks
+            </SidebarLink>
+            
+            <SidebarLink to="/documents" icon={FileText} active={isActive("/documents")}>
+              Templates
+            </SidebarLink>
+            
+            <SidebarLink to="/alerts" icon={Bell} active={isActive("/alerts")}>
+              Alerts
+            </SidebarLink>
+            
+            <SidebarLink to="/documentation" icon={BookOpen} active={isActive("/documentation")}>
+              Knowledge Hub
+            </SidebarLink>
+          </div>
         </nav>
-      </div>
-      
-      {/* Footer/Settings */}
-      <div className="border-t border-border p-2">
-        <SidebarLink to="/settings" icon={Settings} active={isActive("/settings")}>
-          {open && "Settings"}
-        </SidebarLink>
+        
+        {/* Footer/Settings */}
+        <div className="border-t border-border p-2">
+          <SidebarLink to="/settings" icon={Settings} active={isActive("/settings")}>
+            Settings
+          </SidebarLink>
+        </div>
       </div>
     </div>
   );

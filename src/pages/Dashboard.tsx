@@ -1,14 +1,12 @@
-
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { DashboardLayout } from "@/components/dashboard/new-ui/DashboardLayout";
+import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { DashboardHome } from "@/components/dashboard/new-ui/DashboardHome";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Define types for the data structure
 type ChecklistItem = {
   id: string;
   description: string;
@@ -46,7 +44,6 @@ const Dashboard = () => {
     queryKey: ['savedRegulations'],
     queryFn: async () => {
       try {
-        console.log("Fetching saved regulations...");
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -90,7 +87,6 @@ const Dashboard = () => {
         
         console.log("Saved regulations data:", savedRegs);
         
-        // Transform the data to match our types
         const typedRegulations = savedRegs?.map(reg => ({
           id: reg.id,
           regulation_id: reg.regulation_id,
@@ -108,37 +104,38 @@ const Dashboard = () => {
         throw err;
       }
     },
-    staleTime: 10000, // Refetch after 10 seconds
+    staleTime: 10000,
   });
 
-  // Refetch on initial load to ensure we have the latest data
   useEffect(() => {
     refetch();
   }, [refetch]);
 
   return (
     <DashboardLayout>
-      {error ? (
-        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md mb-6">
-          <div className="flex items-center gap-3 mb-3">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            <h3 className="text-base font-medium text-destructive">Could not load your data</h3>
+      <div className="space-y-6">
+        {error ? (
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <div className="flex items-center gap-3 mb-3">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <h3 className="text-base font-medium text-destructive">Could not load your data</h3>
+            </div>
+            <p className="text-sm text-destructive/80 mb-4">
+              We're having trouble connecting to our database. This might be due to network issues or temporary service disruption.
+            </p>
+            <Button
+              onClick={() => refetch()}
+              variant="destructive"
+              size="sm"
+              className="text-xs"
+            >
+              Try Again
+            </Button>
           </div>
-          <p className="text-sm text-destructive/80 mb-4">
-            We're having trouble connecting to our database. This might be due to network issues or temporary service disruption.
-          </p>
-          <Button
-            onClick={() => refetch()}
-            variant="destructive"
-            size="sm"
-            className="text-xs"
-          >
-            Try Again
-          </Button>
-        </div>
-      ) : (
-        <DashboardHome />
-      )}
+        ) : (
+          <DashboardHome />
+        )}
+      </div>
     </DashboardLayout>
   );
 };
