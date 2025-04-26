@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -101,7 +102,7 @@ const Gallery4 = ({
 
   return (
     <section className="py-32">
-      <div className="container mx-auto">
+      <div className="container px-6 lg:px-8 mx-auto">
         <div className="mb-8 flex items-end justify-between md:mb-14 lg:mb-16">
           <div className="flex flex-col gap-4">
             <h2 className="text-3xl font-medium md:text-4xl lg:text-5xl text-white">
@@ -135,10 +136,12 @@ const Gallery4 = ({
           </div>
         </div>
       </div>
-      <div className="w-full">
+      <div className="w-full relative px-6 lg:px-8">
         <Carousel
           setApi={setCarouselApi}
+          className="mx-auto max-w-[1400px]"
           opts={{
+            align: "start",
             breakpoints: {
               "(max-width: 768px)": {
                 dragFree: true,
@@ -146,11 +149,11 @@ const Gallery4 = ({
             },
           }}
         >
-          <CarouselContent className="ml-0 2xl:ml-[max(8rem,calc(50vw-700px))] 2xl:mr-[max(0rem,calc(50vw-700px))]">
+          <CarouselContent>
             {items.map((item) => (
               <CarouselItem
                 key={item.id}
-                className="max-w-[320px] pl-[20px] lg:max-w-[360px]"
+                className="max-w-[320px] pl-4 sm:pl-6 lg:max-w-[360px]"
               >
                 <a href={item.href} className="group rounded-xl">
                   <div className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
