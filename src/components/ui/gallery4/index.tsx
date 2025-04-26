@@ -7,9 +7,10 @@ import { Carousel, CarouselContent } from "@/components/ui/carousel";
 import { GalleryHeader } from "./GalleryHeader";
 import { GalleryItem } from "./GalleryItem";
 import { GalleryPagination } from "./GalleryPagination";
-import type { Gallery4Props } from "./types";
+import type { Gallery4Props, Gallery4Item } from "./types";
 
-export { type Gallery4Item } from "./types";
+// Export both types so they're available when importing from this module
+export type { Gallery4Props, Gallery4Item } from "./types";
 
 export function Gallery4({
   title = "Case Studies",
