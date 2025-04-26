@@ -101,7 +101,7 @@ const Gallery4 = ({
   }, [carouselApi]);
 
   return (
-    <section className="py-32">
+    <section className="py-32 w-[calc(100%-var(--sidebar-width,0px))]">
       <div className="container px-6 lg:px-8 mx-auto">
         <div className="mb-8 flex items-end justify-between md:mb-14 lg:mb-16">
           <div className="flex flex-col gap-4">
@@ -136,12 +136,13 @@ const Gallery4 = ({
           </div>
         </div>
       </div>
-      <div className="w-full relative px-6 lg:px-8">
+      <div className="relative px-6 lg:px-8 max-w-full overflow-hidden">
         <Carousel
           setApi={setCarouselApi}
-          className="mx-auto max-w-[1400px]"
+          className="mx-auto"
           opts={{
             align: "start",
+            containScroll: "trimSnaps",
             breakpoints: {
               "(max-width: 768px)": {
                 dragFree: true,
@@ -153,7 +154,7 @@ const Gallery4 = ({
             {items.map((item) => (
               <CarouselItem
                 key={item.id}
-                className="max-w-[320px] pl-4 sm:pl-6 lg:max-w-[360px]"
+                className="basis-[calc(100%-2rem)] sm:basis-[calc(50%-2rem)] lg:basis-[calc(33.33%-2rem)] pl-4 sm:pl-6"
               >
                 <a href={item.href} className="group rounded-xl">
                   <div className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
