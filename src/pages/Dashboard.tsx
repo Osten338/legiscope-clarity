@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Gallery4 } from "@/components/ui/gallery4";
 
 type ChecklistItem = {
   id: string;
@@ -113,6 +114,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="p-6">
+        <Gallery4 />
         {/* Your new components will go here */}
       </div>
     </DashboardLayout>
