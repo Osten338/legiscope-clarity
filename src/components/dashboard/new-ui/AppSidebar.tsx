@@ -1,4 +1,5 @@
 
+import React, { useState } from "react";
 import { Calendar, Home, FileText, Bell, CheckSquare, Bot, Settings } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar-new";
 import { Link } from "react-router-dom";
