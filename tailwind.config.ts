@@ -1,6 +1,5 @@
 
 import { type Config } from "tailwindcss";
-import flowbitePlugin from 'flowbite/plugin';
 
 export default {
   darkMode: ["class"],
@@ -9,7 +8,6 @@ export default {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-    'node_modules/flowbite-react/lib/esm/**/*.js',
   ],
   theme: {
     container: {
@@ -170,7 +168,6 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
-    flowbitePlugin,
     // Add custom base styles as a separate plugin
     function({ addBase, theme }) {
       addBase({
