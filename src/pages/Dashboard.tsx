@@ -6,7 +6,6 @@ import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Gallery4, Gallery4Item } from "@/components/ui/gallery4";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
-import { UpcomingEvents } from "@/components/compliance/UpcomingEvents";
 
 type ChecklistItem = {
   id: string;
@@ -183,16 +182,12 @@ const Dashboard = () => {
           />
 
           <div className="grid md:grid-cols-3 gap-8 mb-8">
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <Gallery4 
                 items={galleryItems}
                 titleClassName="text-black"
                 descriptionClassName="text-gray-600"
               />
-            </div>
-            
-            <div className="md:col-span-1">
-              <UpcomingEvents events={[{ day: new Date(), events: upcomingReviews }]} />
             </div>
           </div>
         </div>
