@@ -1,4 +1,3 @@
-
 import { Clock, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -80,7 +79,7 @@ export const RegulationsList = ({
   };
 
   // Filter out duplicates by keeping only the latest entry for each regulation
-  const uniqueRegulations = savedRegulations?.reduce((acc: SavedRegulation[], current: SavedRegulation) => {
+  const uniqueRegulations = savedRegulations?.reduce((acc: RegulationListItem[], current: RegulationListItem) => {
     if (!current.regulations) return acc;
     
     const existingIndex = acc.findIndex(item => item.regulations?.id === current.regulations.id);
@@ -93,7 +92,7 @@ export const RegulationsList = ({
     acc.splice(existingIndex, 1);
     return [...acc, current];
     
-  }, [] as SavedRegulation[]);
+  }, [] as RegulationListItem[]);
 
   if (!uniqueRegulations || uniqueRegulations.length === 0) {
     return (
