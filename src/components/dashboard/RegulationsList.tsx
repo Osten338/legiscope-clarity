@@ -1,7 +1,17 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { 
+  AlertDialog,
+  AlertDialogTrigger, 
+  AlertDialogContent, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogCancel, 
+  AlertDialogAction 
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -199,11 +209,11 @@ export const RegulationsList = ({
                     </Button>
                   </Link>
                   <AlertDialog>
-                    <AlertDialog.Trigger asChild>
+                    <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon">
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </AlertDialog.Trigger>
+                    </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Remove Regulation</AlertDialogTitle>
