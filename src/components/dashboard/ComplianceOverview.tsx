@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,10 +8,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { StatusOverview } from "./StatusOverview";
 import { ComplianceTasks } from "./ComplianceTasks";
 import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
+import { GooeyFilter } from "@/components/ui/gooey-filter";
+import { useScreenSize } from "@/hooks/use-screen-size";
 
 const ComplianceOverview = () => {
   const [timeFilter, setTimeFilter] = useState<string>("30");
   const [view, setView] = useState<string>("all");
+  const [isGooeyEnabled, setIsGooeyEnabled] = useState(true);
+  const screenSize = useScreenSize();
 
   const { data: savedRegulations } = useQuery({
     queryKey: ['savedRegulations'],
@@ -92,14 +96,42 @@ const ComplianceOverview = () => {
 
               {savedRegulations && <StatusOverview savedRegulations={savedRegulations} />}
 
-              <div className="border-b border-border mt-6">
+              <div className="border-b border-border mt-6 relative">
+                <GooeyFilter
+                  id="gooey-filter"
+                  strength={screenSize.lessThan("md") ? 8 : 15}
+                />
+                
+                <div
+                  className="relative"
+                  style={{ filter: isGooeyEnabled ? "url(#gooey-filter)" : "none" }}
+                >
+                  <div className="flex w-full">
+                    {complianceViews.map((tab) => (
+                      <div key={tab.value} className="relative flex-1 h-12">
+                        {view === tab.value && (
+                          <motion.div
+                            layoutId="active-tab"
+                            className="absolute inset-0 bg-muted"
+                            transition={{
+                              type: "spring",
+                              bounce: 0.0,
+                              duration: 0.4,
+                            }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <Tabs value={view} onValueChange={setView} className="w-full">
                   <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-0">
                     {complianceViews.map((tab) => (
                       <TabsTrigger
                         key={tab.value}
                         value={tab.value}
-                        className="data-[state=active]:bg-muted rounded-none border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground data-[state=active]:text-foreground h-9"
+                        className="data-[state=active]:bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground data-[state=active]:text-foreground h-12 relative z-10"
                       >
                         {tab.label}
                       </TabsTrigger>
