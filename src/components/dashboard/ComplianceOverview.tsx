@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { StatusOverview } from "./StatusOverview";
 import { ComplianceTasks } from "./ComplianceTasks";
+import { cn } from "@/lib/utils";
 
 export const ComplianceOverview = () => {
   const { toast } = useToast();
@@ -80,7 +81,12 @@ export const ComplianceOverview = () => {
 
   return (
     <section className="w-full">
-      <div className="container mx-auto space-y-8">
+      <div className={cn(
+        "container mx-auto space-y-8",
+        "border border-border rounded-xl",
+        "p-6",
+        "hover:shadow-lg transition-shadow duration-300"
+      )}>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h2 className="text-2xl font-semibold text-foreground">Compliance Overview</h2>
