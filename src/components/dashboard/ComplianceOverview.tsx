@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -107,7 +108,7 @@ const ComplianceOverview = () => {
                   style={{ filter: isGooeyEnabled ? "url(#gooey-filter)" : "none" }}
                 >
                   <div className="flex w-full">
-                    {complianceViews.map((tab) => (
+                    {complianceViews.map((tab, index) => (
                       <div key={tab.value} className="relative flex-1 h-12">
                         {view === tab.value && (
                           <motion.div
@@ -155,6 +156,18 @@ const ComplianceOverview = () => {
                   </Button>
                 </div>
               )}
+
+              {/* Add a toggle for the gooey effect to make it more visible */}
+              <div className="mt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsGooeyEnabled(!isGooeyEnabled)}
+                  className="text-xs"
+                >
+                  {isGooeyEnabled ? "Disable Gooey Effect" : "Enable Gooey Effect"}
+                </Button>
+              </div>
             </CardHeader>
           </Card>
         </div>
