@@ -1,5 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { CalendarClock } from "lucide-react";
 
@@ -37,21 +38,24 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {sortedEvents.map(event => (
-            <div
-              key={event.id}
-              className="flex items-center justify-between p-4 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors duration-300 group"
-            >
-              <div>
-                <h4 className="font-medium text-foreground">{event.name}</h4>
-                <p className="text-sm text-muted-foreground">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableCell className="font-medium">Event</TableCell>
+              <TableCell className="font-medium">Date & Time</TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedEvents.map(event => (
+              <TableRow key={event.id} className="hover:bg-muted/50">
+                <TableCell className="font-medium">{event.name}</TableCell>
+                <TableCell className="text-muted-foreground">
                   {format(new Date(event.day), 'MMM d')} at {event.time}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
