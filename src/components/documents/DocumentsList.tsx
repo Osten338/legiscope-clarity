@@ -1,12 +1,12 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
-import { DocumentsTable } from "./DocumentsTable";
 import { DocumentSortColumn } from "./DocumentTableHeader";
 import { useToast } from "@/hooks/use-toast";
 import { ReviewDocumentDialog } from "./ReviewDocumentDialog";
+import { DocumentTabs } from "./DocumentTabs";
+import { DocumentViewType } from "./types";
 
 interface DocumentsListProps {
   selectedRegulation?: string;
@@ -19,6 +19,7 @@ export const DocumentsList = ({ selectedRegulation }: DocumentsListProps) => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [currentView, setCurrentView] = useState<DocumentViewType>("all");
 
   const { data: documents, isLoading } = useQuery({
     queryKey: ['compliance-documents', selectedRegulation, sortColumn, sortDirection],
@@ -118,7 +119,9 @@ export const DocumentsList = ({ selectedRegulation }: DocumentsListProps) => {
   return (
     <>
       <Card className="mt-6">
-        <DocumentsTable
+        <DocumentTabs
+          currentView={currentView}
+          onViewChange={setCurrentView}
           documents={documents || []}
           sortColumn={sortColumn}
           sortDirection={sortDirection}

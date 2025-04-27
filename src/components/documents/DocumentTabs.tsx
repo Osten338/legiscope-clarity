@@ -1,0 +1,108 @@
+
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { DocumentsTable } from "./DocumentsTable";
+import { DocumentViewType, DocumentViewProps } from "./types";
+import { FileText, FileCog, FileStack } from "lucide-react";
+import { DocumentSortColumn } from "./DocumentTableHeader";
+
+interface DocumentTabsProps extends DocumentViewProps {
+  sortColumn: DocumentSortColumn;
+  sortDirection: "asc" | "desc";
+  onSort: (column: DocumentSortColumn) => void;
+  onDownload: (document: any) => Promise<void>;
+  onReview: (document: any) => void;
+  onDelete: (document: any) => Promise<void>;
+}
+
+export const DocumentTabs = ({
+  currentView,
+  onViewChange,
+  documents,
+  sortColumn,
+  sortDirection,
+  onSort,
+  onDownload,
+  onReview,
+  onDelete,
+}: DocumentTabsProps) => {
+  return (
+    <Tabs value={currentView} onValueChange={(value) => onViewChange(value as DocumentViewType)}>
+      <ScrollArea>
+        <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
+          <TabsTrigger
+            value="all"
+            className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+          >
+            <FileText
+              className="-ms-0.5 me-1.5 opacity-60"
+              size={16}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            All Documents
+          </TabsTrigger>
+          <TabsTrigger
+            value="policies"
+            className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+          >
+            <FileCog
+              className="-ms-0.5 me-1.5 opacity-60"
+              size={16}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            Policies
+          </TabsTrigger>
+          <TabsTrigger
+            value="procedures"
+            className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+          >
+            <FileStack
+              className="-ms-0.5 me-1.5 opacity-60"
+              size={16}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            Procedures
+          </TabsTrigger>
+        </TabsList>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
+      <TabsContent value="all">
+        <DocumentsTable
+          documents={documents}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onDownload={onDownload}
+          onReview={onReview}
+          onDelete={onDelete}
+        />
+      </TabsContent>
+      <TabsContent value="policies">
+        <DocumentsTable
+          documents={documents.filter(doc => doc.document_type === 'Policy')}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onDownload={onDownload}
+          onReview={onReview}
+          onDelete={onDelete}
+        />
+      </TabsContent>
+      <TabsContent value="procedures">
+        <DocumentsTable
+          documents={documents.filter(doc => doc.document_type === 'Procedure')}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onDownload={onDownload}
+          onReview={onReview}
+          onDelete={onDelete}
+        />
+      </TabsContent>
+    </Tabs>
+  );
+};
