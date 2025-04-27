@@ -40,6 +40,12 @@ export const RegulationTableHeader = ({
             <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
           )}
         </TableHead>
+        <TableHead className="cursor-pointer" onClick={() => onSort("next_review_date")}>
+          Next Review
+          {sortColumn === "next_review_date" && (
+            <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
+          )}
+        </TableHead>
         <TableHead>Actions</TableHead>
       </TableRow>
     </TableHeader>

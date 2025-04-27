@@ -2,6 +2,7 @@
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ViewType } from "../types";
+import { useEffect } from "react";
 
 interface RegulationFiltersProps {
   searchTerm: string;
@@ -16,6 +17,10 @@ export const RegulationFilters = ({
   currentView,
   onViewChange,
 }: RegulationFiltersProps) => {
+  useEffect(() => {
+    console.log("RegulationFilters mounted with view:", currentView);
+  }, []);
+
   const handleViewChange = (value: string) => {
     console.log("View change requested to:", value);
     // Force cast the value to ViewType since we control the possible values
@@ -48,7 +53,7 @@ export const RegulationFilters = ({
         value={currentView}
         onValueChange={handleViewChange}
         className="w-full"
-        defaultValue="active"
+        defaultValue={currentView}
       >
         <TabsList className="w-full md:w-auto">
           <TabsTrigger value="active">Active Regulations</TabsTrigger>

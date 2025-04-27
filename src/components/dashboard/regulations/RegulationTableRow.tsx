@@ -16,6 +16,18 @@ export const RegulationTableRow = ({
   regulation,
   onRemoveRegulation,
 }: RegulationTableRowProps) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Not set";
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    } catch (e) {
+      console.error("Invalid date:", dateString);
+      return "Invalid date";
+    }
+  };
+  
   return (
     <TableRow key={regulation.id}>
       <TableCell className="font-medium">
@@ -37,6 +49,11 @@ export const RegulationTableRow = ({
       <TableCell>
         <Badge variant={regulation.progress === 100 ? "default" : "outline"}>
           {regulation.progress}%
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <Badge variant="outline" className={regulation.next_review_date && new Date(regulation.next_review_date) < new Date() ? "bg-amber-100 text-amber-800" : ""}>
+          {formatDate(regulation.next_review_date)}
         </Badge>
       </TableCell>
       <TableCell className="flex gap-1">
