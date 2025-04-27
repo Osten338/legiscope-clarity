@@ -17,9 +17,11 @@ export const RegulationFilters = ({
   onViewChange,
 }: RegulationFiltersProps) => {
   const handleViewChange = (value: string) => {
-    // Explicitly cast the value to ViewType
-    onViewChange(value as ViewType);
-    console.log("View changed to:", value);
+    console.log("View change requested to:", value);
+    // Force cast the value to ViewType since we control the possible values
+    const viewType = value as ViewType;
+    onViewChange(viewType);
+    console.log("View changed to:", viewType);
   };
 
   return (
@@ -46,6 +48,7 @@ export const RegulationFilters = ({
         value={currentView}
         onValueChange={handleViewChange}
         className="w-full"
+        defaultValue="active"
       >
         <TabsList className="w-full md:w-auto">
           <TabsTrigger value="active">Active Regulations</TabsTrigger>

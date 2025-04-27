@@ -45,6 +45,8 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
   };
 
   const filteredRegulations = useMemo(() => {
+    console.log("Filtering with view:", currentView);
+    
     // First, filter by search term
     let filtered = savedRegulations.filter(
       (regulation) =>
@@ -55,25 +57,25 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
           .toLowerCase()
           .includes(searchTerm.toLowerCase())
     );
+    
+    console.log("After search filter:", filtered.length);
 
     // Then apply view-specific filters
-    switch (currentView) {
-      case "upcoming":
-        // Filter for upcoming reviews (those with a future review date)
-        filtered = filtered.filter(
-          (reg) => 
-            reg.next_review_date && 
-            new Date(reg.next_review_date) > new Date()
-        );
-        break;
-      case "tasks":
-        // Filter for incomplete tasks (those with progress less than 100%)
-        filtered = filtered.filter((reg) => reg.progress < 100);
-        break;
-      case "active":
-        // Show all regulations for the active view (no additional filtering)
-        break;
+    if (currentView === "upcoming") {
+      // Filter for upcoming reviews (those with a future review date)
+      filtered = filtered.filter(
+        (reg) => 
+          reg.next_review_date && 
+          new Date(reg.next_review_date) > new Date()
+      );
+      console.log("Upcoming filter applied:", filtered.length);
+    } 
+    else if (currentView === "tasks") {
+      // Filter for incomplete tasks (those with progress less than 100%)
+      filtered = filtered.filter((reg) => reg.progress < 100);
+      console.log("Tasks filter applied:", filtered.length);
     }
+    // For "active" view, we don't need additional filtering
 
     return filtered;
   }, [savedRegulations, searchTerm, currentView]);
@@ -122,9 +124,10 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     }
   };
 
-  // Add debug console log to track when the view changes
+  // Debug logs
   console.log('Current view:', currentView);
   console.log('Filtered regulations:', filteredRegulations.length);
+  console.log('Sorted regulations:', sortedRegulations.length);
   console.log('Total regulations:', savedRegulations.length);
 
   return (
