@@ -5,12 +5,10 @@ import {
   Home,
   FileText,
   Bell,
-  CheckSquare,
   Bot,
   Settings,
   Calendar,
-  LayoutDashboard,
-  BarChart3
+  LayoutDashboard
 } from "lucide-react";
 
 const links = [
@@ -20,24 +18,9 @@ const links = [
     icon: <LayoutDashboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
-    label: "Compliance Overview",
-    href: "/compliance-overview",
-    icon: <CheckSquare className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Risk Assessment",
-    href: "/risk-assessment",
-    icon: <BarChart3 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-  },
-  {
     label: "Alerts",
     href: "/alerts",
     icon: <Bell className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
-  },
-  {
-    label: "Compliance",
-    href: "/compliance-checklist",
-    icon: <CheckSquare className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Documentation",
@@ -55,6 +38,20 @@ const links = [
     icon: <Calendar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
 ];
+
+const Logo = () => {
+  return (
+    <Link
+      to="/dashboard"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+    >
+      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <span className="font-medium text-black dark:text-white whitespace-pre">
+        Compliance Hub
+      </span>
+    </Link>
+  );
+};
 
 export function AppSidebar() {
   const { pathname } = useLocation();
@@ -90,17 +87,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-
-const Logo = () => {
-  return (
-    <Link
-      to="/dashboard"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
-    >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
-      <span className="font-medium text-black dark:text-white whitespace-pre">
-        Compliance Hub
-      </span>
-    </Link>
-  );
-};
