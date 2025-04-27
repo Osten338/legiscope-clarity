@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,6 +27,7 @@ const ComplianceOverview = () => {
           id,
           status,
           progress,
+          next_review_date,
           regulations (
             id,
             name,
