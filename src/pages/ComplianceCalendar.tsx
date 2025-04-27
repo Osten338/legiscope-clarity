@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/dashboard/new-ui"
 import { FullScreenCalendar } from "@/components/ui/fullscreen-calendar"
 import { UpcomingEvents } from "@/components/compliance/UpcomingEvents"
 
-// Temporary mock data - will be replaced with real data in phase 2
+// Updated mock data with new fields
 const mockEvents = [
   {
     day: new Date("2025-04-30"),
@@ -12,6 +12,9 @@ const mockEvents = [
         name: "GDPR Annual Review Due",
         time: "End of Day",
         datetime: "2025-04-30T23:59",
+        description: "Annual review of GDPR compliance policies and procedures. Ensure all documentation is up to date and any necessary updates are implemented.",
+        source: "EU Data Protection Board",
+        referenceLink: "https://edpb.europa.eu/our-work-tools/our-documents/guidelines_en"
       },
     ],
   },
@@ -23,12 +26,16 @@ const mockEvents = [
         name: "ISO 27001 Audit",
         time: "10:00 AM",
         datetime: "2025-05-15T10:00",
+        description: "Internal audit of information security management system (ISMS) to ensure continued compliance with ISO 27001 standards.",
+        source: "Internal Compliance Team",
       },
       {
         id: 3,
         name: "Policy Update Review",
         time: "2:00 PM",
         datetime: "2025-05-15T14:00",
+        description: "Review and update of internal policies to reflect recent regulatory changes.",
+        source: "Compliance Department",
       },
     ],
   },
@@ -40,6 +47,9 @@ const mockEvents = [
         name: "New Data Protection Law Implementation",
         time: "9:00 AM",
         datetime: "2025-05-20T09:00",
+        description: "Team meeting to discuss implementation strategy for the new data protection requirements.",
+        source: "Legal Department",
+        referenceLink: "https://example.com/data-protection-law"
       },
     ],
   },
