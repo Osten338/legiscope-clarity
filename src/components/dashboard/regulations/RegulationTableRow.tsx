@@ -21,10 +21,34 @@ export const RegulationTableRow = ({
     
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString();
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date format:", dateString);
+        return "Invalid date";
+      }
+      
+      return date.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
     } catch (e) {
-      console.error("Invalid date:", dateString);
+      console.error("Error formatting date:", dateString, e);
       return "Invalid date";
+    }
+  };
+
+  // Determine if review date is in the past
+  const isReviewOverdue = () => {
+    if (!regulation.next_review_date) return false;
+    
+    try {
+      const reviewDate = new Date(regulation.next_review_date);
+      const now = new Date();
+      return reviewDate < now;
+    } catch (e) {
+      return false;
     }
   };
   
@@ -52,7 +76,10 @@ export const RegulationTableRow = ({
         </Badge>
       </TableCell>
       <TableCell>
-        <Badge variant="outline" className={regulation.next_review_date && new Date(regulation.next_review_date) < new Date() ? "bg-amber-100 text-amber-800" : ""}>
+        <Badge 
+          variant={isReviewOverdue() ? "destructive" : "outline"} 
+          className={isReviewOverdue() ? "bg-amber-100 text-amber-800" : ""}
+        >
           {formatDate(regulation.next_review_date)}
         </Badge>
       </TableCell>

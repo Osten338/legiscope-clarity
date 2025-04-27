@@ -18,15 +18,15 @@ export const RegulationFilters = ({
   onViewChange,
 }: RegulationFiltersProps) => {
   useEffect(() => {
-    console.log("RegulationFilters mounted with view:", currentView);
-  }, []);
+    console.log("RegulationFilters mounted with current view:", currentView);
+  }, [currentView]);
 
   const handleViewChange = (value: string) => {
-    console.log("View change requested to:", value);
+    console.log(`View change requested to: ${value}`);
     // Force cast the value to ViewType since we control the possible values
     const viewType = value as ViewType;
     onViewChange(viewType);
-    console.log("View changed to:", viewType);
+    console.log(`View changed to: ${viewType}`);
   };
 
   return (
@@ -53,7 +53,6 @@ export const RegulationFilters = ({
         value={currentView}
         onValueChange={handleViewChange}
         className="w-full"
-        defaultValue={currentView}
       >
         <TabsList className="w-full md:w-auto">
           <TabsTrigger value="active">Active Regulations</TabsTrigger>

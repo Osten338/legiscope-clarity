@@ -1,6 +1,7 @@
 
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortColumn } from "../types";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface RegulationTableHeaderProps {
   sortColumn: SortColumn;
@@ -13,38 +14,67 @@ export const RegulationTableHeader = ({
   sortDirection,
   onSort,
 }: RegulationTableHeaderProps) => {
+  const renderSortIcon = (column: SortColumn) => {
+    if (sortColumn !== column) return null;
+    
+    return (
+      <span className="ml-1 inline-flex">
+        {sortDirection === "asc" ? (
+          <ChevronUp className="h-4 w-4" />
+        ) : (
+          <ChevronDown className="h-4 w-4" />
+        )}
+      </span>
+    );
+  };
+
   return (
     <TableHeader>
       <TableRow>
-        <TableHead className="cursor-pointer" onClick={() => onSort("name")}>
-          Name
-          {sortColumn === "name" && (
-            <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
-          )}
+        <TableHead 
+          className="cursor-pointer hover:bg-muted/20" 
+          onClick={() => onSort("name")}
+        >
+          <div className="flex items-center">
+            Name
+            {renderSortIcon("name")}
+          </div>
         </TableHead>
-        <TableHead className="cursor-pointer" onClick={() => onSort("description")}>
-          Description
-          {sortColumn === "description" && (
-            <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
-          )}
+        <TableHead 
+          className="cursor-pointer hover:bg-muted/20" 
+          onClick={() => onSort("description")}
+        >
+          <div className="flex items-center">
+            Description
+            {renderSortIcon("description")}
+          </div>
         </TableHead>
-        <TableHead className="cursor-pointer" onClick={() => onSort("status")}>
-          Status
-          {sortColumn === "status" && (
-            <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
-          )}
+        <TableHead 
+          className="cursor-pointer hover:bg-muted/20" 
+          onClick={() => onSort("status")}
+        >
+          <div className="flex items-center">
+            Status
+            {renderSortIcon("status")}
+          </div>
         </TableHead>
-        <TableHead className="cursor-pointer" onClick={() => onSort("progress")}>
-          Progress
-          {sortColumn === "progress" && (
-            <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
-          )}
+        <TableHead 
+          className="cursor-pointer hover:bg-muted/20" 
+          onClick={() => onSort("progress")}
+        >
+          <div className="flex items-center">
+            Progress
+            {renderSortIcon("progress")}
+          </div>
         </TableHead>
-        <TableHead className="cursor-pointer" onClick={() => onSort("next_review_date")}>
-          Next Review
-          {sortColumn === "next_review_date" && (
-            <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
-          )}
+        <TableHead 
+          className="cursor-pointer hover:bg-muted/20" 
+          onClick={() => onSort("next_review_date")}
+        >
+          <div className="flex items-center">
+            Next Review
+            {renderSortIcon("next_review_date")}
+          </div>
         </TableHead>
         <TableHead>Actions</TableHead>
       </TableRow>
