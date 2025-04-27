@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 import {
   IconAdjustmentsBolt,
   IconCloud,
@@ -15,6 +16,7 @@ const features = [
     title: "Policies and Procedures",
     description: "Access and review your organization's internal policies, standard operating procedures, and compliance guidelines.",
     icon: <IconTerminal2 className="h-6 w-6" />,
+    href: "/documents"
   },
   {
     title: "Risk Assessments",
@@ -58,26 +60,16 @@ const Feature = ({
   description,
   icon,
   index,
+  href,
 }: {
   title: string;
   description: string;
   icon: React.ReactNode;
   index: number;
+  href?: string;
 }) => {
-  return (
-    <div
-      className={cn(
-        "flex flex-col lg:border-r py-10 relative group/feature dark:border-neutral-800",
-        (index === 0 || index === 4) && "lg:border-l dark:border-neutral-800",
-        index < 4 && "lg:border-b dark:border-neutral-800"
-      )}
-    >
-      {index < 4 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
-      )}
-      {index >= 4 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
-      )}
+  const Content = () => (
+    <>
       <div className="mb-4 relative z-10 px-10 text-neutral-600 dark:text-neutral-400">
         {icon}
       </div>
@@ -90,6 +82,31 @@ const Feature = ({
       <p className="text-sm text-neutral-600 dark:text-neutral-300 max-w-xs relative z-10 px-10">
         {description}
       </p>
+    </>
+  );
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col lg:border-r py-10 relative group/feature dark:border-neutral-800",
+        (index === 0 || index === 4) && "lg:border-l dark:border-neutral-800",
+        index < 4 && "lg:border-b dark:border-neutral-800",
+        href && "cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+      )}
+    >
+      {index < 4 && (
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
+      )}
+      {index >= 4 && (
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
+      )}
+      {href ? (
+        <Link to={href} className="h-full">
+          <Content />
+        </Link>
+      ) : (
+        <Content />
+      )}
     </div>
   );
 };

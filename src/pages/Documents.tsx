@@ -38,11 +38,18 @@ const Documents = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
-        <DocumentsHeader 
-          onUpload={handleOpenUploadDialog} 
-          selectedRegulation={selectedRegulation}
-          onRegulationChange={setSelectedRegulation}
-        />
+        <div className="mb-8">
+          <div className="text-sm text-muted-foreground mb-1">
+            <Link to="/documentation" className="hover:text-foreground">Documentation</Link>
+            {" / "}
+            <span>Policies & Procedures</span>
+          </div>
+          <DocumentsHeader 
+            onUpload={handleOpenUploadDialog} 
+            selectedRegulation={selectedRegulation}
+            onRegulationChange={setSelectedRegulation}
+          />
+        </div>
         
         <DocumentsList 
           selectedRegulation={selectedRegulation} 
