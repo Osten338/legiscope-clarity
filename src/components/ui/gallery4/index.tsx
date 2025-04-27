@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,7 +8,6 @@ import { GalleryItem } from "./GalleryItem";
 import { GalleryPagination } from "./GalleryPagination";
 import type { Gallery4Props, Gallery4Item } from "./types";
 
-// Export both types so they're available when importing from this module
 export type { Gallery4Props, Gallery4Item } from "./types";
 
 export function Gallery4({
@@ -41,7 +39,7 @@ export function Gallery4({
   }, [carouselApi]);
 
   return (
-    <section className="py-32 w-full overflow-hidden">
+    <section className="py-24 w-full overflow-hidden">
       <div className="container mx-auto">
         <GalleryHeader
           title={title}
