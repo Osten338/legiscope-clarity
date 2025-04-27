@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -41,19 +40,17 @@ export function Gallery4({
 
   return (
     <section className="w-full overflow-hidden">
-      <div className="container mx-auto">
-        {(title || description) && (
-          <GalleryHeader
-            title={title}
-            titleClassName={titleClassName}
-            description={description}
-            descriptionClassName={descriptionClassName}
-            carouselApi={carouselApi}
-            canScrollPrev={canScrollPrev}
-            canScrollNext={canScrollNext}
-          />
-        )}
-      </div>
+      {(title || description) && (
+        <GalleryHeader
+          title={title}
+          titleClassName={titleClassName}
+          description={description}
+          descriptionClassName={descriptionClassName}
+          carouselApi={carouselApi}
+          canScrollPrev={canScrollPrev}
+          canScrollNext={canScrollNext}
+        />
+      )}
       <div className="w-full">
         <Carousel
           setApi={setCarouselApi}
