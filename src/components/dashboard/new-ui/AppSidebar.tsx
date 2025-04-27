@@ -1,19 +1,33 @@
 import React, { useState } from "react";
-import { Calendar, Home, FileText, Bell, CheckSquare, Bot, Settings } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar-new";
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import {
+  Home,
+  FileText,
+  Bell,
+  CheckSquare,
+  Bot,
+  Settings,
+  Calendar,
+  LayoutDashboard,
+  BarChart3
+} from "lucide-react";
 
 const links = [
   {
     label: "Dashboard",
     href: "/dashboard",
-    icon: <Home className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    icon: <LayoutDashboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Compliance Overview",
+    href: "/compliance-overview",
+    icon: <CheckSquare className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Risk Assessment",
     href: "/risk-assessment",
-    icon: <Calendar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    icon: <BarChart3 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Documents",
