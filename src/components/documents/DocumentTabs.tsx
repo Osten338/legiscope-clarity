@@ -32,7 +32,7 @@ export const DocumentTabs = ({
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
           <TabsTrigger
             value="all"
-            className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+            className="relative overflow-hidden rounded-none border border-border py-2 px-3 text-sm font-medium after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
           >
             <FileText
               className="-ms-0.5 me-1.5 opacity-60"
@@ -44,7 +44,7 @@ export const DocumentTabs = ({
           </TabsTrigger>
           <TabsTrigger
             value="policies"
-            className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+            className="relative overflow-hidden rounded-none border border-border py-2 px-3 text-sm font-medium after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
           >
             <FileCog
               className="-ms-0.5 me-1.5 opacity-60"
@@ -56,7 +56,7 @@ export const DocumentTabs = ({
           </TabsTrigger>
           <TabsTrigger
             value="procedures"
-            className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+            className="relative overflow-hidden rounded-none border border-border py-2 px-3 text-sm font-medium after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
           >
             <FileStack
               className="-ms-0.5 me-1.5 opacity-60"
@@ -70,7 +70,7 @@ export const DocumentTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <TabsContent value="all">
+      <TabsContent value="all" className="mt-2">
         <DocumentsTable
           documents={documents}
           sortColumn={sortColumn}
@@ -81,7 +81,7 @@ export const DocumentTabs = ({
           onDelete={onDelete}
         />
       </TabsContent>
-      <TabsContent value="policies">
+      <TabsContent value="policies" className="mt-2">
         <DocumentsTable
           documents={documents.filter(doc => doc.document_type === 'Policy')}
           sortColumn={sortColumn}
@@ -92,7 +92,7 @@ export const DocumentTabs = ({
           onDelete={onDelete}
         />
       </TabsContent>
-      <TabsContent value="procedures">
+      <TabsContent value="procedures" className="mt-2">
         <DocumentsTable
           documents={documents.filter(doc => doc.document_type === 'Procedure')}
           sortColumn={sortColumn}
