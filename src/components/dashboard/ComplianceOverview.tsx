@@ -6,11 +6,15 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { StatusOverview } from "./StatusOverview";
+import { useToast } from "@/hooks/use-toast";
 
 export const ComplianceOverview = () => {
+  const { toast } = useToast();
+  
   const {
     data: savedRegulations,
     isLoading,
+    error
   } = useQuery({
     queryKey: ['savedRegulations'],
     queryFn: async () => {
@@ -34,10 +38,25 @@ export const ComplianceOverview = () => {
         `)
         .eq('user_id', user.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching regulations:", error);
+        toast({
+          title: "Data loading error",
+          description: "Could not load your saved regulations. Please try again.",
+          variant: "destructive"
+        });
+        throw error;
+      }
+      
+      console.log("Saved regulations data:", data);
       return data || [];
     }
   });
+
+  // Add console logs to help debug
+  console.log("Is loading:", isLoading);
+  console.log("Error:", error);
+  console.log("Saved regulations:", savedRegulations);
 
   return (
     <div className="py-16 w-full">
@@ -47,7 +66,22 @@ export const ComplianceOverview = () => {
           <p className="text-muted-foreground">Track your compliance status and tasks across all regulations.</p>
         </div>
 
-        {!isLoading && savedRegulations && (
+        {isLoading && (
+          <div className="flex justify-center p-8">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
+          </div>
+        )}
+
+        {error && (
+          <Card className="border-red-100 bg-red-50">
+            <CardHeader>
+              <CardTitle className="text-red-800">Error loading compliance data</CardTitle>
+              <p className="text-red-600 mt-2">There was a problem loading your compliance tasks. Please try again later.</p>
+            </CardHeader>
+          </Card>
+        )}
+
+        {!isLoading && !error && savedRegulations && savedRegulations.length > 0 ? (
           <>
             <StatusOverview savedRegulations={savedRegulations} />
             
@@ -159,7 +193,16 @@ export const ComplianceOverview = () => {
               </Tabs>
             </Card>
           </>
-        )}
+        ) : (!isLoading && !error) ? (
+          <Card className="border-amber-100 bg-amber-50">
+            <CardHeader>
+              <CardTitle className="text-amber-800">No compliance tasks found</CardTitle>
+              <p className="text-amber-600 mt-2">
+                It looks like you don't have any compliance tasks yet. Visit the Regulations page to add relevant regulations to your account.
+              </p>
+            </CardHeader>
+          </Card>
+        ) : null}
       </div>
     </div>
   );
