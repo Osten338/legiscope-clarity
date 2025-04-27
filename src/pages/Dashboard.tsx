@@ -153,7 +153,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="flex flex-col">
-        <div className="container mx-auto">
+        <div className="container mx-auto pt-8">
           <WelcomeSection />
           <Gallery4 
             items={galleryItems}
