@@ -26,6 +26,7 @@ import ComplianceChat from "./pages/ComplianceChat";
 import AdminTools from "./pages/AdminTools";
 import ComplianceCalendar from "./pages/ComplianceCalendar";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import ComplianceOverview from "./pages/ComplianceOverview";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -136,6 +137,16 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/home" element={<Index />} />
+                  <Route
+                    path="/compliance-overview"
+                    element={
+                      session ? (
+                        <ComplianceOverview />
+                      ) : (
+                        <Navigate to="/auth" replace={true} />
+                      )
+                    }
+                  />
                   <Route
                     path="/assessment"
                     element={
