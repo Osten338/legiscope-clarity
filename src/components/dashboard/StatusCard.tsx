@@ -17,7 +17,7 @@ export const StatusCard = ({ title, count, image, className }: StatusCardProps) 
         alt={title}
         className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--primary)/0),hsl(var(--primary)/0.4),hsl(var(--primary)/0.8)_100%)] mix-blend-multiply" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#8BC34A] via-[#4CAF50] to-[#2E7D32] mix-blend-multiply" />
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-start p-4">
         <div className="mb-2 text-lg font-semibold text-white">
           {title}
