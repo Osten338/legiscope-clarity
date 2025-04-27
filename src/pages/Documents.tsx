@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+import { Link } from "react-router-dom";  // Add this import
 import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { DocumentsHeader } from "@/components/documents/DocumentsHeader";
 import { DocumentsList } from "@/components/documents/DocumentsList";
