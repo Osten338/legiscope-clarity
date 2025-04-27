@@ -154,8 +154,6 @@ const Dashboard = () => {
       <div className="p-6">
         <WelcomeSection />
         <Gallery4 
-          title="Compliance Resources"
-          description="Access key compliance tools and resources to help your business stay compliant with all relevant regulations."
           items={galleryItems}
           titleClassName="text-black"
           descriptionClassName="text-gray-600"
