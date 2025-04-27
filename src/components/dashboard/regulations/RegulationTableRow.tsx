@@ -2,8 +2,8 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Pencil } from "lucide-react";
 import { RegulationListItem } from "../types";
 import { DeleteRegulationDialog } from "./DeleteRegulationDialog";
 

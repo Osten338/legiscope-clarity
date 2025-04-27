@@ -34,7 +34,6 @@ type SavedRegulationData = {
 
 export const ComplianceOverview = () => {
   const { toast } = useToast();
-  const [openRegulation, setOpenRegulation] = useState<string | null>(null);
   
   const {
     data: savedRegulations,
@@ -128,11 +127,7 @@ export const ComplianceOverview = () => {
 
         <StatusOverview savedRegulations={savedRegulations} />
         
-        <RegulationsList 
-          savedRegulations={savedRegulations}
-          openRegulation={openRegulation}
-          setOpenRegulation={setOpenRegulation}
-        />
+        <RegulationsList savedRegulations={savedRegulations} />
       </div>
     </section>
   );
