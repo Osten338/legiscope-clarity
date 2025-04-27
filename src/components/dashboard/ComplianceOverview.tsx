@@ -1,14 +1,18 @@
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { StatusOverview } from "./StatusOverview";
 import { ComplianceTasks } from "./ComplianceTasks";
+import { RegulationsList } from "./RegulationsList";
+import { UpcomingReviews } from "./UpcomingReviews";
 import { cn } from "@/lib/utils";
 
 export const ComplianceOverview = () => {
   const { toast } = useToast();
+  const [openRegulation, setOpenRegulation] = useState<string | null>(null);
   
   const {
     data: savedRegulations,
@@ -29,10 +33,17 @@ export const ComplianceOverview = () => {
           id,
           status,
           progress,
+          next_review_date,
           regulations (
             id,
             name,
-            description
+            description,
+            motivation,
+            requirements,
+            checklist_items (
+              id, 
+              description
+            )
           )
         `)
         .eq('user_id', user.id);
@@ -79,6 +90,13 @@ export const ComplianceOverview = () => {
     );
   }
 
+  // Filter out regulations with no checklist items
+  const regulationsWithTasks = savedRegulations.filter(reg => 
+    reg.regulations && reg.regulations.checklist_items && reg.regulations.checklist_items.length > 0);
+  
+  // Filter for incomplete tasks (regulations that aren't fully compliant)
+  const incompleteTasks = regulationsWithTasks.filter(reg => reg.progress < 100);
+
   return (
     <section className="w-full">
       <div className={cn(
@@ -95,7 +113,25 @@ export const ComplianceOverview = () => {
         </div>
 
         <StatusOverview savedRegulations={savedRegulations} />
-        <ComplianceTasks savedRegulations={savedRegulations} />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <RegulationsList 
+              savedRegulations={savedRegulations} 
+              openRegulation={openRegulation}
+              setOpenRegulation={setOpenRegulation}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <UpcomingReviews savedRegulations={savedRegulations} />
+            
+            {incompleteTasks.length > 0 && (
+              <Card className="animate-appear delay-200 bg-card/80 backdrop-blur-md border-neutral-200">
+                <ComplianceTasks savedRegulations={incompleteTasks} />
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );
