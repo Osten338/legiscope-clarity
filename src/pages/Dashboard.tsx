@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Gallery4, Gallery4Item } from "@/components/ui/gallery4";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
+import { ComplianceOverview } from "@/components/dashboard/ComplianceOverview";
 
 type ChecklistItem = {
   id: string;
@@ -160,6 +160,7 @@ const Dashboard = () => {
           titleClassName="text-black"
           descriptionClassName="text-gray-600"
         />
+        <ComplianceOverview />
       </div>
     </DashboardLayout>
   );
