@@ -1,14 +1,16 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { useState, useMemo } from "react";
 
 type RegulationListItem = {
   id: string;
@@ -27,6 +29,8 @@ interface RegulationsListProps {
   setOpenRegulation: (id: string | null) => void;
 }
 
+type SortColumn = "name" | "description" | "status" | "progress";
+
 export const RegulationsList = ({
   savedRegulations,
   openRegulation,
@@ -34,6 +38,9 @@ export const RegulationsList = ({
 }: RegulationsListProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortColumn, setSortColumn] = useState<SortColumn>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const handleRemoveRegulation = async (savedRegulationId: string) => {
     try {
@@ -54,49 +61,149 @@ export const RegulationsList = ({
     }
   };
 
-  const backgroundImages = [
-    "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-    "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
-  ];
+  const filteredRegulations = useMemo(() => {
+    return savedRegulations.filter((regulation) =>
+      regulation.regulations.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      regulation.regulations.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [savedRegulations, searchTerm]);
+
+  const sortedRegulations = useMemo(() => {
+    return [...filteredRegulations].sort((a, b) => {
+      let valueA, valueB;
+
+      switch (sortColumn) {
+        case "name":
+          valueA = a.regulations.name;
+          valueB = b.regulations.name;
+          break;
+        case "description":
+          valueA = a.regulations.description;
+          valueB = b.regulations.description;
+          break;
+        case "status":
+          valueA = a.status;
+          valueB = b.status;
+          break;
+        case "progress":
+          valueA = a.progress;
+          valueB = b.progress;
+          break;
+        default:
+          return 0;
+      }
+
+      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredRegulations, sortColumn, sortDirection]);
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
 
   return (
     <Card className="animate-appear delay-300 bg-card border">
       <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-foreground">Active Regulations</h2>
-          <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20">
-            {savedRegulations.length} active
-          </Badge>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-semibold text-foreground">Active Regulations</h2>
+            <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20">
+              {savedRegulations.length} active
+            </Badge>
+          </div>
+          <Input
+            placeholder="Search regulations..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="md:w-96"
+          />
         </div>
 
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent>
-            {savedRegulations.map((regulation, index) => (
-              <CarouselItem key={regulation.id} className="md:basis-1/2 lg:basis-1/3">
-                <div className="relative h-[250px] w-full overflow-hidden rounded-xl group">
-                  <img
-                    src={backgroundImages[index % backgroundImages.length]}
-                    alt={regulation.regulations.name}
-                    className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 mix-blend-multiply" />
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("name")}>
+                Name
+                {sortColumn === "name" && (
+                  <span className="ml-1">
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("description")}>
+                Description
+                {sortColumn === "description" && (
+                  <span className="ml-1">
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>
+                Status
+                {sortColumn === "status" && (
+                  <span className="ml-1">
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("progress")}>
+                Progress
+                {sortColumn === "progress" && (
+                  <span className="ml-1">
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </span>
+                )}
+              </TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedRegulations.map((regulation) => (
+              <TableRow key={regulation.id}>
+                <TableCell className="font-medium">
+                  <Link 
+                    to={`/legislation/${regulation.regulations.id}`}
+                    className="text-foreground hover:text-primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenRegulation(openRegulation === regulation.regulations.id ? null : regulation.regulations.id);
+                    }}
+                  >
+                    {regulation.regulations.name}
+                  </Link>
+                </TableCell>
+                <TableCell className="max-w-md truncate">
+                  {regulation.regulations.description}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="capitalize">
+                    {regulation.status.replace('_', ' ')}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={regulation.progress === 100 ? "default" : "outline"}>
+                    {regulation.progress}%
+                  </Badge>
+                </TableCell>
+                <TableCell className="flex gap-1">
+                  <Link to={`/legislation/${regulation.regulations.id}`}>
+                    <Button variant="ghost" size="icon">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/20 hover:bg-black/40"
-                      >
-                        <X className="h-4 w-4 text-white" />
+                    <AlertDialog.Trigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    </AlertDialogTrigger>
+                    </AlertDialog.Trigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Remove Regulation</AlertDialogTitle>
@@ -112,35 +219,11 @@ export const RegulationsList = ({
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                  
-                  <Link 
-                    to={`/legislation/${regulation.regulations.id}`} 
-                    className="absolute inset-0 p-4 flex flex-col justify-end hover:no-underline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenRegulation(openRegulation === regulation.regulations.id ? null : regulation.regulations.id);
-                    }}
-                  >
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      {regulation.regulations.name}
-                    </h3>
-                    <p className="text-white/90 text-sm line-clamp-2">
-                      {regulation.regulations.description}
-                    </p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-white/90 text-sm">
-                        Progress: {regulation.progress}%
-                      </span>
-                      <span className="text-white/90 text-sm capitalize">
-                        {regulation.status.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </CarouselItem>
+                </TableCell>
+              </TableRow>
             ))}
-          </CarouselContent>
-        </Carousel>
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
