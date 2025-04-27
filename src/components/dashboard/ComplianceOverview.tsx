@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,7 +125,6 @@ export const ComplianceOverview = () => {
     <section className="w-full">
       <div className={cn(
         "container mx-auto space-y-8",
-        "border border-border rounded-xl",
         "p-6",
         "hover:shadow-lg transition-shadow duration-300"
       )}>
