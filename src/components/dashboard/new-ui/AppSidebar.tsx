@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Calendar, Home, FileText, Bell, CheckSquare, Bot, Settings } from "lucide-react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar-new";
@@ -40,6 +39,11 @@ const links = [
     label: "AI Assistant",
     href: "/compliance-chat",
     icon: <Bot className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Compliance Calendar",
+    href: "/compliance-calendar",
+    icon: <Calendar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
 ];
 

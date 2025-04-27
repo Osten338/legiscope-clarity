@@ -24,6 +24,7 @@ import Settings from "./pages/Settings";
 import Documents from "./pages/Documents";
 import ComplianceChat from "./pages/ComplianceChat";
 import AdminTools from "./pages/AdminTools";
+import ComplianceCalendar from "./pages/ComplianceCalendar";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient({
@@ -266,6 +267,7 @@ const App = () => {
                     }
                   />
                   <Route path="/admin" element={<AdminTools />} />
+                  <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
