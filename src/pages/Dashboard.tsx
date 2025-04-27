@@ -6,7 +6,7 @@ import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Gallery4, Gallery4Item } from "@/components/ui/gallery4";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
-import { UpcomingReviews } from "@/components/compliance/UpcomingEvents";
+import { UpcomingEvents } from "@/components/compliance/UpcomingEvents";
 
 type ChecklistItem = {
   id: string;
@@ -192,7 +192,7 @@ const Dashboard = () => {
             </div>
             
             <div className="md:col-span-1">
-              <UpcomingReviews events={[{ day: new Date(), events: upcomingReviews }]} />
+              <UpcomingEvents events={[{ day: new Date(), events: upcomingReviews }]} />
             </div>
           </div>
         </div>
