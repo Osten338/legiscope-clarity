@@ -1,8 +1,6 @@
-
 import { DashboardLayout } from "@/components/dashboard/new-ui"
 import { FullScreenCalendar } from "@/components/ui/fullscreen-calendar"
 import { UpcomingEvents } from "@/components/compliance/UpcomingEvents"
-import { GradientText } from "@/components/ui/gradient-text"
 
 // Temporary mock data - will be replaced with real data in phase 2
 const mockEvents = [
@@ -52,8 +50,8 @@ export default function ComplianceCalendar() {
     <DashboardLayout>
       <div className="p-6 space-y-6">
         <div className="flex flex-col gap-4">
-          <h1 className="text-4xl font-medium">
-            <GradientText>Compliance Calendar</GradientText>
+          <h1 className="text-4xl font-medium text-black">
+            Compliance Calendar
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl">
             Track important compliance deadlines, upcoming regulation changes, and policy reviews.
