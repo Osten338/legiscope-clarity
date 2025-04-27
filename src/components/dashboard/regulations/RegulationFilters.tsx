@@ -16,6 +16,12 @@ export const RegulationFilters = ({
   currentView,
   onViewChange,
 }: RegulationFiltersProps) => {
+  const handleViewChange = (value: string) => {
+    // Explicitly cast the value to ViewType
+    onViewChange(value as ViewType);
+    console.log("View changed to:", value);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -38,10 +44,10 @@ export const RegulationFilters = ({
 
       <Tabs
         value={currentView}
-        onValueChange={(value) => onViewChange(value as ViewType)}
+        onValueChange={handleViewChange}
         className="w-full"
       >
-        <TabsList>
+        <TabsList className="w-full md:w-auto">
           <TabsTrigger value="active">Active Regulations</TabsTrigger>
           <TabsTrigger value="upcoming">Upcoming Reviews</TabsTrigger>
           <TabsTrigger value="tasks">Compliance Tasks</TabsTrigger>

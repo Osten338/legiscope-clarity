@@ -45,6 +45,7 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
   };
 
   const filteredRegulations = useMemo(() => {
+    // First, filter by search term
     let filtered = savedRegulations.filter(
       (regulation) =>
         regulation.regulations.name
@@ -55,16 +56,22 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
           .includes(searchTerm.toLowerCase())
     );
 
+    // Then apply view-specific filters
     switch (currentView) {
       case "upcoming":
+        // Filter for upcoming reviews (those with a future review date)
         filtered = filtered.filter(
-          (reg) => reg.next_review_date && new Date(reg.next_review_date) > new Date()
+          (reg) => 
+            reg.next_review_date && 
+            new Date(reg.next_review_date) > new Date()
         );
         break;
       case "tasks":
+        // Filter for incomplete tasks (those with progress less than 100%)
         filtered = filtered.filter((reg) => reg.progress < 100);
         break;
-      default:
+      case "active":
+        // Show all regulations for the active view (no additional filtering)
         break;
     }
 
@@ -115,6 +122,11 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     }
   };
 
+  // Add debug console log to track when the view changes
+  console.log('Current view:', currentView);
+  console.log('Filtered regulations:', filteredRegulations.length);
+  console.log('Total regulations:', savedRegulations.length);
+
   return (
     <Card className="animate-appear delay-300 bg-card border">
       <CardContent className="p-6">
@@ -125,22 +137,32 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
           onViewChange={setCurrentView}
         />
 
-        <Table>
-          <RegulationTableHeader
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-          />
-          <TableBody>
-            {sortedRegulations.map((regulation) => (
-              <RegulationTableRow
-                key={regulation.id}
-                regulation={regulation}
-                onRemoveRegulation={handleRemoveRegulation}
+        <div className="mt-4">
+          {sortedRegulations.length === 0 ? (
+            <div className="py-6 text-center text-muted-foreground">
+              No {currentView === "upcoming" ? "upcoming reviews" : 
+                  currentView === "tasks" ? "compliance tasks" : 
+                  "active regulations"} found
+            </div>
+          ) : (
+            <Table>
+              <RegulationTableHeader
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
               />
-            ))}
-          </TableBody>
-        </Table>
+              <TableBody>
+                {sortedRegulations.map((regulation) => (
+                  <RegulationTableRow
+                    key={regulation.id}
+                    regulation={regulation}
+                    onRemoveRegulation={handleRemoveRegulation}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
