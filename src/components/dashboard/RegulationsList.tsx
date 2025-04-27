@@ -23,8 +23,8 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
   const [currentView, setCurrentView] = useState<ViewType>("active");
 
   useEffect(() => {
-    console.log(`Current view changed to: ${currentView}`);
-    console.log(`Total regulations: ${savedRegulations.length}`);
+    console.log("Current view changed to:", currentView);
+    console.log("Total regulations:", savedRegulations.length);
   }, [currentView, savedRegulations.length]);
 
   const handleRemoveRegulation = async (savedRegulationId: string) => {
@@ -49,10 +49,8 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     }
   };
 
-  // Apply search filter first - common to all views
   const searchFilteredRegulations = useMemo(() => {
-    console.log(`Applying search filter: "${searchTerm}"`);
-    
+    console.log("Applying search filter:", searchTerm);
     return savedRegulations.filter(
       (regulation) =>
         regulation.regulations.name
@@ -64,52 +62,32 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     );
   }, [savedRegulations, searchTerm]);
 
-  // Filter for upcoming view
   const upcomingRegulations = useMemo(() => {
     console.log("Filtering for upcoming reviews");
-    return searchFilteredRegulations.filter(reg => {
-      if (!reg.next_review_date) {
-        console.log(`Regulation ${reg.regulations.name}: No review date`);
-        return false;
-      }
-      
+    return searchFilteredRegulations.filter((reg) => {
+      if (!reg.next_review_date) return false;
       const reviewDate = new Date(reg.next_review_date);
       const now = new Date();
       const isInFuture = !isNaN(reviewDate.getTime()) && reviewDate > now;
-      
-      console.log(`Regulation ${reg.regulations.name}: Review date ${reviewDate.toISOString()}, Is in future: ${isInFuture}`);
+      console.log(
+        `Regulation ${reg.regulations.name}: Review date ${reviewDate.toISOString()}, Is in future: ${isInFuture}`
+      );
       return isInFuture;
     });
   }, [searchFilteredRegulations]);
 
-  // Filter for tasks view
   const tasksRegulations = useMemo(() => {
     console.log("Filtering for incomplete tasks");
-    return searchFilteredRegulations.filter(reg => {
+    return searchFilteredRegulations.filter((reg) => {
       const progress = reg.progress;
       console.log(`Regulation ${reg.regulations.name} has progress: ${progress}`);
-      return typeof progress === 'number' && progress < 100;
+      return typeof progress === "number" && progress < 100;
     });
   }, [searchFilteredRegulations]);
 
-  // Sort the currently visible regulations
-  const sortedRegulations = useMemo(() => {
-    const getVisibleRegulations = () => {
-      switch (currentView) {
-        case "upcoming":
-          return upcomingRegulations;
-        case "tasks":
-          return tasksRegulations;
-        case "active":
-        default:
-          return searchFilteredRegulations;
-      }
-    };
-
-    const visibleRegulations = getVisibleRegulations();
-    console.log(`Sorting ${visibleRegulations.length} regulations by ${sortColumn} ${sortDirection}`);
-    
-    return [...visibleRegulations].sort((a, b) => {
+  const sortRegulations = (regulations: RegulationListItem[]) => {
+    console.log(`Sorting regulations by ${sortColumn} ${sortDirection}`);
+    return [...regulations].sort((a, b) => {
       let valueA, valueB;
 
       switch (sortColumn) {
@@ -141,7 +119,7 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
       if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [searchFilteredRegulations, upcomingRegulations, tasksRegulations, currentView, sortColumn, sortDirection]);
+  };
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -152,32 +130,23 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     }
   };
 
-  const renderTableContent = () => {
-    const getVisibleRegulations = () => {
-      switch (currentView) {
-        case "upcoming":
-          return upcomingRegulations;
-        case "tasks":
-          return tasksRegulations;
-        case "active":
-        default:
-          return searchFilteredRegulations;
-      }
-    };
-    const visibleRegulations = sortedRegulations;
+  const renderRegulationTable = (regulations: RegulationListItem[]) => {
+    console.log(`Rendering table with ${regulations.length} regulations`);
     
-    if (visibleRegulations.length === 0) {
+    if (regulations.length === 0) {
       return (
         <div className="py-6 text-center text-muted-foreground">
-          {currentView === "upcoming" 
-            ? "No upcoming reviews found" 
-            : currentView === "tasks" 
-              ? "No compliance tasks found" 
-              : "No active regulations found"}
+          {currentView === "upcoming"
+            ? "No upcoming reviews found"
+            : currentView === "tasks"
+            ? "No compliance tasks found"
+            : "No active regulations found"}
         </div>
       );
     }
-    
+
+    const sortedRegulations = sortRegulations(regulations);
+
     return (
       <Table>
         <RegulationTableHeader
@@ -186,7 +155,7 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
           onSort={handleSort}
         />
         <TableBody>
-          {visibleRegulations.map((regulation) => (
+          {sortedRegulations.map((regulation) => (
             <RegulationTableRow
               key={regulation.id}
               regulation={regulation}
@@ -198,10 +167,6 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     );
   };
 
-  console.log(`Current view: ${currentView}`);
-  console.log(`Filtered regulations: ${searchFilteredRegulations.length}`);
-  console.log(`Sorted regulations: ${sortedRegulations.length}`);
-
   return (
     <Card className="animate-appear delay-300 bg-card border">
       <CardContent className="p-6">
@@ -211,23 +176,30 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
           currentView={currentView}
         />
 
-        <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as ViewType)} className="w-full mt-4">
+        <Tabs
+          value={currentView}
+          onValueChange={(value) => {
+            console.log("Tab change triggered:", value);
+            setCurrentView(value as ViewType);
+          }}
+          className="w-full mt-4"
+        >
           <TabsList className="w-full md:w-auto">
             <TabsTrigger value="active">Active Regulations</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming Reviews</TabsTrigger>
             <TabsTrigger value="tasks">Compliance Tasks</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="active">
-            {renderTableContent()}
+            {renderRegulationTable(searchFilteredRegulations)}
           </TabsContent>
-          
+
           <TabsContent value="upcoming">
-            {renderTableContent()}
+            {renderRegulationTable(upcomingRegulations)}
           </TabsContent>
-          
+
           <TabsContent value="tasks">
-            {renderTableContent()}
+            {renderRegulationTable(tasksRegulations)}
           </TabsContent>
         </Tabs>
       </CardContent>
