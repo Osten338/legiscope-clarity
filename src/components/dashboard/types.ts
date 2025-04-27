@@ -1,4 +1,3 @@
-
 export type ChecklistItem = {
   id: string;
   description: string;
@@ -24,3 +23,17 @@ export type SavedRegulation = {
   regulations: Regulation;
 };
 
+export type ViewType = "active" | "upcoming" | "tasks";
+export type SortColumn = "name" | "description" | "status" | "progress" | "next_review_date";
+
+export type RegulationListItem = {
+  id: string;
+  status: string;
+  progress: number;
+  next_review_date: string | null;
+  regulations: {
+    id: string;
+    name: string;
+    description: string;
+  };
+};
