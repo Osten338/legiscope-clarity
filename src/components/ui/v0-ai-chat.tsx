@@ -91,13 +91,13 @@ export function VercelV0Chat() {
     sendMessage(prompt);
   };
 
-  return <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8 bg-neutral-100 min-h-screen">
+  return <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8 bg-white min-h-screen">
             <h1 className="text-4xl font-bold text-black dark:text-white">
                 Compliance Assistant
             </h1>
 
             <div className="w-full">
-                <ScrollArea className="h-[400px] rounded-t-xl border border-b-0 border-neutral-300 bg-white p-4">
+                <ScrollArea className="h-[400px] rounded-t-xl border border-b-0 border-neutral-300 bg-neutral-100 p-4">
                     <div className="space-y-4 pb-4">
                         {messages.map((message, i) => (
                             <div key={i} className={cn(
@@ -127,7 +127,7 @@ export function VercelV0Chat() {
                     </div>
                 </ScrollArea>
 
-                <div className="relative bg-white rounded-b-xl border border-t-0 border-neutral-300">
+                <div className="relative bg-neutral-100 rounded-b-xl border border-t-0 border-neutral-300">
                     <div className="overflow-y-auto">
                         <Textarea 
                             ref={textareaRef}
