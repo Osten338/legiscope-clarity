@@ -39,7 +39,7 @@ export function Gallery4({
   }, [carouselApi]);
 
   return (
-    <section className="py-24 w-full overflow-hidden">
+    <section className="py-20 w-full overflow-hidden">
       <div className="container mx-auto">
         <GalleryHeader
           title={title}
