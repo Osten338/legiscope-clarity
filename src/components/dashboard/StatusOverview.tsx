@@ -1,39 +1,29 @@
 
-import { Card, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { CheckCircle2, Clock, AlertTriangle, HelpCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { StatusCard } from "./StatusCard";
 
-const statusCards = {
-  compliant: {
-    icon: CheckCircle2,
-    class: "text-emerald-500",
-    gradient: "bg-emerald-500/10",
-    badge: "bg-emerald-500",
-    label: "Compliant"
+const statusCards = [
+  {
+    id: "compliant",
+    title: "Compliant",
+    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?crop=entropy&cs=tinysrgb&fit=max&w=1080",
   },
-  in_progress: {
-    icon: Clock,
-    class: "text-amber-500",
-    gradient: "bg-amber-500/10",
-    badge: "bg-amber-500",
-    label: "In Progress"
+  {
+    id: "in_progress",
+    title: "In Progress",
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?crop=entropy&cs=tinysrgb&fit=max&w=1080",
   },
-  not_compliant: {
-    icon: AlertTriangle,
-    class: "text-red-500",
-    gradient: "bg-red-500/10",
-    badge: "bg-red-500",
-    label: "Not Compliant"
+  {
+    id: "not_compliant",
+    title: "Not Compliant",
+    image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?crop=entropy&cs=tinysrgb&fit=max&w=1080",
   },
-  under_review: {
-    icon: HelpCircle,
-    class: "text-blue-500",
-    gradient: "bg-blue-500/10",
-    badge: "bg-blue-500",
-    label: "Under Review"
+  {
+    id: "under_review",
+    title: "Under Review",
+    image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?crop=entropy&cs=tinysrgb&fit=max&w=1080",
   }
-};
+];
 
 interface StatusOverviewProps {
   savedRegulations: any[];
@@ -42,24 +32,14 @@ interface StatusOverviewProps {
 export const StatusOverview = ({ savedRegulations }: StatusOverviewProps) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      {Object.entries(statusCards).map(([status, { icon: Icon, class: colorClass, gradient, badge, label }], index) => {
-        const count = savedRegulations?.filter(reg => reg.status === status).length || 0;
+      {statusCards.map((card) => {
+        const count = savedRegulations?.filter(reg => reg.status === card.id).length || 0;
         return (
           <Card 
-            key={status} 
-            className={cn("border-border", gradient, "animate-appear")}
-            style={{ animationDelay: `${index * 50}ms` }}
+            key={card.id} 
+            className="h-[200px] overflow-hidden border animate-appear hover:shadow-lg transition-shadow duration-300"
           >
-            <CardHeader className="pb-2 p-3 md:p-4">
-              <div className="flex justify-between items-center">
-                <CardDescription className="flex items-center gap-1.5 text-xs">
-                  <Badge className={cn("w-1.5 h-1.5 p-0 rounded-full", badge)} />
-                  <span className="font-medium">{label}</span>
-                </CardDescription>
-                <Icon className={cn("w-4 h-4", colorClass)} />
-              </div>
-              <CardTitle className="text-lg font-medium mono">{count}</CardTitle>
-            </CardHeader>
+            <StatusCard {...card} count={count} />
           </Card>
         );
       })}

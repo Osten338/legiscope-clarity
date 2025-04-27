@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,17 +52,18 @@ export const ComplianceOverview = () => {
     }
   });
 
-  // Add console logs to help debug
   console.log("Is loading:", isLoading);
   console.log("Error:", error);
   console.log("Saved regulations:", savedRegulations);
 
   return (
-    <div className="py-16 w-full">
+    <section className="py-32 w-full overflow-hidden">
       <div className="container mx-auto">
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-black mb-2">Compliance Overview</h2>
-          <p className="text-muted-foreground">Track your compliance status and tasks across all regulations.</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold text-black">Compliance Overview</h2>
+            <p className="text-muted-foreground">Track your compliance status and tasks across all regulations.</p>
+          </div>
         </div>
 
         {isLoading && (
@@ -133,16 +133,16 @@ export const ComplianceOverview = () => {
                 <TabsContent value="all" className="mt-4">
                   <div className="space-y-4">
                     {savedRegulations.map((reg) => (
-                      <div key={reg.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                      <div key={reg.id} className="group flex items-center justify-between p-4 bg-muted/50 hover:bg-muted/70 rounded-lg transition-colors">
                         <div>
-                          <h3 className="font-medium">{reg.regulations?.name}</h3>
-                          <p className="text-sm text-muted-foreground">{reg.regulations?.description}</p>
+                          <h3 className="font-medium text-black">{reg.regulations?.name}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{reg.regulations?.description}</p>
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="text-sm text-muted-foreground">
                             Progress: {reg.progress}%
                           </div>
-                          <div className={`px-3 py-1 rounded-full text-xs
+                          <div className={`px-3 py-1 rounded-full text-xs font-medium
                             ${reg.status === 'compliant' ? 'bg-green-100 text-green-700' : 
                               reg.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : 
                               'bg-red-100 text-red-700'}`}>
@@ -204,6 +204,6 @@ export const ComplianceOverview = () => {
           </Card>
         ) : null}
       </div>
-    </div>
+    </section>
   );
 };
