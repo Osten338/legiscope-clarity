@@ -1,16 +1,27 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { DocumentCard } from "./DocumentCard";
+import { useState } from "react";
+import { DocumentsTable } from "./DocumentsTable";
+import { DocumentSortColumn } from "./DocumentTableHeader";
+import { useToast } from "@/hooks/use-toast";
+import { ReviewDocumentDialog } from "./ReviewDocumentDialog";
 
 interface DocumentsListProps {
   selectedRegulation?: string;
 }
 
 export const DocumentsList = ({ selectedRegulation }: DocumentsListProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [sortColumn, setSortColumn] = useState<DocumentSortColumn>("file_name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+
   const { data: documents, isLoading } = useQuery({
-    queryKey: ['compliance-documents', selectedRegulation],
+    queryKey: ['compliance-documents', selectedRegulation, sortColumn, sortDirection],
     queryFn: async () => {
       let query = supabase
         .from('compliance_documents')
@@ -21,7 +32,7 @@ export const DocumentsList = ({ selectedRegulation }: DocumentsListProps) => {
             name
           )
         `)
-        .order('uploaded_at', { ascending: false });
+        .order(sortColumn, { ascending: sortDirection === 'asc' });
 
       if (selectedRegulation && selectedRegulation !== 'all') {
         query = query.eq('regulation_id', selectedRegulation);
@@ -33,6 +44,69 @@ export const DocumentsList = ({ selectedRegulation }: DocumentsListProps) => {
     },
   });
 
+  const handleSort = (column: DocumentSortColumn) => {
+    setSortDirection(sortColumn === column && sortDirection === "asc" ? "desc" : "asc");
+    setSortColumn(column);
+  };
+
+  const handleDownload = async (document: any) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('compliance_documents')
+        .download(document.file_path);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = document.file_name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast({
+        title: "Error downloading document",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (document: any) => {
+    try {
+      const { error: storageError } = await supabase.storage
+        .from('compliance_documents')
+        .remove([document.file_path]);
+
+      if (storageError) throw storageError;
+
+      const { error: dbError } = await supabase
+        .from('compliance_documents')
+        .delete()
+        .eq('id', document.id);
+
+      if (dbError) throw dbError;
+
+      queryClient.invalidateQueries({ queryKey: ['compliance-documents'] });
+
+      toast({
+        title: "Document deleted",
+        description: "The document has been permanently removed",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting document",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReview = (document: any) => {
+    setSelectedDocument(document);
+    setReviewDialogOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="text-center text-slate-500 my-8">
@@ -41,19 +115,27 @@ export const DocumentsList = ({ selectedRegulation }: DocumentsListProps) => {
     );
   }
 
-  if (!documents?.length) {
-    return (
-      <Card className="p-8 text-center text-slate-500">
-        No documents found. {selectedRegulation !== 'all' ? "Try selecting a different regulation or " : ""}Click the upload button to add your first document.
-      </Card>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {documents.map((document) => (
-        <DocumentCard key={document.id} document={document} />
-      ))}
-    </div>
+    <>
+      <Card className="mt-6">
+        <DocumentsTable
+          documents={documents || []}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          onDownload={handleDownload}
+          onReview={handleReview}
+          onDelete={handleDelete}
+        />
+      </Card>
+
+      {selectedDocument && (
+        <ReviewDocumentDialog
+          open={reviewDialogOpen}
+          onOpenChange={setReviewDialogOpen}
+          document={selectedDocument}
+        />
+      )}
+    </>
   );
 };
