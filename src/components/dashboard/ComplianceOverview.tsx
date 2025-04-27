@@ -10,7 +10,6 @@ import { RegulationsList } from "./RegulationsList";
 import { UpcomingReviews } from "./UpcomingReviews";
 import { cn } from "@/lib/utils";
 
-// Define types for the data we're working with
 type ChecklistItem = {
   id: string;
   description: string;
@@ -66,7 +65,7 @@ export const ComplianceOverview = () => {
             description,
             motivation,
             requirements,
-            checklist_items (
+            checklist_items!checklist_items_regulation_id_fkey (
               id, 
               description
             )
