@@ -19,7 +19,7 @@ export const StatusCard = ({ title, count, image, gradient, className }: StatusC
         className="absolute h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
       />
       <div className={cn(
-        "absolute inset-0 bg-clip-content",
+        "absolute inset-0 bg-clip-content bg-opacity-60 opacity-50 mix-blend-multiply",
         gradient
       )} />
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-start p-4 bg-black/20">
