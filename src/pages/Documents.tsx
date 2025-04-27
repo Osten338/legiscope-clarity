@@ -1,17 +1,11 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";  // Add this import
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { DocumentsHeader } from "@/components/documents/DocumentsHeader";
 import { DocumentsList } from "@/components/documents/DocumentsList";
 import { UploadDocumentDialog } from "@/components/documents/UploadDocumentDialog";
 import { ReviewDocumentDialog } from "@/components/documents/ReviewDocumentDialog";
-
-// Define mock documents data
-const mockDocuments = [
-  { id: "1", title: "Privacy Policy", category: "Policy", updatedAt: "2023-06-01" },
-  { id: "2", title: "Data Breach Response Plan", category: "Procedure", updatedAt: "2023-05-15" },
-];
 
 const Documents = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -23,20 +17,6 @@ const Documents = () => {
     setUploadDialogOpen(true);
   };
 
-  const handleCloseUploadDialog = () => {
-    setUploadDialogOpen(false);
-  };
-
-  const handleOpenReviewDialog = (document: any) => {
-    setSelectedDocument(document);
-    setReviewDialogOpen(true);
-  };
-
-  const handleCloseReviewDialog = () => {
-    setSelectedDocument(null);
-    setReviewDialogOpen(false);
-  };
-
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
@@ -46,11 +26,7 @@ const Documents = () => {
             {" / "}
             <span>Policies & Procedures</span>
           </div>
-          <DocumentsHeader 
-            onUpload={handleOpenUploadDialog} 
-            selectedRegulation={selectedRegulation}
-            onRegulationChange={setSelectedRegulation}
-          />
+          <DocumentsHeader onUpload={handleOpenUploadDialog} />
         </div>
         
         <DocumentsList 
