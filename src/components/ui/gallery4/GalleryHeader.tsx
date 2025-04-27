@@ -1,7 +1,8 @@
 
 import React from 'react';
 import type { CarouselApi } from "@/components/ui/carousel";
-import { CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface GalleryHeaderProps {
   title: string;
@@ -33,8 +34,24 @@ export function GalleryHeader({
         </p>
       </div>
       <div className="flex space-x-2">
-        <CarouselPrevious />
-        <CarouselNext />
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={!canScrollPrev}
+          onClick={() => carouselApi?.scrollPrev()}
+          className="h-8 w-8 rounded-full"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={!canScrollNext}
+          onClick={() => carouselApi?.scrollNext()}
+          className="h-8 w-8 rounded-full"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
