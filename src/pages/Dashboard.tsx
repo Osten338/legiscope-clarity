@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Gallery4, Gallery4Item } from "@/components/ui/gallery4";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
+import { StatsOverview } from "@/components/dashboard/StatsOverview";
+import { UpcomingReviews } from "@/components/compliance/UpcomingEvents";
 
 type ChecklistItem = {
   id: string;
@@ -148,16 +150,51 @@ const Dashboard = () => {
     }
   ];
 
+  const upcomingDeadlines = savedRegulations?.filter(reg => 
+    reg.next_review_date && new Date(reg.next_review_date) > new Date()
+  ).length || 0;
+
+  const completedRegulations = savedRegulations?.filter(reg => 
+    reg.status === "completed"
+  ).length || 0;
+
+  const totalRegulations = savedRegulations?.length || 0;
+
+  const upcomingReviews = savedRegulations
+    ?.filter(reg => reg.next_review_date)
+    .map(reg => ({
+      id: Number(reg.id.split('-')[0]),
+      name: reg.regulations.name,
+      time: "Review Due",
+      datetime: reg.next_review_date || "",
+      day: new Date(reg.next_review_date || "")
+    })) || [];
+
   return (
     <DashboardLayout>
       <div className="flex flex-col">
         <div className="container mx-auto pt-8">
           <WelcomeSection />
-          <Gallery4 
-            items={galleryItems}
-            titleClassName="text-black"
-            descriptionClassName="text-gray-600"
+          
+          <StatsOverview 
+            totalRegulations={totalRegulations}
+            completedRegulations={completedRegulations}
+            upcomingDeadlines={upcomingDeadlines}
           />
+
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div className="md:col-span-2">
+              <Gallery4 
+                items={galleryItems}
+                titleClassName="text-black"
+                descriptionClassName="text-gray-600"
+              />
+            </div>
+            
+            <div className="md:col-span-1">
+              <UpcomingReviews events={[{ day: new Date(), events: upcomingReviews }]} />
+            </div>
+          </div>
         </div>
       </div>
     </DashboardLayout>
