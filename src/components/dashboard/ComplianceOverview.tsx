@@ -10,6 +10,32 @@ import { RegulationsList } from "./RegulationsList";
 import { UpcomingReviews } from "./UpcomingReviews";
 import { cn } from "@/lib/utils";
 
+// Define types for the data we're working with
+type ChecklistItem = {
+  id: string;
+  description: string;
+};
+
+type Regulation = {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
+  checklist_items: ChecklistItem[];
+};
+
+type SavedRegulationData = {
+  id: string;
+  regulation_id?: string;
+  status: string;
+  progress: number;
+  next_review_date: string | null;
+  completion_date?: string | null;
+  notes?: string | null;
+  regulations: Regulation;
+};
+
 export const ComplianceOverview = () => {
   const { toast } = useToast();
   const [openRegulation, setOpenRegulation] = useState<string | null>(null);
@@ -58,7 +84,7 @@ export const ComplianceOverview = () => {
         throw error;
       }
       
-      return data || [];
+      return data as SavedRegulationData[] || [];
     }
   });
 
@@ -117,7 +143,7 @@ export const ComplianceOverview = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <RegulationsList 
-              savedRegulations={savedRegulations} 
+              savedRegulations={savedRegulations}
               openRegulation={openRegulation}
               setOpenRegulation={setOpenRegulation}
             />

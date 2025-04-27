@@ -27,19 +27,20 @@ type Regulation = {
   checklist_items: ChecklistItem[];
 };
 
-type SavedRegulation = {
+// Updated type definition to match the actual data structure
+type RegulationListItem = {
   id: string;
-  regulation_id: string;
   status: string;
   progress: number;
   next_review_date: string | null;
-  completion_date: string | null;
-  notes: string | null;
+  completion_date?: string | null;
+  notes?: string | null;
+  regulation_id?: string;
   regulations: Regulation;
 };
 
 interface RegulationsListProps {
-  savedRegulations: SavedRegulation[];
+  savedRegulations: RegulationListItem[];
   openRegulation: string | null;
   setOpenRegulation: (id: string | null) => void;
 }

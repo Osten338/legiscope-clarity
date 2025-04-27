@@ -7,15 +7,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+type RegulationDetails = {
+  id: string;
+  name: string;
+  description: string;
+};
+
 type SavedRegulation = {
   id: string;
   status: string;
   progress: number;
-  regulations: {
-    id: string;
-    name: string;
-    description: string;
-  };
+  regulations: RegulationDetails;
 };
 
 export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedRegulation[] }) => {
