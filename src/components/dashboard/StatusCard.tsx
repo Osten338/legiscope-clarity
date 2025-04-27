@@ -33,3 +33,4 @@ export const StatusCard = ({ title, count, image, gradient, className }: StatusC
     </div>
   );
 };
+
