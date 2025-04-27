@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -91,7 +92,7 @@ export function VercelV0Chat() {
     sendMessage(prompt);
   };
 
-  return <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8 bg-[#F1F1F1] min-h-screen">
+  return <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
             <h1 className="text-4xl font-bold text-black dark:text-white">
                 Compliance Assistant
             </h1>
