@@ -5,7 +5,7 @@ import { RegulationCard } from "@/components/RegulationCard";
 import { cn } from "@/lib/utils";
 import { statusIcons, getStatusText } from "./utils";
 import { Link } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,6 @@ type Regulation = {
   checklist_items: ChecklistItem[];
 };
 
-// Updated type definition to match the actual data structure
 type RegulationListItem = {
   id: string;
   status: string;
@@ -49,9 +48,7 @@ export const RegulationsList = ({
   openRegulation,
   setOpenRegulation
 }: RegulationsListProps) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleRemoveRegulation = async (savedRegulationId: string) => {
@@ -61,7 +58,6 @@ export const RegulationsList = ({
       } = await supabase.from('saved_regulations').delete().eq('id', savedRegulationId);
       if (error) throw error;
 
-      // Invalidate and refetch the savedRegulations query
       queryClient.invalidateQueries({
         queryKey: ['savedRegulations']
       });
@@ -78,28 +74,24 @@ export const RegulationsList = ({
     }
   };
 
-  // Filter out duplicates by keeping only the latest entry for each regulation
   const uniqueRegulations = savedRegulations?.reduce((acc: RegulationListItem[], current: RegulationListItem) => {
     if (!current.regulations) return acc;
     
     const existingIndex = acc.findIndex(item => item.regulations?.id === current.regulations.id);
     if (existingIndex === -1) {
-      // No existing entry, add current to accumulator
       return [...acc, current];
     }
     
-    // Keep the current one if it's newer (no created_at comparison needed)
     acc.splice(existingIndex, 1);
     return [...acc, current];
-    
   }, [] as RegulationListItem[]);
 
   if (!uniqueRegulations || uniqueRegulations.length === 0) {
     return (
-      <Card className="animate-appear delay-300 bg-card/80 backdrop-blur-md border-neutral-200">
+      <Card className="animate-appear delay-300 bg-card border">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Active Regulations</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-semibold text-foreground font-inter">Active Regulations</CardTitle>
+          <CardDescription className="text-base text-muted-foreground font-inter">
             No regulations have been saved to your dashboard yet
           </CardDescription>
         </CardHeader>
@@ -115,12 +107,12 @@ export const RegulationsList = ({
   }
 
   return (
-    <Card className="animate-appear delay-300 bg-card/80 backdrop-blur-md border-neutral-200">
+    <Card className="animate-appear delay-300 bg-card border">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle className="text-lg font-medium">Active Regulations</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-semibold text-foreground font-inter">Active Regulations</CardTitle>
+            <CardDescription className="text-base text-muted-foreground font-inter">
               Detailed view of all your compliance requirements
             </CardDescription>
           </div>
@@ -130,11 +122,11 @@ export const RegulationsList = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {uniqueRegulations.map((saved, index) => {
             if (!saved.regulations) return null;
             const StatusIcon = statusIcons[saved.status as keyof typeof statusIcons]?.icon || Clock;
-            const statusColor = statusIcons[saved.status as keyof typeof statusIcons]?.class || "text-neutral-400";
+            const statusColor = statusIcons[saved.status as keyof typeof statusIcons]?.class || "text-muted-foreground";
             const badgeColor = saved.status === 'compliant' ? 'bg-emerald-500' : 
                              saved.status === 'in_progress' ? 'bg-amber-500' : 
                              saved.status === 'not_compliant' ? 'bg-red-500' : 'bg-blue-500';
@@ -142,28 +134,28 @@ export const RegulationsList = ({
             return (
               <div 
                 key={saved.id} 
-                className="space-y-2 animate-appear"
+                className="space-y-4 animate-appear"
                 style={{ animationDelay: `${300 + (index * 100)}ms` }}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex items-center gap-2 flex-1">
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="flex items-center gap-4 flex-1">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-2">
                             <Badge className={cn("w-2 h-2 p-0 rounded-full", badgeColor)} />
                             <StatusIcon className={cn("w-4 h-4", statusColor)} />
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{getStatusText(saved.status)}</p>
+                          <p className="font-inter">{getStatusText(saved.status)}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                    <div className="h-2 flex-1 bg-neutral-100 rounded-full">
+                    <div className="h-2 flex-1 bg-secondary rounded-full">
                       <div 
                         className={cn(
-                          "h-2 rounded-full transition-all duration-500",
+                          "h-2 rounded-full transition-all duration-300",
                           saved.status === 'compliant' ? 'bg-emerald-500' : 
                           saved.status === 'in_progress' ? 'bg-amber-500' : 
                           saved.status === 'not_compliant' ? 'bg-red-500' : 'bg-blue-500'
@@ -173,12 +165,12 @@ export const RegulationsList = ({
                         }} 
                       />
                     </div>
-                    <span className="text-sm text-neutral-600">{saved.progress}%</span>
+                    <span className="text-sm text-muted-foreground font-mono">{saved.progress}%</span>
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                        <X className="h-4 w-4 text-neutral-500 hover:text-neutral-900" />
+                        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -198,7 +190,6 @@ export const RegulationsList = ({
                   </AlertDialog>
                 </div>
                 <Link to={`/legislation/${saved.regulations.id}`} className="block hover:no-underline" onClick={e => {
-                  // Prevent the click from triggering the collapsible
                   e.stopPropagation();
                 }}>
                   <RegulationCard 

@@ -35,10 +35,10 @@ export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedR
   };
 
   const TaskItem = ({ regulation }: { regulation: SavedRegulation }) => (
-    <div className="group flex items-center justify-between p-4 bg-muted/50 hover:bg-muted rounded-lg transition-all duration-300 animate-appear">
-      <div className="space-y-1">
-        <h3 className="font-medium text-foreground">{regulation.regulations?.name}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 group-hover:text-foreground transition-colors">
+    <div className="group flex items-center justify-between p-4 bg-secondary hover:bg-secondary/80 rounded-lg transition-all duration-300 animate-appear">
+      <div className="space-y-2">
+        <h3 className="font-medium text-foreground font-inter">{regulation.regulations?.name}</h3>
+        <p className="text-sm text-muted-foreground line-clamp-2 group-hover:text-foreground transition-colors font-inter">
           {regulation.regulations?.description}
         </p>
       </div>
@@ -46,7 +46,7 @@ export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedR
         <div className="text-sm text-muted-foreground font-mono">
           {regulation.progress}%
         </div>
-        <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(regulation.status)}`}>
+        <div className={`px-3 py-1 rounded-full text-xs font-medium font-inter ${getStatusColor(regulation.status)}`}>
           {regulation.status.replace('_', ' ')}
         </div>
       </div>
@@ -56,29 +56,29 @@ export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedR
   return (
     <Card className="border shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Compliance Tasks</CardTitle>
+        <CardTitle className="text-2xl font-semibold text-foreground font-inter">Compliance Tasks</CardTitle>
       </CardHeader>
       
       <Tabs defaultValue="all" className="px-6 pb-6">
         <ScrollArea>
-          <TabsList className="mb-4 inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-auto">
+          <TabsList className="mb-4 inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-muted-foreground w-auto">
             <TabsTrigger
               value="all"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium font-inter ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
             >
               <Clock className="mr-2 h-4 w-4" />
               All Tasks
             </TabsTrigger>
             <TabsTrigger
               value="completed"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium font-inter ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
             >
               <CheckCircle2 className="mr-2 h-4 w-4" />
               Completed
             </TabsTrigger>
             <TabsTrigger
               value="pending"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium font-inter ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
             >
               <AlertTriangle className="mr-2 h-4 w-4" />
               Pending
