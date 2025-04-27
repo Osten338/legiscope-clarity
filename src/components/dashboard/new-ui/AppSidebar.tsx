@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar-new";
@@ -8,7 +9,8 @@ import {
   Bot,
   Settings,
   Calendar,
-  LayoutDashboard
+  LayoutDashboard,
+  Clipboard
 } from "lucide-react";
 
 const links = [
@@ -31,6 +33,11 @@ const links = [
     label: "AI Assistant",
     href: "/compliance-chat",
     icon: <Bot className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Compliance Overview",
+    href: "/compliance-overview",
+    icon: <Clipboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Compliance Calendar",
