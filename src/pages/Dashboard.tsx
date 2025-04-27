@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +6,7 @@ import { DashboardLayout } from "@/components/dashboard/new-ui";
 import { Gallery4, Gallery4Item } from "@/components/ui/gallery4";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { ComplianceOverview } from "@/components/dashboard/ComplianceOverview";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type ChecklistItem = {
   id: string;
@@ -155,14 +155,25 @@ const Dashboard = () => {
       <div className="flex flex-col">
         <div className="container mx-auto pt-8">
           <WelcomeSection />
-          <Gallery4 
-            items={galleryItems}
-            titleClassName="text-black"
-            descriptionClassName="text-gray-600"
-          />
-        </div>
-        <div className="p-6">
-          <ComplianceOverview />
+          
+          <Tabs defaultValue="quick-actions" className="mt-8">
+            <TabsList className="mb-4">
+              <TabsTrigger value="quick-actions">Quick Actions</TabsTrigger>
+              <TabsTrigger value="compliance">Compliance Overview</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="quick-actions">
+              <Gallery4 
+                items={galleryItems}
+                titleClassName="text-black"
+                descriptionClassName="text-gray-600"
+              />
+            </TabsContent>
+            
+            <TabsContent value="compliance">
+              <ComplianceOverview />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </DashboardLayout>
