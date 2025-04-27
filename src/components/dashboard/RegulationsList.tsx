@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +8,7 @@ import { RegulationTableHeader } from "./regulations/RegulationTableHeader";
 import { RegulationTableRow } from "./regulations/RegulationTableRow";
 import { RegulationFilters } from "./regulations/RegulationFilters";
 import { RegulationListItem, SortColumn, ViewType } from "./types";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface RegulationsListProps {
   savedRegulations: RegulationListItem[];
@@ -93,21 +92,20 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     });
   }, [searchFilteredRegulations]);
 
-  // Get the currently visible regulations based on the active tab
-  const getVisibleRegulations = () => {
-    switch (currentView) {
-      case "upcoming":
-        return upcomingRegulations;
-      case "tasks":
-        return tasksRegulations;
-      case "active":
-      default:
-        return searchFilteredRegulations;
-    }
-  };
-
   // Sort the currently visible regulations
   const sortedRegulations = useMemo(() => {
+    const getVisibleRegulations = () => {
+      switch (currentView) {
+        case "upcoming":
+          return upcomingRegulations;
+        case "tasks":
+          return tasksRegulations;
+        case "active":
+        default:
+          return searchFilteredRegulations;
+      }
+    };
+
     const visibleRegulations = getVisibleRegulations();
     console.log(`Sorting ${visibleRegulations.length} regulations by ${sortColumn} ${sortDirection}`);
     
@@ -143,7 +141,7 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
       if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [getVisibleRegulations, sortColumn, sortDirection, currentView]);
+  }, [searchFilteredRegulations, upcomingRegulations, tasksRegulations, currentView, sortColumn, sortDirection]);
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -155,6 +153,17 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
   };
 
   const renderTableContent = () => {
+    const getVisibleRegulations = () => {
+      switch (currentView) {
+        case "upcoming":
+          return upcomingRegulations;
+        case "tasks":
+          return tasksRegulations;
+        case "active":
+        default:
+          return searchFilteredRegulations;
+      }
+    };
     const visibleRegulations = sortedRegulations;
     
     if (visibleRegulations.length === 0) {
@@ -190,7 +199,7 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
   };
 
   console.log(`Current view: ${currentView}`);
-  console.log(`Filtered regulations: ${getVisibleRegulations().length}`);
+  console.log(`Filtered regulations: ${searchFilteredRegulations.length}`);
   console.log(`Sorted regulations: ${sortedRegulations.length}`);
 
   return (
@@ -200,19 +209,24 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           currentView={currentView}
-          onViewChange={setCurrentView}
         />
 
-        <Tabs value={currentView} className="w-full mt-4">
-          <TabsContent value="active" className="mt-4">
+        <Tabs value={currentView} onValueChange={(value) => setCurrentView(value as ViewType)} className="w-full mt-4">
+          <TabsList className="w-full md:w-auto">
+            <TabsTrigger value="active">Active Regulations</TabsTrigger>
+            <TabsTrigger value="upcoming">Upcoming Reviews</TabsTrigger>
+            <TabsTrigger value="tasks">Compliance Tasks</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="active">
             {renderTableContent()}
           </TabsContent>
           
-          <TabsContent value="upcoming" className="mt-4">
+          <TabsContent value="upcoming">
             {renderTableContent()}
           </TabsContent>
           
-          <TabsContent value="tasks" className="mt-4">
+          <TabsContent value="tasks">
             {renderTableContent()}
           </TabsContent>
         </Tabs>

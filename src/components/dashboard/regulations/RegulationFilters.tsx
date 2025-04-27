@@ -1,34 +1,18 @@
 
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ViewType } from "../types";
-import { useEffect } from "react";
 
 interface RegulationFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   currentView: ViewType;
-  onViewChange: (value: ViewType) => void;
 }
 
 export const RegulationFilters = ({
   searchTerm,
   onSearchChange,
   currentView,
-  onViewChange,
 }: RegulationFiltersProps) => {
-  useEffect(() => {
-    console.log("RegulationFilters mounted with current view:", currentView);
-  }, [currentView]);
-
-  const handleViewChange = (value: string) => {
-    console.log(`View change requested to: ${value}`);
-    // Force cast the value to ViewType since we control the possible values
-    const viewType = value as ViewType;
-    onViewChange(viewType);
-    console.log(`View changed to: ${viewType}`);
-  };
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -48,18 +32,6 @@ export const RegulationFilters = ({
           className="md:w-96"
         />
       </div>
-
-      <Tabs
-        value={currentView}
-        onValueChange={handleViewChange}
-        className="w-full"
-      >
-        <TabsList className="w-full md:w-auto">
-          <TabsTrigger value="active">Active Regulations</TabsTrigger>
-          <TabsTrigger value="upcoming">Upcoming Reviews</TabsTrigger>
-          <TabsTrigger value="tasks">Compliance Tasks</TabsTrigger>
-        </TabsList>
-      </Tabs>
     </div>
   );
 };
