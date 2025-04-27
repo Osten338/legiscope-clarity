@@ -11,8 +11,8 @@ import type { Gallery4Props, Gallery4Item } from "./types";
 export type { Gallery4Props, Gallery4Item } from "./types";
 
 export function Gallery4({
-  title = "Case Studies",
-  description = "Discover how leading companies and developers are leveraging modern web technologies to build exceptional digital experiences. These case studies showcase real-world applications and success stories.",
+  title = "",
+  description = "",
   items,
   titleClassName = "text-black",
   descriptionClassName = "text-gray-600",
@@ -41,15 +41,17 @@ export function Gallery4({
   return (
     <section className="py-20 w-full overflow-hidden">
       <div className="container mx-auto">
-        <GalleryHeader
-          title={title}
-          titleClassName={titleClassName}
-          description={description}
-          descriptionClassName={descriptionClassName}
-          carouselApi={carouselApi}
-          canScrollPrev={canScrollPrev}
-          canScrollNext={canScrollNext}
-        />
+        {(title || description) && (
+          <GalleryHeader
+            title={title}
+            titleClassName={titleClassName}
+            description={description}
+            descriptionClassName={descriptionClassName}
+            carouselApi={carouselApi}
+            canScrollPrev={canScrollPrev}
+            canScrollNext={canScrollNext}
+          />
+        )}
       </div>
       <div className="w-full">
         <Carousel
