@@ -1,11 +1,8 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, CheckCircle2, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 type RegulationDetails = {
   id: string;
@@ -21,93 +18,87 @@ type SavedRegulation = {
 };
 
 export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedRegulation[] }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'compliant':
-        return 'bg-emerald-100 text-emerald-700';
-      case 'in_progress':
-        return 'bg-amber-100 text-amber-700';
-      case 'under_review':
-        return 'bg-blue-100 text-blue-700';
-      default:
-        return 'bg-red-100 text-red-700';
-    }
+  const backgroundImages = {
+    all: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+    completed: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+    pending: "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
   };
 
-  const TaskItem = ({ regulation }: { regulation: SavedRegulation }) => (
-    <div className="group flex items-center justify-between p-4 bg-secondary hover:bg-secondary/80 rounded-lg transition-all duration-300 animate-appear">
-      <div className="space-y-2">
-        <h3 className="font-medium text-foreground font-inter">{regulation.regulations?.name}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 group-hover:text-foreground transition-colors font-inter">
-          {regulation.regulations?.description}
-        </p>
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="text-sm text-muted-foreground font-mono">
-          {regulation.progress}%
-        </div>
-        <div className={`px-3 py-1 rounded-full text-xs font-medium font-inter ${getStatusColor(regulation.status)}`}>
-          {regulation.status.replace('_', ' ')}
-        </div>
-      </div>
-    </div>
+  const TaskList = ({ items }: { items: SavedRegulation[] }) => (
+    <Carousel
+      opts={{
+        align: "start",
+        loop: true,
+      }}
+      className="w-full"
+    >
+      <CarouselContent>
+        {items.map((task) => (
+          <CarouselItem key={task.id} className="md:basis-1/2 lg:basis-1/3">
+            <div className="relative h-[200px] w-full overflow-hidden rounded-xl group">
+              <img
+                src={backgroundImages.all}
+                alt={task.regulations?.name}
+                className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 mix-blend-multiply" />
+              <div className="absolute inset-x-0 bottom-0 p-4">
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  {task.regulations?.name}
+                </h3>
+                <div className="flex items-center justify-between">
+                  <p className="text-white/90 text-sm">
+                    Progress: {task.progress}%
+                  </p>
+                  <span className="text-white/90 text-sm capitalize">
+                    {task.status.replace('_', ' ')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
   );
 
   return (
     <Card className="border shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl font-semibold text-foreground font-inter">Compliance Tasks</CardTitle>
-      </CardHeader>
-      
-      <Tabs defaultValue="all" className="px-6 pb-6">
-        <ScrollArea>
-          <TabsList className="mb-4 inline-flex h-9 items-center justify-center rounded-lg bg-secondary p-1 text-muted-foreground w-auto">
-            <TabsTrigger
-              value="all"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium font-inter ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
-            >
+      <CardContent className="p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <Clock className="w-5 h-5 text-brand" />
+          <h2 className="text-2xl font-semibold text-foreground">Compliance Tasks</h2>
+        </div>
+        
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="all">
               <Clock className="mr-2 h-4 w-4" />
               All Tasks
             </TabsTrigger>
-            <TabsTrigger
-              value="completed"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium font-inter ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
-            >
+            <TabsTrigger value="completed">
               <CheckCircle2 className="mr-2 h-4 w-4" />
               Completed
             </TabsTrigger>
-            <TabsTrigger
-              value="pending"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium font-inter ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
-            >
+            <TabsTrigger value="pending">
               <AlertTriangle className="mr-2 h-4 w-4" />
               Pending
             </TabsTrigger>
           </TabsList>
-        </ScrollArea>
 
-        <TabsContent value="all" className="space-y-4">
-          {savedRegulations.map((reg) => (
-            <TaskItem key={reg.id} regulation={reg} />
-          ))}
-        </TabsContent>
+          <TabsContent value="all">
+            <TaskList items={savedRegulations} />
+          </TabsContent>
 
-        <TabsContent value="completed" className="space-y-4">
-          {savedRegulations
-            .filter(reg => reg.status === 'compliant')
-            .map((reg) => (
-              <TaskItem key={reg.id} regulation={reg} />
-          ))}
-        </TabsContent>
+          <TabsContent value="completed">
+            <TaskList items={savedRegulations.filter(reg => reg.status === 'compliant')} />
+          </TabsContent>
 
-        <TabsContent value="pending" className="space-y-4">
-          {savedRegulations
-            .filter(reg => reg.status !== 'compliant')
-            .map((reg) => (
-              <TaskItem key={reg.id} regulation={reg} />
-          ))}
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="pending">
+            <TaskList items={savedRegulations.filter(reg => reg.status !== 'compliant')} />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
     </Card>
   );
 };

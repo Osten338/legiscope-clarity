@@ -1,8 +1,9 @@
 
-import { Calendar, ArrowUpRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
+import { Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 interface SavedRegulation {
   id: string;
@@ -18,49 +19,66 @@ interface UpcomingReviewsProps {
 }
 
 export const UpcomingReviews = ({ savedRegulations }: UpcomingReviewsProps) => {
+  const upcomingReviews = savedRegulations
+    ?.filter(saved => saved.next_review_date && new Date(saved.next_review_date) > new Date())
+    .sort((a, b) => new Date(a.next_review_date!).getTime() - new Date(b.next_review_date!).getTime())
+    .slice(0, 3);
+
+  const backgroundImages = [
+    "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+    "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7"
+  ];
+
   return (
     <Card className="mb-8 border bg-card animate-appear delay-100">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-2xl font-semibold text-foreground font-inter flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-brand" />
-          Upcoming Reviews
-        </CardTitle>
-        <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20">
-          {savedRegulations?.filter(saved => saved.next_review_date && new Date(saved.next_review_date) > new Date()).length || 0} pending
-        </Badge>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {savedRegulations
-            ?.filter(saved => saved.next_review_date && new Date(saved.next_review_date) > new Date())
-            .sort((a, b) => new Date(a.next_review_date!).getTime() - new Date(b.next_review_date!).getTime())
-            .slice(0, 3)
-            .map(saved => saved.regulations && (
-              <div
-                key={saved.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors duration-300 group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center">
-                    <Calendar className="w-4 h-4 text-brand" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground font-inter">{saved.regulations.name}</h4>
-                    <p className="text-sm text-muted-foreground font-inter">
-                      Due: {format(new Date(saved.next_review_date!), 'PPP')}
-                    </p>
-                  </div>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-brand group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
-              </div>
-            ))}
-
-          {savedRegulations?.filter(saved => saved.next_review_date && new Date(saved.next_review_date) > new Date()).length === 0 && (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground font-inter">No upcoming reviews</p>
-            </div>
-          )}
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-brand" />
+            <h2 className="text-2xl font-semibold text-foreground">Upcoming Reviews</h2>
+          </div>
+          <Badge variant="outline" className="bg-brand/10 text-brand border-brand/20">
+            {upcomingReviews.length} pending
+          </Badge>
         </div>
+
+        {upcomingReviews.length > 0 ? (
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {upcomingReviews.map((review, index) => (
+                <CarouselItem key={review.id} className="md:basis-1/2 lg:basis-1/3">
+                  <div className="relative h-[200px] w-full overflow-hidden rounded-xl group">
+                    <img
+                      src={backgroundImages[index % backgroundImages.length]}
+                      alt={review.regulations?.name}
+                      className="absolute h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 mix-blend-multiply" />
+                    <div className="absolute inset-x-0 bottom-0 p-4">
+                      <h3 className="text-lg font-semibold text-white mb-2">
+                        {review.regulations?.name}
+                      </h3>
+                      <p className="text-white/90 text-sm">
+                        Due: {format(new Date(review.next_review_date!), 'PPP')}
+                      </p>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        ) : (
+          <div className="text-center py-6">
+            <p className="text-muted-foreground">No upcoming reviews</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
