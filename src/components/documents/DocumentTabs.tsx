@@ -27,7 +27,7 @@ export const DocumentTabs = ({
   onDelete,
 }: DocumentTabsProps) => {
   return (
-    <Tabs value={currentView} onValueChange={(value) => onViewChange(value as DocumentViewType)}>
+    <Tabs value={currentView} onValueChange={(value) => onViewChange(value as DocumentViewType)} className="w-full mt-4">
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
           <TabsTrigger
