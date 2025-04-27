@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import {
   IconAdjustmentsBolt,
@@ -14,42 +13,42 @@ import {
 const features = [
   {
     title: "Policies and Procedures",
-    description: "Comprehensive guidelines and standardized procedures for maintaining compliance operations.",
+    description: "Access and review your organization's internal policies, standard operating procedures, and compliance guidelines.",
     icon: <IconTerminal2 className="h-6 w-6" />,
   },
   {
     title: "Risk Assessments",
-    description: "Templates and results for evaluating compliance risks and mitigation strategies.",
+    description: "View detailed risk assessment reports, mitigation strategies, and ongoing monitoring documentation.",
     icon: <IconEaseInOut className="h-6 w-6" />,
   },
   {
     title: "Training Materials",
-    description: "Educational resources and documentation for staff compliance training.",
+    description: "Access compliance training resources, educational materials, and certification tracking documents.",
     icon: <IconHelp className="h-6 w-6" />,
   },
   {
     title: "Incident Reports",
-    description: "Detailed documentation of compliance incidents and their resolutions.",
+    description: "Review historical incident reports, resolution documentation, and preventive measures implemented.",
     icon: <IconCloud className="h-6 w-6" />,
   },
   {
     title: "Compliance Checklists",
-    description: "Step-by-step guides and verification lists for regulatory requirements.",
+    description: "Access comprehensive checklists for regular compliance audits and self-assessments.",
     icon: <IconRouteAltLeft className="h-6 w-6" />,
   },
   {
     title: "Audit Reports",
-    description: "Comprehensive records of compliance audits and their findings.",
+    description: "View internal and external audit findings, recommendations, and action plans.",
     icon: <IconAdjustmentsBolt className="h-6 w-6" />,
   },
   {
     title: "Regulatory Updates",
-    description: "Latest changes and updates to compliance requirements and regulations.",
+    description: "Stay informed with the latest regulatory changes and their impact on your compliance program.",
     icon: <IconCurrencyDollar className="h-6 w-6" />,
   },
   {
     title: "Best Practices",
-    description: "Industry-standard compliance practices and implementation guides.",
+    description: "Access guides and documentation on industry-standard compliance practices and implementation strategies.",
     icon: <IconHeart className="h-6 w-6" />,
   },
 ];
