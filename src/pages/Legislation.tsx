@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +8,7 @@ import { RegulationTab } from "@/components/compliance/RegulationTab";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { RegulationImpactAnalysis } from "@/components/legislation/RegulationImpactAnalysis";
 
 const Legislation = () => {
   const { id } = useParams<{ id: string }>();
@@ -108,6 +110,7 @@ const Legislation = () => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="requirements">Requirements</TabsTrigger>
+            <TabsTrigger value="impact">Impact Analysis</TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
             <RegulationTab regulation={regulation} />
@@ -138,6 +141,18 @@ const Legislation = () => {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+          <TabsContent value="impact">
+            <div className="grid gap-4">
+              <RegulationImpactAnalysis
+                regulation={{
+                  id: regulation.id,
+                  title: regulation.name,
+                  description: regulation.description,
+                  content: `${regulation.description} ${regulation.requirements} ${regulation.motivation}`
+                }}
+              />
             </div>
           </TabsContent>
         </Tabs>

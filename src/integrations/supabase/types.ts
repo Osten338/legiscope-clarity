@@ -490,6 +490,65 @@ export type Database = {
         }
         Relationships: []
       }
+      regulatory_impact_analyses: {
+        Row: {
+          analysis_summary: string
+          created_at: string
+          departments_for_review: Json
+          id: string
+          impacted_policies: Json
+          is_automated: boolean
+          legislation_item_id: string | null
+          regulation_id: string | null
+          risk_justification: string | null
+          risk_score: number
+          status: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          analysis_summary: string
+          created_at?: string
+          departments_for_review?: Json
+          id?: string
+          impacted_policies?: Json
+          is_automated?: boolean
+          legislation_item_id?: string | null
+          regulation_id?: string | null
+          risk_justification?: string | null
+          risk_score: number
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          analysis_summary?: string
+          created_at?: string
+          departments_for_review?: Json
+          id?: string
+          impacted_policies?: Json
+          is_automated?: boolean
+          legislation_item_id?: string | null
+          regulation_id?: string | null
+          risk_justification?: string | null
+          risk_score?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_impact_analyses_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risks: {
         Row: {
           action_items: string | null

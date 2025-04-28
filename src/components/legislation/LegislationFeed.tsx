@@ -1,11 +1,14 @@
 
 import { useState, useEffect } from "react";
-import { ExternalLink, Clock, FileText, AlertTriangle, RefreshCw } from "lucide-react";
+import { ExternalLink, Clock, FileText, AlertTriangle, RefreshCw, BarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { RegulationImpactAnalysis } from "./RegulationImpactAnalysis";
+import { Badge } from "@/components/ui/badge";
 
 interface LegislationItem {
   title: string;
@@ -13,6 +16,7 @@ interface LegislationItem {
   description: string;
   pubDate: string;
   celex: string;
+  hasAnalysis?: boolean;
 }
 
 export const LegislationFeed = () => {
@@ -20,6 +24,7 @@ export const LegislationFeed = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFallback, setIsFallback] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<LegislationItem | null>(null);
   const { toast } = useToast();
 
   const fetchLegislation = async () => {
@@ -37,7 +42,31 @@ export const LegislationFeed = () => {
       }
       
       if (data && data.entries) {
-        setLegislationItems(data.entries);
+        // Check for existing analyses for these items
+        const items = data.entries;
+        const celexIds = items
+          .filter((item: LegislationItem) => item.celex)
+          .map((item: LegislationItem) => item.celex);
+
+        if (celexIds.length > 0) {
+          const { data: analyses } = await supabase
+            .from("regulatory_impact_analyses")
+            .select("legislation_item_id")
+            .in("legislation_item_id", celexIds);
+
+          const analysisMap = new Set(analyses?.map(a => a.legislation_item_id) || []);
+          
+          // Mark items that have an analysis
+          const itemsWithAnalysisStatus = items.map((item: LegislationItem) => ({
+            ...item,
+            hasAnalysis: item.celex ? analysisMap.has(item.celex) : false
+          }));
+          
+          setLegislationItems(itemsWithAnalysisStatus);
+        } else {
+          setLegislationItems(items);
+        }
+
         // Check if we're using fallback data
         if (data.status === "fallback") {
           setIsFallback(true);
@@ -162,9 +191,17 @@ export const LegislationFeed = () => {
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {legislationItems.map((item, index) => (
               <div key={index} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-                <h3 className="font-medium text-slate-900 mb-1 leading-tight">
-                  {item.title}
-                </h3>
+                <div className="flex justify-between items-start">
+                  <h3 className="font-medium text-slate-900 mb-1 leading-tight">
+                    {item.title}
+                  </h3>
+                  {item.hasAnalysis && (
+                    <Badge variant="secondary" className="ml-2">
+                      <BarChart size={12} className="mr-1" />
+                      Analyzed
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                   <Clock size={12} />
                   <span>{formatDate(item.pubDate)}</span>
@@ -179,17 +216,47 @@ export const LegislationFeed = () => {
                 <p className="text-sm text-slate-600 mb-2">
                   {truncateDescription(item.description)}
                 </p>
-                {item.link && (
-                  <a 
-                    href={item.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-800"
-                  >
-                    View on EUR-Lex
-                    <ExternalLink size={12} className="ml-1" />
-                  </a>
-                )}
+                <div className="flex gap-2 mt-2">
+                  {item.link && (
+                    <a 
+                      href={item.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                    >
+                      View on EUR-Lex
+                      <ExternalLink size={12} className="ml-1" />
+                    </a>
+                  )}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-xs px-2 h-6"
+                        onClick={() => setSelectedItem(item)}
+                      >
+                        <BarChart size={12} className="mr-1" />
+                        {item.hasAnalysis ? "View Impact Analysis" : "Analyze Impact"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Regulatory Impact Analysis</DialogTitle>
+                      </DialogHeader>
+                      {selectedItem && (
+                        <RegulationImpactAnalysis 
+                          regulation={{
+                            title: selectedItem.title,
+                            description: selectedItem.description,
+                            celex: selectedItem.celex
+                          }}
+                          onAnalysisComplete={fetchLegislation}
+                        />
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
             ))}
           </div>
