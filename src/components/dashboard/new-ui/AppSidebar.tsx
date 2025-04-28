@@ -5,6 +5,7 @@ import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar-new";
 import {
   Home,
   FileText,
+  FileSearch,
   Bell,
   Bot,
   Settings,
@@ -23,6 +24,11 @@ const links = [
     label: "Alerts",
     href: "/alerts",
     icon: <Bell className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+  },
+  {
+    label: "Legislation",
+    href: "/legislation",
+    icon: <FileSearch className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
   },
   {
     label: "Documentation",

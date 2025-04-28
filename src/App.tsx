@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +28,7 @@ import AdminTools from "./pages/AdminTools";
 import ComplianceCalendar from "./pages/ComplianceCalendar";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import ComplianceOverview from "./pages/ComplianceOverview";
+import LegislationPage from "./pages/LegislationPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -202,6 +204,16 @@ const App = () => {
                     element={
                       session ? (
                         <Legislation />
+                      ) : (
+                        <Navigate to="/auth" replace={true} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/legislation"
+                    element={
+                      session ? (
+                        <LegislationPage />
                       ) : (
                         <Navigate to="/auth" replace={true} />
                       )
