@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CheckCircle, Clock, Users, File, RefreshCw } from "lucide-react";
+import { AlertTriangle, Clock, Users, File, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -46,25 +47,29 @@ export const RegulationImpactAnalysis = ({
     setError(null);
     
     try {
-      let query: any = supabase
-        .from('regulatory_impact_analyses')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Use a generic query approach to bypass TypeScript table restrictions
+      let query = `regulatory_impact_analyses`;
+      let filters = {};
       
       if (regulation.id) {
-        query = query.eq("regulation_id", regulation.id);
+        filters = { regulation_id: regulation.id };
       } 
       else if (regulation.celex) {
-        query = query.eq("legislation_item_id", regulation.celex);
+        filters = { legislation_item_id: regulation.celex };
       } 
       else {
-        query = query.eq("title", regulation.title);
+        filters = { title: regulation.title };
       }
       
-      const { data, error } = await query.maybeSingle() as unknown as { 
-        data: AnalysisData | null; 
-        error: any; 
-      };
+      const { data, error } = await supabase
+        .from(query)
+        .select('*')
+        .order('created_at', { ascending: false })
+        .match(filters)
+        .maybeSingle() as unknown as { 
+          data: AnalysisData | null; 
+          error: any; 
+        };
       
       if (error) {
         throw error;
@@ -139,7 +144,7 @@ export const RegulationImpactAnalysis = ({
     return "text-green-500";
   };
 
-  const getRiskBadgeVariant = (level: string) => {
+  const getRiskBadgeVariant = (level: string): "default" | "destructive" | "outline" | "secondary" => {
     switch (level.toLowerCase()) {
       case "high":
         return "destructive";
@@ -222,8 +227,8 @@ export const RegulationImpactAnalysis = ({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Regulatory Impact Analysis</span>
-          <Badge variant={analysis.status === 'completed' ? "default" : "outline"}>
-            {analysis.status === 'completed' ? "Completed" : "Pending"}
+          <Badge variant={analysis?.status === 'completed' ? "default" : "outline"}>
+            {analysis?.status === 'completed' ? "Completed" : "Pending"}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -232,23 +237,23 @@ export const RegulationImpactAnalysis = ({
           <div>
             <h3 className="text-lg font-medium mb-2">Summary</h3>
             <p className="text-slate-700 dark:text-slate-300">
-              {analysis.analysis_summary}
+              {analysis?.analysis_summary}
             </p>
           </div>
           
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-medium">Risk Assessment</h3>
-              <span className={`font-bold text-xl ${getRiskColor(analysis.risk_score)}`}>
-                {analysis.risk_score}/10
+              <span className={`font-bold text-xl ${getRiskColor(analysis?.risk_score || 0)}`}>
+                {analysis?.risk_score}/10
               </span>
             </div>
             <Progress 
-              value={analysis.risk_score * 10} 
-              className={`${analysis.risk_score >= 8 ? 'bg-red-200' : analysis.risk_score >= 5 ? 'bg-orange-200' : 'bg-green-200'}`}
+              value={(analysis?.risk_score || 0) * 10} 
+              className={`${(analysis?.risk_score || 0) >= 8 ? 'bg-red-200' : (analysis?.risk_score || 0) >= 5 ? 'bg-orange-200' : 'bg-green-200'}`}
             />
             <p className="text-slate-600 dark:text-slate-400 text-sm mt-2">
-              {analysis.risk_justification}
+              {analysis?.risk_justification}
             </p>
           </div>
           
@@ -258,7 +263,7 @@ export const RegulationImpactAnalysis = ({
               <h3 className="text-lg font-medium">Impacted Policies</h3>
             </div>
             <div className="space-y-2">
-              {analysis.impacted_policies.map((policy: any, index: number) => (
+              {analysis?.impacted_policies?.map((policy: any, index: number) => (
                 <div key={index} className="border rounded-md p-3">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium">{policy.name}</h4>
@@ -280,7 +285,7 @@ export const RegulationImpactAnalysis = ({
               <h3 className="text-lg font-medium">Departments for Review</h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              {analysis.departments_for_review.map((department: string, index: number) => (
+              {analysis?.departments_for_review?.map((department: string, index: number) => (
                 <Badge key={index} variant="secondary">
                   {department}
                 </Badge>
@@ -291,7 +296,7 @@ export const RegulationImpactAnalysis = ({
           <div className="flex justify-between items-center">
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="w-4 h-4 mr-1" />
-              {new Date(analysis.created_at).toLocaleDateString()}
+              {analysis ? new Date(analysis.created_at).toLocaleDateString() : ''}
             </div>
             <Button 
               onClick={runAnalysis} 

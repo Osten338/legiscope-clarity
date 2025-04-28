@@ -50,18 +50,19 @@ export const LegislationFeed = () => {
 
         if (celexIds.length > 0) {
           // Use the raw query method to bypass TypeScript table restrictions
-          const { data: analyses } = await supabase.rpc('match_documents', {
+          const { data: analysesData } = await supabase.rpc('match_documents', {
             query_embedding: 'dummy', 
             match_threshold: 0.5, 
             match_count: 1
           }).maybeSingle();
           
-          // Temporary workaround until type definitions are updated
-          const { data: analysesData } = await supabase.from('regulatory_impact_analyses')
+          // Use the raw query method to bypass TypeScript table restrictions
+          const { data: analyses } = await supabase
+            .from('regulatory_impact_analyses')
             .select('legislation_item_id')
             .in('legislation_item_id', celexIds) as unknown as { data: { legislation_item_id: string }[] };
 
-          const analysisMap = new Set(analysesData?.map(a => a.legislation_item_id) || []);
+          const analysisMap = new Set(analyses?.map(a => a.legislation_item_id) || []);
           
           // Mark items that have an analysis
           const itemsWithAnalysisStatus = items.map((item: LegislationItem) => ({
@@ -271,4 +272,29 @@ export const LegislationFeed = () => {
       </CardContent>
     </Card>
   );
+};
+
+// Helper functions
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    }).format(date);
+  } catch {
+    return dateString;
+  }
+};
+
+// Truncate description to avoid overly long texts
+const truncateDescription = (text: string, maxLength = 150) => {
+  if (!text) return "";
+  
+  // Strip HTML tags
+  const plainText = text.replace(/<\/?[^>]+(>|$)/g, "");
+  
+  if (plainText.length <= maxLength) return plainText;
+  return `${plainText.substring(0, maxLength)}...`;
 };
