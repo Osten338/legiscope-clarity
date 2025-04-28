@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -47,8 +46,7 @@ export const RegulationImpactAnalysis = ({
     setError(null);
     
     try {
-      // Use a generic query approach to bypass TypeScript table restrictions
-      let query = `regulatory_impact_analyses`;
+      // Use a raw query approach instead of typed methods
       let filters = {};
       
       if (regulation.id) {
@@ -61,15 +59,12 @@ export const RegulationImpactAnalysis = ({
         filters = { title: regulation.title };
       }
       
-      const { data, error } = await supabase
-        .from(query)
+      const { data, error } = await (supabase as any)
+        .from('regulatory_impact_analyses')
         .select('*')
         .order('created_at', { ascending: false })
         .match(filters)
-        .maybeSingle() as unknown as { 
-          data: AnalysisData | null; 
-          error: any; 
-        };
+        .maybeSingle();
       
       if (error) {
         throw error;
