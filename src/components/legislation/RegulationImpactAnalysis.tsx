@@ -19,11 +19,23 @@ interface RegulationImpactAnalysisProps {
   onAnalysisComplete?: () => void;
 }
 
+type AnalysisData = {
+  id: string;
+  title: string;
+  analysis_summary: string;
+  risk_score: number;
+  risk_justification: string;
+  impacted_policies: Array<{ name: string; impact: string; riskLevel: string }>;
+  departments_for_review: string[];
+  created_at: string;
+  status: string;
+};
+
 export const RegulationImpactAnalysis = ({ 
   regulation, 
   onAnalysisComplete 
 }: RegulationImpactAnalysisProps) => {
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,25 +46,25 @@ export const RegulationImpactAnalysis = ({
     setError(null);
     
     try {
-      const query = supabase
-        .from("regulatory_impact_analyses")
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query: any = supabase
+        .from('regulatory_impact_analyses')
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      // If we have a regulation ID, filter by it
       if (regulation.id) {
-        query.eq("regulation_id", regulation.id);
+        query = query.eq("regulation_id", regulation.id);
       } 
-      // Otherwise if we have a CELEX, filter by legislation_item_id
       else if (regulation.celex) {
-        query.eq("legislation_item_id", regulation.celex);
+        query = query.eq("legislation_item_id", regulation.celex);
       } 
-      // Otherwise filter by title (less reliable)
       else {
-        query.eq("title", regulation.title);
+        query = query.eq("title", regulation.title);
       }
       
-      const { data, error } = await query.maybeSingle();
+      const { data, error } = await query.maybeSingle() as unknown as { 
+        data: AnalysisData | null; 
+        error: any; 
+      };
       
       if (error) {
         throw error;
@@ -92,7 +104,6 @@ export const RegulationImpactAnalysis = ({
         throw new Error(response.error.message || "Analysis failed");
       }
       
-      // Refresh the analysis to get the stored version
       await fetchExistingAnalysis();
       
       toast({
@@ -133,7 +144,7 @@ export const RegulationImpactAnalysis = ({
       case "high":
         return "destructive";
       case "medium":
-        return "warning";
+        return "secondary";
       default:
         return "outline";
     }

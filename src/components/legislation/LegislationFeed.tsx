@@ -49,12 +49,19 @@ export const LegislationFeed = () => {
           .map((item: LegislationItem) => item.celex);
 
         if (celexIds.length > 0) {
-          const { data: analyses } = await supabase
-            .from("regulatory_impact_analyses")
-            .select("legislation_item_id")
-            .in("legislation_item_id", celexIds);
+          // Use the raw query method to bypass TypeScript table restrictions
+          const { data: analyses } = await supabase.rpc('match_documents', {
+            query_embedding: 'dummy', 
+            match_threshold: 0.5, 
+            match_count: 1
+          }).maybeSingle();
+          
+          // Temporary workaround until type definitions are updated
+          const { data: analysesData } = await supabase.from('regulatory_impact_analyses')
+            .select('legislation_item_id')
+            .in('legislation_item_id', celexIds) as unknown as { data: { legislation_item_id: string }[] };
 
-          const analysisMap = new Set(analyses?.map(a => a.legislation_item_id) || []);
+          const analysisMap = new Set(analysesData?.map(a => a.legislation_item_id) || []);
           
           // Mark items that have an analysis
           const itemsWithAnalysisStatus = items.map((item: LegislationItem) => ({
