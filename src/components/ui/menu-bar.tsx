@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
@@ -74,6 +74,8 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
           className,
         )}
         initial="initial"
+        // Using the proper typing for framer-motion
+        animate={undefined}
         whileHover="hover"
         {...props}
       >
