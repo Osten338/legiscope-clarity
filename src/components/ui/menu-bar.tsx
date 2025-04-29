@@ -15,7 +15,7 @@ interface MenuItem {
   iconColor: string;
 }
 
-interface MenuBarProps extends React.HTMLAttributes<HTMLDivElement> {
+interface MenuBarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onAnimationStart' | 'onDrag' | 'onDragEnd' | 'onDragStart' | 'onAnimationComplete'> {
   items: MenuItem[];
   activeItem?: string;
   onItemClick?: (label: string) => void;
@@ -74,10 +74,7 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
           className,
         )}
         initial="initial"
-        // Using the proper typing for framer-motion
-        animate={undefined}
         whileHover="hover"
-        {...props}
       >
         <motion.div
           className={`absolute -inset-2 bg-gradient-radial from-transparent ${
