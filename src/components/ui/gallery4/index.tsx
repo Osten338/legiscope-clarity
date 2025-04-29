@@ -52,10 +52,9 @@ export function Gallery4({
           canScrollNext={canScrollNext}
         />
       )}
-      <div className="w-full flex justify-center">
+      <div className="w-full">
         <Carousel
           setApi={setCarouselApi}
-          className="w-full"
           opts={{
             containScroll: "trimSnaps",
             breakpoints: {

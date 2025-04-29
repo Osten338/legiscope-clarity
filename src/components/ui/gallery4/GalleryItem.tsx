@@ -9,9 +9,9 @@ interface GalleryItemProps {
 
 export const GalleryItem = ({ item }: GalleryItemProps) => {
   return (
-    <CarouselItem className="md:basis-1/2 lg:basis-1/3 px-4">
+    <CarouselItem key={item.id} className="max-w-[320px] pl-[20px] lg:max-w-[360px]">
       <a href={item.href} className="group rounded-xl">
-        <div className="group relative h-full min-h-[27rem] overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
+        <div className="group relative h-full min-h-[27rem] max-w-full overflow-hidden rounded-xl md:aspect-[5/4] lg:aspect-[16/9]">
           <img
             src={item.image}
             alt={item.title}
