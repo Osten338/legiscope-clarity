@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { DashboardLayout } from "@/components/dashboard/new-ui";
+import { MenuBarLayout } from "@/components/dashboard/new-ui";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { QuickActions } from "@/components/dashboard/QuickActions";
@@ -24,7 +24,7 @@ const Dashboard = () => {
   const totalRegulations = savedRegulations?.length || 0;
 
   return (
-    <DashboardLayout>
+    <MenuBarLayout>
       <div className="flex flex-col">
         <div className="container mx-auto pt-8">
           <WelcomeSection />
@@ -38,9 +38,8 @@ const Dashboard = () => {
           <QuickActions />
         </div>
       </div>
-    </DashboardLayout>
+    </MenuBarLayout>
   );
 };
 
 export default Dashboard;
-
