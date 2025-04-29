@@ -25,8 +25,8 @@ const Dashboard = () => {
 
   return (
     <MenuBarLayout>
-      <div className="flex flex-col">
-        <div className="container mx-auto px-6 md:px-8 lg:px-10 pt-8 max-w-7xl">
+      <div className="flex flex-col w-full">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 max-w-5xl">
           <WelcomeSection />
           
           <StatsOverview 
