@@ -102,13 +102,15 @@ export function MenuBarLayout({ children }: MenuBarLayoutProps) {
   
   return (
     <div className="min-h-screen flex flex-col w-full bg-background overflow-hidden">
-      <header className="flex justify-center py-4 border-b">
-        <MenuBar 
-          items={menuItems} 
-          activeItem={activeItem} 
-          onItemClick={handleItemClick} 
-          className="w-auto"
-        />
+      <header className="flex justify-center py-3 border-b">
+        <div className="w-full max-w-5xl px-4 mx-auto">
+          <MenuBar 
+            items={menuItems} 
+            activeItem={activeItem} 
+            onItemClick={handleItemClick}
+            className="mx-auto sm:mx-0"
+          />
+        </div>
       </header>
       <main className="flex-1 overflow-auto">
         {children}
