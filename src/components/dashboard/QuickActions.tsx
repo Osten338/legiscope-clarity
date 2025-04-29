@@ -41,7 +41,7 @@ const galleryItems: Gallery4Item[] = [
 
 export const QuickActions = () => {
   return (
-    <div className="mb-8 ml-[max(2rem,calc(50vw-700px))] 2xl:ml-[max(8rem,calc(50vw-700px))]">
+    <div className="mb-8">
       <Gallery4 
         title="Quick Actions"
         description="Common tasks and actions to help manage your compliance"

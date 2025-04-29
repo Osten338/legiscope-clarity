@@ -3,7 +3,7 @@ import { GradientText } from "@/components/ui/gradient-text";
 
 export const WelcomeSection = () => {
   return (
-    <div className="mb-8 ml-[max(2rem,calc(50vw-700px))] 2xl:ml-[max(8rem,calc(50vw-700px))]">
+    <div className="mb-8">
       <h1 className="text-4xl md:text-5xl font-medium text-black mb-4">
         Welcome back
       </h1>
