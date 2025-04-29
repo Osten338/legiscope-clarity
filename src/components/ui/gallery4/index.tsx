@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -63,7 +64,7 @@ export function Gallery4({
             },
           }}
         >
-          <CarouselContent className="ml-0 sm:ml-4 md:ml-6 lg:ml-8 2xl:ml-[max(8rem,calc(50vw-700px))] 2xl:mr-[max(0rem,calc(50vw-700px))]">
+          <CarouselContent className="ml-0">
             {items.map((item) => (
               <GalleryItem key={item.id} item={item} />
             ))}
