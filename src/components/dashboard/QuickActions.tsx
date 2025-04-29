@@ -41,14 +41,15 @@ const galleryItems: Gallery4Item[] = [
 
 export const QuickActions = () => {
   return (
-    <div className="mb-8">
-      <Gallery4 
-        title="Quick Actions"
-        description="Common tasks and actions to help manage your compliance"
-        items={galleryItems}
-        titleClassName="text-black"
-        descriptionClassName="text-gray-600"
-      />
+    <div className="grid md:grid-cols-3 gap-8 mb-8">
+      <div className="md:col-span-3">
+        <Gallery4 
+          items={galleryItems}
+          titleClassName="text-black"
+          descriptionClassName="text-gray-600"
+        />
+      </div>
     </div>
   );
 };
+

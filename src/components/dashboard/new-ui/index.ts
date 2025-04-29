@@ -1,3 +1,3 @@
 
-export { MenuBarLayout } from './MenuBarLayout';
 export { DashboardLayout } from './DashboardLayout';
+export { AppSidebar } from './AppSidebar';
