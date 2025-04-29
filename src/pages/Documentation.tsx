@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { DashboardLayout } from "@/components/dashboard/new-ui";
+import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { Button } from "@/components/ui/button";
 import { ComplianceBuddyDialog } from "@/components/compliance/ComplianceBuddyDialog";
 import { GenerateDocumentDialog } from "@/components/compliance/GenerateDocumentDialog";
@@ -29,8 +29,8 @@ const Documentation = () => {
   const [isGenerateDocumentOpen, setIsGenerateDocumentOpen] = useState(false);
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-8">
+    <TopbarLayout>
+      <div className="container mx-auto px-6 md:px-8 lg:px-10 py-8 max-w-7xl">
         <div className="mb-8 flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Documentation &amp; Compliance</h1>
           <div>
@@ -56,7 +56,7 @@ const Documentation = () => {
 
         <DocumentationFeatures />
       </div>
-    </DashboardLayout>
+    </TopbarLayout>
   );
 };
 

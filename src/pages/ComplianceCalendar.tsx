@@ -1,4 +1,5 @@
-import { DashboardLayout } from "@/components/dashboard/new-ui"
+
+import { TopbarLayout } from "@/components/dashboard/new-ui"
 import { FullScreenCalendar } from "@/components/ui/fullscreen-calendar"
 import { UpcomingEvents } from "@/components/compliance/UpcomingEvents"
 
@@ -57,8 +58,8 @@ const mockEvents = [
 
 export default function ComplianceCalendar() {
   return (
-    <DashboardLayout>
-      <div className="p-6 space-y-6">
+    <TopbarLayout>
+      <div className="container mx-auto px-6 md:px-8 lg:px-10 p-6 max-w-7xl space-y-6">
         <div className="flex flex-col gap-4">
           <h1 className="text-4xl font-medium text-black">
             Compliance Calendar
@@ -77,6 +78,6 @@ export default function ComplianceCalendar() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </TopbarLayout>
   );
 }

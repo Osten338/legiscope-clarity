@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { DashboardLayout } from "@/components/dashboard/new-ui";
+import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,8 +15,8 @@ export default function AdminTools() {
   const [activeTab, setActiveTab] = useState<string>("embeddings");
   
   return (
-    <DashboardLayout>
-      <div className="container py-6 max-w-5xl">
+    <TopbarLayout>
+      <div className="container mx-auto px-6 md:px-8 lg:px-10 py-8 max-w-5xl">
         <h1 className="text-2xl font-semibold mb-6">Admin Tools</h1>
         
         <Alert className="mb-6 bg-amber-50">
@@ -51,6 +52,6 @@ export default function AdminTools() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </TopbarLayout>
   );
 }

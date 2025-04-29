@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { DashboardLayout } from "@/components/dashboard/new-ui";
+import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { RiskMatrix } from "@/components/risk-assessment/RiskMatrix";
 import { RiskList } from "@/components/risk-assessment/RiskList";
 import { AddRiskDialog } from "@/components/risk-assessment/AddRiskDialog";
@@ -79,8 +80,8 @@ const RiskAssessment = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-8">
+    <TopbarLayout>
+      <div className="container mx-auto px-6 md:px-8 lg:px-10 py-8 max-w-7xl">
         <Card>
           <CardHeader>
             <CardTitle>Risk Assessment</CardTitle>
@@ -110,7 +111,7 @@ const RiskAssessment = () => {
           onOpenChange={setIsAddRiskDialogOpen}
         />
       </div>
-    </DashboardLayout>
+    </TopbarLayout>
   );
 };
 

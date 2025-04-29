@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { DashboardLayout } from "@/components/dashboard/new-ui";
+import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { AlertsHeader } from "@/components/alerts/AlertsHeader";
 import { AlertCategoryCard } from "@/components/alerts/AlertCategoryCard";
 import { Button } from "@/components/ui/button";
@@ -54,8 +55,8 @@ const Alerts = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto py-8">
+    <TopbarLayout>
+      <div className="container mx-auto px-6 md:px-8 lg:px-10 py-8 max-w-7xl">
         <AlertsHeader 
           alertsEnabled={alertsEnabled}
           onToggle={handleToggleAlerts}
@@ -83,7 +84,7 @@ const Alerts = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </TopbarLayout>
   );
 };
 
