@@ -14,7 +14,7 @@ export const StatsOverview = ({
   upcomingDeadlines 
 }: StatsOverviewProps) => {
   return (
-    <div className="grid gap-4 md:grid-cols-3 mb-8">
+    <div className="grid gap-4 md:grid-cols-3 mb-8 ml-[max(2rem,calc(50vw-700px))] 2xl:ml-[max(8rem,calc(50vw-700px))]">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Regulations</CardTitle>
