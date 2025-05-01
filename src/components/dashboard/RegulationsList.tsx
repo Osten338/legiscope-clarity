@@ -36,7 +36,7 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     setCurrentView(view);
   };
 
-  // Log when regulations data changes
+  // Log when regulations data changes or view changes
   useEffect(() => {
     console.log("RegulationsList: Data updated", {
       totalRegulations: savedRegulations.length,

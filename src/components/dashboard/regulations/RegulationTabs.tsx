@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
 import { Box, House, PanelsTopLeft } from "lucide-react";
+import { useId } from "react";
 
 interface RegulationTabsProps {
   currentView: ViewType;
@@ -30,6 +31,11 @@ export const RegulationTabs = ({
   onRemoveRegulation,
   sortRegulations,
 }: RegulationTabsProps) => {
+  // Generate unique IDs for each table to ensure proper re-rendering
+  const activeTableId = useId();
+  const upcomingTableId = useId();
+  const tasksTableId = useId();
+  
   // Prepare the data to display for each tab
   const activeData = sortRegulations(searchFilteredRegulations);
   const upcomingData = sortRegulations(upcomingRegulations);
@@ -42,7 +48,7 @@ export const RegulationTabs = ({
     tasksDataLength: tasksData.length
   });
 
-  // The handler for tab changes
+  // The handler for tab changes with improved logging
   const handleTabChange = (value: string) => {
     console.log("Tab change handler called with value:", value);
     onViewChange(value as ViewType);
@@ -96,33 +102,39 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <TabsContent value="active">
+      <TabsContent value="active" key={`active-tab-${activeTableId}`} forceMount={false}>
         <RegulationsTable
+          key={`active-table-${activeTableId}`}
           regulations={activeData}
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={onSort}
           onRemoveRegulation={onRemoveRegulation}
+          tableId="active-regulations"
         />
       </TabsContent>
 
-      <TabsContent value="upcoming">
+      <TabsContent value="upcoming" key={`upcoming-tab-${upcomingTableId}`} forceMount={false}>
         <RegulationsTable
+          key={`upcoming-table-${upcomingTableId}`}
           regulations={upcomingData}
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={onSort}
           onRemoveRegulation={onRemoveRegulation}
+          tableId="upcoming-regulations"
         />
       </TabsContent>
 
-      <TabsContent value="tasks">
+      <TabsContent value="tasks" key={`tasks-tab-${tasksTableId}`} forceMount={false}>
         <RegulationsTable
+          key={`tasks-table-${tasksTableId}`}
           regulations={tasksData}
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={onSort}
           onRemoveRegulation={onRemoveRegulation}
+          tableId="tasks-regulations"
         />
       </TabsContent>
     </Tabs>

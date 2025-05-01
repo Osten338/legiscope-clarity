@@ -11,6 +11,7 @@ interface RegulationsTableProps {
   sortDirection: "asc" | "desc";
   onSort: (column: SortColumn) => void;
   onRemoveRegulation: (id: string) => Promise<void>;
+  tableId?: string; // Added tableId prop
 }
 
 export const RegulationsTable = ({
@@ -19,10 +20,11 @@ export const RegulationsTable = ({
   sortDirection,
   onSort,
   onRemoveRegulation,
+  tableId = "default-table", // Default value for tableId
 }: RegulationsTableProps) => {
   // Add detailed debug logging to help track rendering and data issues
   useEffect(() => {
-    console.log(`RegulationsTable rendering with:`, {
+    console.log(`RegulationsTable [${tableId}] rendering with:`, {
       regulationsCount: regulations.length,
       sortColumn,
       sortDirection,
@@ -36,22 +38,22 @@ export const RegulationsTable = ({
     
     // Log whether this table has any data
     if (regulations.length === 0) {
-      console.log(`RegulationsTable has NO data to display`);
+      console.log(`RegulationsTable [${tableId}] has NO data to display`);
     } else {
-      console.log(`RegulationsTable has ${regulations.length} regulations to display`);
+      console.log(`RegulationsTable [${tableId}] has ${regulations.length} regulations to display`);
     }
-  }, [regulations, sortColumn, sortDirection]);
+  }, [regulations, sortColumn, sortDirection, tableId]);
 
   if (regulations.length === 0) {
     return (
-      <div className="py-6 text-center text-muted-foreground">
+      <div className="py-6 text-center text-muted-foreground" data-table-id={tableId}>
         No regulations found
       </div>
     );
   }
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full overflow-auto" data-table-id={tableId}>
       <Table>
         <RegulationTableHeader
           sortColumn={sortColumn}
