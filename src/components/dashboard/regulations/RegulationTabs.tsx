@@ -102,7 +102,7 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <TabsContent value="active" key={`active-tab-${activeTableId}`} forceMount={false}>
+      <TabsContent value="active" key={`active-tab-${activeTableId}`}>
         <RegulationsTable
           key={`active-table-${activeTableId}`}
           regulations={activeData}
@@ -114,7 +114,7 @@ export const RegulationTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="upcoming" key={`upcoming-tab-${upcomingTableId}`} forceMount={false}>
+      <TabsContent value="upcoming" key={`upcoming-tab-${upcomingTableId}`}>
         <RegulationsTable
           key={`upcoming-table-${upcomingTableId}`}
           regulations={upcomingData}
@@ -126,7 +126,7 @@ export const RegulationTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="tasks" key={`tasks-tab-${tasksTableId}`} forceMount={false}>
+      <TabsContent value="tasks" key={`tasks-tab-${tasksTableId}`}>
         <RegulationsTable
           key={`tasks-table-${tasksTableId}`}
           regulations={tasksData}
