@@ -3,7 +3,7 @@ import { Table, TableBody } from "@/components/ui/table";
 import { RegulationTableHeader } from "./RegulationTableHeader";
 import { RegulationTableRow } from "./RegulationTableRow";
 import { RegulationListItem, SortColumn } from "../types";
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 
 interface RegulationsTableProps {
   regulations: RegulationListItem[];
@@ -20,22 +20,22 @@ export const RegulationsTable = ({
   onSort,
   onRemoveRegulation,
 }: RegulationsTableProps) => {
-  // Add debug logging to help track rendering and data issues
+  // Generate a unique ID for this table instance for debugging
+  const tableId = useId();
+
+  // Add detailed debug logging to help track rendering and data issues
   useEffect(() => {
-    console.log("RegulationsTable rendering with:", {
+    console.log(`RegulationsTable [${tableId}] rendering with:`, {
       regulationsCount: regulations.length,
       sortColumn,
-      sortDirection
-    });
-    
-    if (regulations.length > 0) {
-      console.log("First regulation:", {
+      sortDirection,
+      firstRegulation: regulations.length > 0 ? {
         id: regulations[0].id,
-        name: regulations[0].regulations.name,
+        name: regulations[0].regulations?.name,
         status: regulations[0].status
-      });
-    }
-  }, [regulations, sortColumn, sortDirection]);
+      } : 'none'
+    });
+  }, [regulations, sortColumn, sortDirection, tableId]);
 
   if (regulations.length === 0) {
     return (

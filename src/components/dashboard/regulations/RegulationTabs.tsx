@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
 import { Box, House, PanelsTopLeft } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 interface RegulationTabsProps {
   currentView: ViewType;
@@ -31,38 +31,32 @@ export const RegulationTabs = ({
   onRemoveRegulation,
   sortRegulations,
 }: RegulationTabsProps) => {
-  // Local state to ensure proper tab synchronization
-  const [activeTab, setActiveTab] = useState<ViewType>(currentView);
-  
-  // Ensure local state stays in sync with props
+  // Log when tab component renders or gets new props
   useEffect(() => {
-    setActiveTab(currentView);
-  }, [currentView]);
+    console.log("RegulationTabs rendered with currentView:", currentView);
+    console.log("Regulations counts:", {
+      active: searchFilteredRegulations.length,
+      upcoming: upcomingRegulations.length, 
+      tasks: tasksRegulations.length
+    });
+  }, [currentView, searchFilteredRegulations, upcomingRegulations, tasksRegulations]);
 
-  // Handler that updates both local state and calls the parent handler
+  // Prepare the data to display for each tab
+  const activeData = sortRegulations(searchFilteredRegulations);
+  const upcomingData = sortRegulations(upcomingRegulations);
+  const tasksData = sortRegulations(tasksRegulations);
+
+  // The handler for tab changes
   const handleTabChange = (value: string) => {
-    console.log("Tab change triggered:", value);
-    const newView = value as ViewType;
-    setActiveTab(newView);
-    onViewChange(newView);
+    console.log("Tab change requested to:", value);
+    onViewChange(value as ViewType);
   };
-
-  // Debug which regulations are being displayed for each tab
-  useEffect(() => {
-    console.log("Active tab:", activeTab);
-    console.log("Regulations for active tab:", 
-      activeTab === "active" ? searchFilteredRegulations.length : 
-      activeTab === "upcoming" ? upcomingRegulations.length : 
-      activeTab === "tasks" ? tasksRegulations.length : 0
-    );
-  }, [activeTab, searchFilteredRegulations, upcomingRegulations, tasksRegulations]);
 
   return (
     <Tabs
-      value={activeTab}
+      value={currentView}
       onValueChange={handleTabChange}
       className="w-full mt-4"
-      defaultValue="active"
     >
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
@@ -106,50 +100,41 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* Force a complete re-render of each table when the active tab changes */}
+      {/* Each TabsContent is always mounted but only the active one is visible */}
       <TabsContent value="active">
-        {activeTab === "active" && (
-          <div className="mt-2">
-            <RegulationsTable
-              key={`active-${searchFilteredRegulations.length}`}
-              regulations={sortRegulations(searchFilteredRegulations)}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={onSort}
-              onRemoveRegulation={onRemoveRegulation}
-            />
-          </div>
-        )}
+        <div className="mt-2">
+          <RegulationsTable
+            regulations={activeData}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRemoveRegulation={onRemoveRegulation}
+          />
+        </div>
       </TabsContent>
 
       <TabsContent value="upcoming">
-        {activeTab === "upcoming" && (
-          <div className="mt-2">
-            <RegulationsTable
-              key={`upcoming-${upcomingRegulations.length}`}
-              regulations={sortRegulations(upcomingRegulations)}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={onSort}
-              onRemoveRegulation={onRemoveRegulation}
-            />
-          </div>
-        )}
+        <div className="mt-2">
+          <RegulationsTable
+            regulations={upcomingData}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRemoveRegulation={onRemoveRegulation}
+          />
+        </div>
       </TabsContent>
 
       <TabsContent value="tasks">
-        {activeTab === "tasks" && (
-          <div className="mt-2">
-            <RegulationsTable
-              key={`tasks-${tasksRegulations.length}`}
-              regulations={sortRegulations(tasksRegulations)}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={onSort}
-              onRemoveRegulation={onRemoveRegulation}
-            />
-          </div>
-        )}
+        <div className="mt-2">
+          <RegulationsTable
+            regulations={tasksData}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRemoveRegulation={onRemoveRegulation}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   );
