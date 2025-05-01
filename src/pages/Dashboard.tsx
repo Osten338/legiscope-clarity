@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { DashboardLayout } from "@/components/dashboard/new-ui";
+import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { useDashboardData } from "@/components/dashboard/useDashboardData";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { StatusOverview } from "@/components/dashboard/StatusOverview";
@@ -26,7 +26,7 @@ const Dashboard = () => {
   const totalRegulations = savedRegulations?.length || 0;
 
   return (
-    <DashboardLayout>
+    <TopbarLayout>
       <div className="flex flex-col">
         <DashboardHeader />
         
@@ -57,7 +57,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </TopbarLayout>
   );
 };
 
