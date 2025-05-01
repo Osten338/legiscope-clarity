@@ -30,10 +30,24 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     sortRegulations,
   } = useRegulationsFilters(savedRegulations);
 
+  // Enhanced view change handler with more logging
   const handleViewChange = (view: ViewType) => {
-    console.log("View changed to:", view);
+    console.log("RegulationsList: View changed to:", view);
+    console.log("Regulations counts - Active:", searchFilteredRegulations.length, 
+                "Upcoming:", upcomingRegulations.length, 
+                "Tasks:", tasksRegulations.length);
     setCurrentView(view);
   };
+
+  // Log when data changes to help with debugging
+  useEffect(() => {
+    console.log("RegulationsList: Data updated", {
+      totalRegulations: savedRegulations.length,
+      filteredCount: searchFilteredRegulations.length,
+      upcomingCount: upcomingRegulations.length,
+      tasksCount: tasksRegulations.length
+    });
+  }, [savedRegulations, searchFilteredRegulations, upcomingRegulations, tasksRegulations]);
 
   const handleRemoveRegulation = async (savedRegulationId: string) => {
     try {
