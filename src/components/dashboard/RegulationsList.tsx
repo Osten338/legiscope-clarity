@@ -79,7 +79,6 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
         />
         
         <RegulationTabs
-          key={`regulation-tabs-${currentView}-${searchFilteredRegulations.length}`}
           currentView={currentView}
           onViewChange={handleViewChange}
           searchFilteredRegulations={searchFilteredRegulations}

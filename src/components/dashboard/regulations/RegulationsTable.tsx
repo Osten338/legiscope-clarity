@@ -3,7 +3,7 @@ import { Table, TableBody } from "@/components/ui/table";
 import { RegulationTableHeader } from "./RegulationTableHeader";
 import { RegulationTableRow } from "./RegulationTableRow";
 import { RegulationListItem, SortColumn } from "../types";
-import { useEffect, useId } from "react";
+import { useEffect } from "react";
 
 interface RegulationsTableProps {
   regulations: RegulationListItem[];
@@ -20,12 +20,9 @@ export const RegulationsTable = ({
   onSort,
   onRemoveRegulation,
 }: RegulationsTableProps) => {
-  // Generate a unique ID for this table instance
-  const tableId = useId();
-
   // Add detailed debug logging to help track rendering and data issues
   useEffect(() => {
-    console.log(`RegulationsTable [${tableId}] rendering with:`, {
+    console.log(`RegulationsTable rendering with:`, {
       regulationsCount: regulations.length,
       sortColumn,
       sortDirection,
@@ -39,11 +36,11 @@ export const RegulationsTable = ({
     
     // Log whether this table has any data
     if (regulations.length === 0) {
-      console.log(`RegulationsTable [${tableId}] has NO data to display`);
+      console.log(`RegulationsTable has NO data to display`);
     } else {
-      console.log(`RegulationsTable [${tableId}] has ${regulations.length} regulations to display`);
+      console.log(`RegulationsTable has ${regulations.length} regulations to display`);
     }
-  }, [regulations, sortColumn, sortDirection, tableId]);
+  }, [regulations, sortColumn, sortDirection]);
 
   if (regulations.length === 0) {
     return (
