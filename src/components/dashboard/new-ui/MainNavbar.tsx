@@ -93,7 +93,7 @@ export function MainNavbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
+    <header className="sticky top-0 z-40 border-b bg-white shadow-sm transition-all duration-200">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2">
