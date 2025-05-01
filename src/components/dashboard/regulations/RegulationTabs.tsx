@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
 import { Box, House, PanelsTopLeft } from "lucide-react";
-import { useId } from "react";
+import { useId, useEffect } from "react";
 
 interface RegulationTabsProps {
   currentView: ViewType;
@@ -41,24 +41,29 @@ export const RegulationTabs = ({
   const upcomingData = sortRegulations(upcomingRegulations);
   const tasksData = sortRegulations(tasksRegulations);
 
-  console.log("RegulationTabs rendering with", {
-    currentView,
-    activeDataLength: activeData.length,
-    upcomingDataLength: upcomingData.length,
-    tasksDataLength: tasksData.length
-  });
+  // Enhanced debugging to track tab changes and data state
+  useEffect(() => {
+    console.log("RegulationTabs currentView changed to:", currentView);
+    console.log("Data for current tab:", {
+      active: activeData.length,
+      upcoming: upcomingData.length,
+      tasks: tasksData.length,
+      currentView
+    });
+  }, [currentView, activeData, upcomingData, tasksData]);
 
-  // The handler for tab changes with improved logging
+  // The handler for tab changes
   const handleTabChange = (value: string) => {
     console.log("Tab change handler called with value:", value);
     onViewChange(value as ViewType);
   };
 
   return (
-    <Tabs
-      value={currentView}
-      onValueChange={handleTabChange}
+    <Tabs 
+      value={currentView} 
+      onValueChange={handleTabChange} 
       className="w-full mt-4"
+      defaultValue="active"
     >
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
@@ -102,9 +107,8 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <TabsContent value="active" key={`active-tab-${activeTableId}`}>
+      <TabsContent value="active">
         <RegulationsTable
-          key={`active-table-${activeTableId}`}
           regulations={activeData}
           sortColumn={sortColumn}
           sortDirection={sortDirection}
@@ -114,9 +118,8 @@ export const RegulationTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="upcoming" key={`upcoming-tab-${upcomingTableId}`}>
+      <TabsContent value="upcoming">
         <RegulationsTable
-          key={`upcoming-table-${upcomingTableId}`}
           regulations={upcomingData}
           sortColumn={sortColumn}
           sortDirection={sortDirection}
@@ -126,9 +129,8 @@ export const RegulationTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="tasks" key={`tasks-tab-${tasksTableId}`}>
+      <TabsContent value="tasks">
         <RegulationsTable
-          key={`tasks-table-${tasksTableId}`}
           regulations={tasksData}
           sortColumn={sortColumn}
           sortDirection={sortDirection}

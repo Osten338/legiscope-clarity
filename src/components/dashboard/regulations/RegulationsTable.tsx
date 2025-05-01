@@ -3,7 +3,7 @@ import { Table, TableBody } from "@/components/ui/table";
 import { RegulationTableHeader } from "./RegulationTableHeader";
 import { RegulationTableRow } from "./RegulationTableRow";
 import { RegulationListItem, SortColumn } from "../types";
-import { useEffect } from "react";
+import { useEffect, memo } from "react";
 
 interface RegulationsTableProps {
   regulations: RegulationListItem[];
@@ -11,37 +11,35 @@ interface RegulationsTableProps {
   sortDirection: "asc" | "desc";
   onSort: (column: SortColumn) => void;
   onRemoveRegulation: (id: string) => Promise<void>;
-  tableId?: string; // Added tableId prop
+  tableId?: string;
 }
 
-export const RegulationsTable = ({
+// Using memo to prevent unnecessary re-renders when parent components change
+export const RegulationsTable = memo(({
   regulations,
   sortColumn,
   sortDirection,
   onSort,
   onRemoveRegulation,
-  tableId = "default-table", // Default value for tableId
+  tableId = "default-table",
 }: RegulationsTableProps) => {
-  // Add detailed debug logging to help track rendering and data issues
+  // Enhanced debug logging to help track rendering and data issues
   useEffect(() => {
-    console.log(`RegulationsTable [${tableId}] rendering with:`, {
+    console.log(`RegulationsTable [${tableId}] mounted/updated with:`, {
       regulationsCount: regulations.length,
       sortColumn,
       sortDirection,
       regulationIds: regulations.slice(0, 3).map(r => r.id),
       firstRegulation: regulations.length > 0 ? {
         id: regulations[0].id,
-        name: regulations[0].regulations?.name,
-        status: regulations[0].status
+        name: regulations[0]?.regulations?.name,
+        status: regulations[0]?.status
       } : 'none'
     });
     
-    // Log whether this table has any data
-    if (regulations.length === 0) {
-      console.log(`RegulationsTable [${tableId}] has NO data to display`);
-    } else {
-      console.log(`RegulationsTable [${tableId}] has ${regulations.length} regulations to display`);
-    }
+    return () => {
+      console.log(`RegulationsTable [${tableId}] unmounting`);
+    };
   }, [regulations, sortColumn, sortDirection, tableId]);
 
   if (regulations.length === 0) {
@@ -72,4 +70,6 @@ export const RegulationsTable = ({
       </Table>
     </div>
   );
-};
+});
+
+RegulationsTable.displayName = 'RegulationsTable';

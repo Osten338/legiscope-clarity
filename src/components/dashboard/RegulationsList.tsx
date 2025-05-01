@@ -36,14 +36,15 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
     setCurrentView(view);
   };
 
-  // Log when regulations data changes or view changes
+  // Enhanced logging to track data and state changes
   useEffect(() => {
-    console.log("RegulationsList: Data updated", {
+    console.log("RegulationsList: Data or view updated", {
       totalRegulations: savedRegulations.length,
       filteredCount: searchFilteredRegulations.length,
       upcomingCount: upcomingRegulations.length,
       tasksCount: tasksRegulations.length,
-      currentView
+      currentView,
+      activeTabId: `${currentView}-tab`
     });
   }, [savedRegulations, searchFilteredRegulations, upcomingRegulations, tasksRegulations, currentView]);
 
