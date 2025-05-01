@@ -11,7 +11,7 @@ export function ChatInput({ className, ...props }: ChatInputProps) {
   return (
     <Textarea
       className={cn(
-        "w-full resize-none border-0 focus-visible:ring-0",
+        "w-full resize-none border-0 focus-visible:ring-0 bg-white/60 backdrop-blur-sm",
         className
       )}
       {...props}

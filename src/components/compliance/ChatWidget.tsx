@@ -144,7 +144,7 @@ export function ChatWidget() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question..."
-            className="min-h-10 rounded-md border bg-background p-2"
+            className="min-h-10 rounded-md border bg-white/60 backdrop-blur-sm p-2"
             disabled={isLoading}
           />
           <Button 
