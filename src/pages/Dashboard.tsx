@@ -4,9 +4,9 @@ import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { useDashboardData } from "@/components/dashboard/useDashboardData";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { StatusOverview } from "@/components/dashboard/StatusOverview";
-import { RegulationsList } from "@/components/dashboard/RegulationsList";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ComplianceChart } from "@/components/dashboard/ComplianceChart";
+import { UrgentTasksTable } from "@/components/dashboard/UrgentTasksTable";
 
 const Dashboard = () => {
   const { savedRegulations, isLoading, refetch } = useDashboardData();
@@ -53,7 +53,7 @@ const Dashboard = () => {
           </div>
           
           <div className="mt-8">
-            <RegulationsList savedRegulations={savedRegulations || []} />
+            <UrgentTasksTable savedRegulations={savedRegulations || []} />
           </div>
         </div>
       </div>
