@@ -26,13 +26,15 @@ interface RetrievedContext {
 interface FullScreenChatDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialMessages?: Message[];
 }
 
 export function FullScreenChatDialog({
   open,
   onOpenChange,
+  initialMessages = [],
 }: FullScreenChatDialogProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [retrievedContext, setRetrievedContext] = useState<RetrievedContext[]>([]);
@@ -56,6 +58,13 @@ export function FullScreenChatDialog({
       scrollElement.scrollTop = scrollElement.scrollHeight;
     }
   }, [messages]);
+
+  // Update messages if initialMessages changes
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages]);
 
   const formatMessageContent = (content: string) => {
     if (!content) return "";

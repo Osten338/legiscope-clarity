@@ -7,6 +7,7 @@ import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ComplianceChart } from "@/components/dashboard/ComplianceChart";
 import { UrgentTasksTable } from "@/components/dashboard/UrgentTasksTable";
+import { ChatWidget } from "@/components/compliance/ChatWidget";
 
 const Dashboard = () => {
   const { savedRegulations, isLoading, refetch } = useDashboardData();
@@ -56,6 +57,9 @@ const Dashboard = () => {
             <UrgentTasksTable savedRegulations={savedRegulations || []} />
           </div>
         </div>
+
+        {/* Chat Widget */}
+        <ChatWidget />
       </div>
     </TopbarLayout>
   );
