@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
 import { Box, House, PanelsTopLeft } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface RegulationTabsProps {
   currentView: ViewType;
@@ -31,25 +31,33 @@ export const RegulationTabs = ({
   onRemoveRegulation,
   sortRegulations,
 }: RegulationTabsProps) => {
-  // Log when tab component renders or gets new props
-  useEffect(() => {
-    console.log("RegulationTabs rendered with currentView:", currentView);
-    console.log("Regulations counts:", {
-      active: searchFilteredRegulations.length,
-      upcoming: upcomingRegulations.length, 
-      tasks: tasksRegulations.length
-    });
-  }, [currentView, searchFilteredRegulations, upcomingRegulations, tasksRegulations]);
+  // Create state to trigger re-renders when tab changes
+  const [activeView, setActiveView] = useState<ViewType>(currentView);
 
   // Prepare the data to display for each tab
   const activeData = sortRegulations(searchFilteredRegulations);
   const upcomingData = sortRegulations(upcomingRegulations);
   const tasksData = sortRegulations(tasksRegulations);
 
+  // Log when tab component renders or gets new data
+  useEffect(() => {
+    console.log("RegulationTabs rendered with currentView:", currentView);
+    console.log("Regulations counts:", {
+      active: activeData.length,
+      upcoming: upcomingData.length, 
+      tasks: tasksData.length
+    });
+    
+    // Update local state to match prop
+    setActiveView(currentView);
+  }, [currentView, activeData.length, upcomingData.length, tasksData.length]);
+
   // The handler for tab changes
   const handleTabChange = (value: string) => {
     console.log("Tab change requested to:", value);
-    onViewChange(value as ViewType);
+    const newView = value as ViewType;
+    setActiveView(newView);
+    onViewChange(newView);
   };
 
   return (
@@ -100,41 +108,37 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* Each TabsContent is always mounted but only the active one is visible */}
-      <TabsContent value="active">
-        <div className="mt-2">
-          <RegulationsTable
-            regulations={activeData}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={onSort}
-            onRemoveRegulation={onRemoveRegulation}
-          />
-        </div>
+      <TabsContent value="active" className="mt-2 data-[state=active]:block data-[state=inactive]:hidden">
+        <RegulationsTable
+          key={`active-table-${activeData.length}`}
+          regulations={activeData}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onRemoveRegulation={onRemoveRegulation}
+        />
       </TabsContent>
 
-      <TabsContent value="upcoming">
-        <div className="mt-2">
-          <RegulationsTable
-            regulations={upcomingData}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={onSort}
-            onRemoveRegulation={onRemoveRegulation}
-          />
-        </div>
+      <TabsContent value="upcoming" className="mt-2 data-[state=active]:block data-[state=inactive]:hidden">
+        <RegulationsTable
+          key={`upcoming-table-${upcomingData.length}`}
+          regulations={upcomingData}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onRemoveRegulation={onRemoveRegulation}
+        />
       </TabsContent>
 
-      <TabsContent value="tasks">
-        <div className="mt-2">
-          <RegulationsTable
-            regulations={tasksData}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={onSort}
-            onRemoveRegulation={onRemoveRegulation}
-          />
-        </div>
+      <TabsContent value="tasks" className="mt-2 data-[state=active]:block data-[state=inactive]:hidden">
+        <RegulationsTable
+          key={`tasks-table-${tasksData.length}`}
+          regulations={tasksData}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onRemoveRegulation={onRemoveRegulation}
+        />
       </TabsContent>
     </Tabs>
   );

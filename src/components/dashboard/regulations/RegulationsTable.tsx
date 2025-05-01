@@ -20,7 +20,7 @@ export const RegulationsTable = ({
   onSort,
   onRemoveRegulation,
 }: RegulationsTableProps) => {
-  // Generate a unique ID for this table instance for debugging
+  // Generate a unique ID for this table instance
   const tableId = useId();
 
   // Add detailed debug logging to help track rendering and data issues
@@ -29,12 +29,20 @@ export const RegulationsTable = ({
       regulationsCount: regulations.length,
       sortColumn,
       sortDirection,
+      regulationIds: regulations.slice(0, 3).map(r => r.id),
       firstRegulation: regulations.length > 0 ? {
         id: regulations[0].id,
         name: regulations[0].regulations?.name,
         status: regulations[0].status
       } : 'none'
     });
+    
+    // Log whether this table has any data
+    if (regulations.length === 0) {
+      console.log(`RegulationsTable [${tableId}] has NO data to display`);
+    } else {
+      console.log(`RegulationsTable [${tableId}] has ${regulations.length} regulations to display`);
+    }
   }, [regulations, sortColumn, sortDirection, tableId]);
 
   if (regulations.length === 0) {
@@ -46,21 +54,23 @@ export const RegulationsTable = ({
   }
 
   return (
-    <Table>
-      <RegulationTableHeader
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
-        onSort={onSort}
-      />
-      <TableBody>
-        {regulations.map((regulation) => (
-          <RegulationTableRow
-            key={regulation.id}
-            regulation={regulation}
-            onRemoveRegulation={onRemoveRegulation}
-          />
-        ))}
-      </TableBody>
-    </Table>
+    <div className="w-full overflow-auto">
+      <Table>
+        <RegulationTableHeader
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+        />
+        <TableBody>
+          {regulations.map((regulation) => (
+            <RegulationTableRow
+              key={regulation.id}
+              regulation={regulation}
+              onRemoveRegulation={onRemoveRegulation}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
