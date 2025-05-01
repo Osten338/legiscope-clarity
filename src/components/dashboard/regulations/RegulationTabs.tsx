@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
 import { Box, House, PanelsTopLeft } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface RegulationTabsProps {
   currentView: ViewType;
@@ -30,13 +31,26 @@ export const RegulationTabs = ({
   onRemoveRegulation,
   sortRegulations,
 }: RegulationTabsProps) => {
+  // Local state to ensure proper tab synchronization
+  const [activeTab, setActiveTab] = useState<ViewType>(currentView);
+  
+  // Ensure local state stays in sync with props
+  useEffect(() => {
+    setActiveTab(currentView);
+  }, [currentView]);
+
+  // Handler that updates both local state and calls the parent handler
+  const handleTabChange = (value: string) => {
+    console.log("Tab change triggered:", value);
+    const newView = value as ViewType;
+    setActiveTab(newView);
+    onViewChange(newView);
+  };
+
   return (
     <Tabs
-      value={currentView}
-      onValueChange={(value) => {
-        console.log("Tab change triggered:", value);
-        onViewChange(value as ViewType);
-      }}
+      value={activeTab}
+      onValueChange={handleTabChange}
       className="w-full mt-4"
     >
       <ScrollArea>
@@ -81,7 +95,7 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <TabsContent value="active">
+      <TabsContent value="active" className="mt-2 data-[state=active]:block data-[state=inactive]:hidden">
         <RegulationsTable
           regulations={sortRegulations(searchFilteredRegulations)}
           sortColumn={sortColumn}
@@ -91,7 +105,7 @@ export const RegulationTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="upcoming">
+      <TabsContent value="upcoming" className="mt-2 data-[state=active]:block data-[state=inactive]:hidden">
         <RegulationsTable
           regulations={sortRegulations(upcomingRegulations)}
           sortColumn={sortColumn}
@@ -101,7 +115,7 @@ export const RegulationTabs = ({
         />
       </TabsContent>
 
-      <TabsContent value="tasks">
+      <TabsContent value="tasks" className="mt-2 data-[state=active]:block data-[state=inactive]:hidden">
         <RegulationsTable
           regulations={sortRegulations(tasksRegulations)}
           sortColumn={sortColumn}
