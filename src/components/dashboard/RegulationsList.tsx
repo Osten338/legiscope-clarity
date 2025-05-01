@@ -39,12 +39,15 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
   // Enhanced logging to track data and state changes
   useEffect(() => {
     console.log("RegulationsList: Data or view updated", {
-      totalRegulations: savedRegulations.length,
-      filteredCount: searchFilteredRegulations.length,
-      upcomingCount: upcomingRegulations.length,
-      tasksCount: tasksRegulations.length,
+      totalRegulations: savedRegulations?.length || 0,
+      filteredCount: searchFilteredRegulations?.length || 0,
+      upcomingCount: upcomingRegulations?.length || 0,
+      tasksCount: tasksRegulations?.length || 0,
       currentView,
-      activeTabId: `${currentView}-tab`
+      activeTabId: `${currentView}-tab`,
+      firstFilteredItem: searchFilteredRegulations?.[0]?.regulations?.name || "none",
+      firstUpcomingItem: upcomingRegulations?.[0]?.regulations?.name || "none",
+      firstTasksItem: tasksRegulations?.[0]?.regulations?.name || "none"
     });
   }, [savedRegulations, searchFilteredRegulations, upcomingRegulations, tasksRegulations, currentView]);
 

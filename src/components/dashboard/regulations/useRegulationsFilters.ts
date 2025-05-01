@@ -7,9 +7,15 @@ export const useRegulationsFilters = (savedRegulations: RegulationListItem[]) =>
   const [sortColumn, setSortColumn] = useState<SortColumn>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Enhanced searching with better logging
+  // Enhanced searching with better logging and null checks
   const searchFilteredRegulations = useMemo(() => {
-    console.log("Applying search filter:", searchTerm, "to", savedRegulations.length, "regulations");
+    console.log("Applying search filter:", searchTerm, "to", savedRegulations?.length || 0, "regulations");
+    
+    // Ensure savedRegulations is valid
+    if (!savedRegulations || !Array.isArray(savedRegulations)) {
+      console.warn("savedRegulations is not a valid array:", savedRegulations);
+      return [];
+    }
     
     if (!searchTerm.trim()) {
       return savedRegulations;
@@ -17,46 +23,60 @@ export const useRegulationsFilters = (savedRegulations: RegulationListItem[]) =>
     
     const lowercaseSearchTerm = searchTerm.toLowerCase();
     const filtered = savedRegulations.filter(
-      (regulation) =>
-        regulation.regulations.name
-          .toLowerCase()
-          .includes(lowercaseSearchTerm) ||
-        regulation.regulations.description
-          .toLowerCase()
-          .includes(lowercaseSearchTerm)
+      (regulation) => {
+        // Add null checks
+        const name = regulation?.regulations?.name || "";
+        const description = regulation?.regulations?.description || "";
+        
+        return name.toLowerCase().includes(lowercaseSearchTerm) ||
+               description.toLowerCase().includes(lowercaseSearchTerm);
+      }
     );
     
     console.log(`Search filter found ${filtered.length} matches for "${searchTerm}"`);
     return filtered;
   }, [savedRegulations, searchTerm]);
 
-  // Enhanced upcoming regulation filter with better date handling
+  // Enhanced upcoming regulation filter with better date handling and null checks
   const upcomingRegulations = useMemo(() => {
-    console.log("Filtering for upcoming reviews from", searchFilteredRegulations.length, "regulations");
+    console.log("Filtering for upcoming reviews from", searchFilteredRegulations?.length || 0, "regulations");
+    
+    if (!searchFilteredRegulations || !Array.isArray(searchFilteredRegulations)) {
+      return [];
+    }
     
     const now = new Date();
     const filtered = searchFilteredRegulations.filter((reg) => {
-      if (!reg.next_review_date) {
+      if (!reg?.next_review_date) {
         return false;
       }
       
-      const reviewDate = new Date(reg.next_review_date);
-      const isValidDate = !isNaN(reviewDate.getTime());
-      const isUpcoming = isValidDate && reviewDate > now;
-      
-      return isUpcoming;
+      try {
+        const reviewDate = new Date(reg.next_review_date);
+        const isValidDate = !isNaN(reviewDate.getTime());
+        const isUpcoming = isValidDate && reviewDate > now;
+        
+        return isUpcoming;
+      } catch (e) {
+        console.error("Error processing date:", reg.next_review_date, e);
+        return false;
+      }
     });
     
     console.log(`Found ${filtered.length} upcoming reviews`);
     return filtered;
   }, [searchFilteredRegulations]);
 
-  // Enhanced tasks filter with better progress handling
+  // Enhanced tasks filter with better progress handling and null checks
   const tasksRegulations = useMemo(() => {
-    console.log("Filtering for incomplete tasks from", searchFilteredRegulations.length, "regulations");
+    console.log("Filtering for incomplete tasks from", searchFilteredRegulations?.length || 0, "regulations");
+    
+    if (!searchFilteredRegulations || !Array.isArray(searchFilteredRegulations)) {
+      return [];
+    }
     
     const filtered = searchFilteredRegulations.filter((reg) => {
-      const hasProgress = typeof reg.progress === "number";
+      const hasProgress = typeof reg?.progress === "number";
       const isIncomplete = hasProgress && reg.progress < 100;
       return isIncomplete;
     });
@@ -65,9 +85,9 @@ export const useRegulationsFilters = (savedRegulations: RegulationListItem[]) =>
     return filtered;
   }, [searchFilteredRegulations]);
 
-  // Enhanced sorting with better error handling
+  // Enhanced sorting with better error handling and null checks
   const sortRegulations = (regulations: RegulationListItem[]) => {
-    if (!regulations || regulations.length === 0) {
+    if (!regulations || !Array.isArray(regulations) || regulations.length === 0) {
       return [];
     }
     
@@ -79,24 +99,24 @@ export const useRegulationsFilters = (savedRegulations: RegulationListItem[]) =>
       try {
         switch (sortColumn) {
           case "name":
-            valueA = a.regulations?.name || "";
-            valueB = b.regulations?.name || "";
+            valueA = a?.regulations?.name || "";
+            valueB = b?.regulations?.name || "";
             break;
           case "description":
-            valueA = a.regulations?.description || "";
-            valueB = b.regulations?.description || "";
+            valueA = a?.regulations?.description || "";
+            valueB = b?.regulations?.description || "";
             break;
           case "status":
-            valueA = a.status || "";
-            valueB = b.status || "";
+            valueA = a?.status || "";
+            valueB = b?.status || "";
             break;
           case "progress":
-            valueA = typeof a.progress === "number" ? a.progress : 0;
-            valueB = typeof b.progress === "number" ? b.progress : 0;
+            valueA = typeof a?.progress === "number" ? a.progress : 0;
+            valueB = typeof b?.progress === "number" ? b.progress : 0;
             break;
           case "next_review_date":
-            valueA = a.next_review_date || "";
-            valueB = b.next_review_date || "";
+            valueA = a?.next_review_date || "";
+            valueB = b?.next_review_date || "";
             break;
           default:
             return 0;

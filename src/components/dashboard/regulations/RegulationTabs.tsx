@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
 import { Box, House, PanelsTopLeft } from "lucide-react";
-import { useId, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 interface RegulationTabsProps {
   currentView: ViewType;
@@ -31,24 +31,29 @@ export const RegulationTabs = ({
   onRemoveRegulation,
   sortRegulations,
 }: RegulationTabsProps) => {
-  // Generate unique IDs for each table to ensure proper re-rendering
-  const activeTableId = useId();
-  const upcomingTableId = useId();
-  const tasksTableId = useId();
+  // Prepare the data to display for each tab - move inside component to ensure fresh reference
+  const [activeData, setActiveData] = useState<RegulationListItem[]>([]);
+  const [upcomingData, setUpcomingData] = useState<RegulationListItem[]>([]);
+  const [tasksData, setTasksData] = useState<RegulationListItem[]>([]);
   
-  // Prepare the data to display for each tab
-  const activeData = sortRegulations(searchFilteredRegulations);
-  const upcomingData = sortRegulations(upcomingRegulations);
-  const tasksData = sortRegulations(tasksRegulations);
+  // Update the data whenever the props change
+  useEffect(() => {
+    console.log("Updating tab data based on new props");
+    setActiveData(sortRegulations(searchFilteredRegulations));
+    setUpcomingData(sortRegulations(upcomingRegulations));
+    setTasksData(sortRegulations(tasksRegulations));
+  }, [searchFilteredRegulations, upcomingRegulations, tasksRegulations, sortColumn, sortDirection, sortRegulations]);
 
   // Enhanced debugging to track tab changes and data state
   useEffect(() => {
-    console.log("RegulationTabs currentView changed to:", currentView);
-    console.log("Data for current tab:", {
-      active: activeData.length,
-      upcoming: upcomingData.length,
-      tasks: tasksData.length,
-      currentView
+    console.log("RegulationTabs: View or data changed:", {
+      currentView,
+      activeDataLength: activeData.length,
+      upcomingDataLength: upcomingData.length,
+      tasksDataLength: tasksData.length,
+      firstActiveItem: activeData[0]?.regulations?.name || "none",
+      firstUpcomingItem: upcomingData[0]?.regulations?.name || "none",
+      firstTasksItem: tasksData[0]?.regulations?.name || "none"
     });
   }, [currentView, activeData, upcomingData, tasksData]);
 
@@ -107,37 +112,44 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
+      {/* We're conditionally rendering the tables directly inside the TabsContent based on currentView */}
       <TabsContent value="active">
-        <RegulationsTable
-          regulations={activeData}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={onSort}
-          onRemoveRegulation={onRemoveRegulation}
-          tableId="active-regulations"
-        />
+        {currentView === "active" && (
+          <RegulationsTable
+            regulations={activeData}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRemoveRegulation={onRemoveRegulation}
+            tableId="active-regulations"
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="upcoming">
-        <RegulationsTable
-          regulations={upcomingData}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={onSort}
-          onRemoveRegulation={onRemoveRegulation}
-          tableId="upcoming-regulations"
-        />
+        {currentView === "upcoming" && (
+          <RegulationsTable
+            regulations={upcomingData}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRemoveRegulation={onRemoveRegulation}
+            tableId="upcoming-regulations"
+          />
+        )}
       </TabsContent>
 
       <TabsContent value="tasks">
-        <RegulationsTable
-          regulations={tasksData}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={onSort}
-          onRemoveRegulation={onRemoveRegulation}
-          tableId="tasks-regulations"
-        />
+        {currentView === "tasks" && (
+          <RegulationsTable
+            regulations={tasksData}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={onSort}
+            onRemoveRegulation={onRemoveRegulation}
+            tableId="tasks-regulations"
+          />
+        )}
       </TabsContent>
     </Tabs>
   );

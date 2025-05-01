@@ -3,7 +3,7 @@ import { Table, TableBody } from "@/components/ui/table";
 import { RegulationTableHeader } from "./RegulationTableHeader";
 import { RegulationTableRow } from "./RegulationTableRow";
 import { RegulationListItem, SortColumn } from "../types";
-import { useEffect, memo } from "react";
+import { useEffect, memo, useMemo } from "react";
 
 interface RegulationsTableProps {
   regulations: RegulationListItem[];
@@ -25,15 +25,15 @@ export const RegulationsTable = memo(({
 }: RegulationsTableProps) => {
   // Enhanced debug logging to help track rendering and data issues
   useEffect(() => {
-    console.log(`RegulationsTable [${tableId}] mounted/updated with:`, {
+    console.log(`RegulationsTable [${tableId}] rendered with:`, {
       regulationsCount: regulations.length,
       sortColumn,
       sortDirection,
       regulationIds: regulations.slice(0, 3).map(r => r.id),
       firstRegulation: regulations.length > 0 ? {
-        id: regulations[0].id,
-        name: regulations[0]?.regulations?.name,
-        status: regulations[0]?.status
+        id: regulations[0]?.id,
+        name: regulations[0]?.regulations?.name || "undefined",
+        status: regulations[0]?.status || "undefined"
       } : 'none'
     });
     
@@ -42,7 +42,18 @@ export const RegulationsTable = memo(({
     };
   }, [regulations, sortColumn, sortDirection, tableId]);
 
-  if (regulations.length === 0) {
+  // Use useMemo to memoize the rows to prevent unnecessary re-renders
+  const regulationRows = useMemo(() => {
+    return regulations.map((regulation) => (
+      <RegulationTableRow
+        key={`${regulation.id}-${tableId}`}
+        regulation={regulation}
+        onRemoveRegulation={onRemoveRegulation}
+      />
+    ));
+  }, [regulations, onRemoveRegulation, tableId]);
+
+  if (!regulations || regulations.length === 0) {
     return (
       <div className="py-6 text-center text-muted-foreground" data-table-id={tableId}>
         No regulations found
@@ -59,13 +70,7 @@ export const RegulationsTable = memo(({
           onSort={onSort}
         />
         <TableBody>
-          {regulations.map((regulation) => (
-            <RegulationTableRow
-              key={regulation.id}
-              regulation={regulation}
-              onRemoveRegulation={onRemoveRegulation}
-            />
-          ))}
+          {regulationRows}
         </TableBody>
       </Table>
     </div>
