@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
->(({ className, value, onValueChange, defaultValue, ...props }, ref) => {
+>(({ className, value, defaultValue, onValueChange, ...props }, ref) => {
   // Add debugging to track tab value changes
   React.useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
@@ -17,7 +17,7 @@ const Tabs = React.forwardRef<
     }
   }, [value]);
 
-  // Handle value changes with logging
+  // Simplified handler without preventDefault - let Radix handle the native behavior
   const handleValueChange = React.useCallback(
     (newValue: string) => {
       console.log("Tabs onValueChange called with:", newValue);
@@ -56,26 +56,17 @@ const TabsList = React.forwardRef<
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
-// Enhanced TabsTrigger with logging and preventDefault
+// Simplified TabsTrigger without custom click handling
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, value, children, ...props }, ref) => {
-  // Fix the type error by explicitly typing the event parameter
-  const handleClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    // Add preventDefault to stop any potential unexpected behavior
-    event.preventDefault();
-    event.stopPropagation();
-    
+  // Debug log when component renders
+  React.useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`TabsTrigger clicked: ${value}`);
+      console.log(`TabsTrigger rendered with value: ${value}`);
     }
-    
-    // Original onClick if provided
-    if (props.onClick) {
-      props.onClick(event);
-    }
-  }, [value, props.onClick]);
+  }, [value]);
   
   return (
     <TabsPrimitive.Trigger
@@ -85,7 +76,6 @@ const TabsTrigger = React.forwardRef<
         "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium outline-offset-2 transition-all hover:text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:shadow-black/5",
         className,
       )}
-      onClick={handleClick}
       {...props}
     >
       {children}
