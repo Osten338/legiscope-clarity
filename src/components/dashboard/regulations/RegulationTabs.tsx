@@ -112,44 +112,38 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* We're conditionally rendering the tables directly inside the TabsContent based on currentView */}
+      {/* Remove the conditional rendering here to let the TabsContent handle it */}
       <TabsContent value="active">
-        {currentView === "active" && (
-          <RegulationsTable
-            regulations={activeData}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={onSort}
-            onRemoveRegulation={onRemoveRegulation}
-            tableId="active-regulations"
-          />
-        )}
+        <RegulationsTable
+          regulations={activeData}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onRemoveRegulation={onRemoveRegulation}
+          tableId="active-regulations"
+        />
       </TabsContent>
 
       <TabsContent value="upcoming">
-        {currentView === "upcoming" && (
-          <RegulationsTable
-            regulations={upcomingData}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={onSort}
-            onRemoveRegulation={onRemoveRegulation}
-            tableId="upcoming-regulations"
-          />
-        )}
+        <RegulationsTable
+          regulations={upcomingData}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onRemoveRegulation={onRemoveRegulation}
+          tableId="upcoming-regulations"
+        />
       </TabsContent>
 
       <TabsContent value="tasks">
-        {currentView === "tasks" && (
-          <RegulationsTable
-            regulations={tasksData}
-            sortColumn={sortColumn}
-            sortDirection={sortDirection}
-            onSort={onSort}
-            onRemoveRegulation={onRemoveRegulation}
-            tableId="tasks-regulations"
-          />
-        )}
+        <RegulationsTable
+          regulations={tasksData}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={onSort}
+          onRemoveRegulation={onRemoveRegulation}
+          tableId="tasks-regulations"
+        />
       </TabsContent>
     </Tabs>
   );

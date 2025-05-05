@@ -158,11 +158,11 @@ const ComplianceChecklist = () => {
             <CardTitle>Compliance Checklist</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue={activeTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="mb-4">
-                <TabsTrigger value="overview" onClick={() => setActiveTab("overview")}>Overview</TabsTrigger>
+                <TabsTrigger value="overview">Overview</TabsTrigger>
                 {regulations?.map((regulation) => (
-                  <TabsTrigger key={regulation.id} value={regulation.id} onClick={() => setActiveTab(regulation.id)}>
+                  <TabsTrigger key={regulation.id} value={regulation.id}>
                     {regulation.name}
                   </TabsTrigger>
                 ))}
