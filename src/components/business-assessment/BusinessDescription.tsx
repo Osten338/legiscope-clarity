@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "../ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -134,18 +133,17 @@ export const BusinessDescription = () => {
   };
 
   return (
-    <section className="py-16 px-4">
+    <div className="space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto"
       >
         <motion.span
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="px-4 py-1.5 text-sm font-medium bg-white/80 text-neutral-800 rounded-full inline-block mb-6 backdrop-blur-sm"
+          className="px-4 py-1.5 text-sm font-medium bg-primary/10 text-primary rounded-full inline-block mb-6"
         >
           Comprehensive Compliance Assessment
         </motion.span>
@@ -154,7 +152,7 @@ export const BusinessDescription = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-4xl md:text-5xl font-serif font-normal mb-8 text-neutral-900 tracking-tight"
+          className="text-3xl font-semibold mb-6 text-gray-900"
         >
           Tell Us About Your Business
         </motion.h2>
@@ -163,13 +161,13 @@ export const BusinessDescription = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-neutral-900 text-lg md:text-xl mb-10 leading-relaxed"
+          className="text-gray-600 text-lg mb-8"
         >
           Provide details about your business for a thorough compliance analysis. The more information you share, the more accurate our assessment will be.
         </motion.p>
 
-        <Card className="backdrop-blur-sm border-white/40 shadow-lg transition-all duration-300 p-8 bg-white/[0.84]">
-          <div className="space-y-6">
+        <Card className="border border-gray-200 shadow-md">
+          <div className="p-6 space-y-6">
             <AnalysisInfoAlert />
 
             <BusinessDescriptionForm 
@@ -188,6 +186,6 @@ export const BusinessDescription = () => {
           </div>
         </Card>
       </motion.div>
-    </section>
+    </div>
   );
 };
