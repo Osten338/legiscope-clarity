@@ -61,7 +61,8 @@ const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, value, children, ...props }, ref) => {
-  const handleClick = React.useCallback((event: React.MouseEvent) => {
+  // Fix the type error by explicitly typing the event parameter
+  const handleClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     // Add preventDefault to stop any potential unexpected behavior
     event.preventDefault();
     event.stopPropagation();
