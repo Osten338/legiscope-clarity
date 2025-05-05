@@ -42,7 +42,7 @@ export const StatusOverview = ({ savedRegulations }: StatusOverviewProps) => {
         return (
           <Card 
             key={card.id} 
-            className="h-[150px] overflow-hidden border shadow-sm hover:shadow-md transition-shadow duration-300"
+            className="h-[200px] overflow-hidden border shadow-sm hover:shadow-md transition-shadow duration-300"
           >
             <StatusCard {...card} count={count} />
           </Card>

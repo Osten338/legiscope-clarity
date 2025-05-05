@@ -53,14 +53,14 @@ export const UrgentTasksTable = ({ savedRegulations }: UrgentTasksTableProps) =>
   };
 
   return (
-    <Card className="border shadow-sm">
-      <CardHeader className="pb-3">
+    <Card className="border shadow-md hover:shadow-lg transition-shadow duration-300">
+      <CardHeader className="pb-4">
         <div className="flex items-center space-x-2">
           <Clock className="h-5 w-5 text-amber-500" />
           <CardTitle className="text-xl font-semibold">Urgent Tasks</CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pb-6">
         {urgentTasks.length > 0 ? (
           <Table>
             <TableHeader>
@@ -78,7 +78,7 @@ export const UrgentTasksTable = ({ savedRegulations }: UrgentTasksTableProps) =>
                   : 0;
                 
                 return (
-                  <TableRow key={task.id}>
+                  <TableRow key={task.id} className="py-2">
                     <TableCell className="font-medium">
                       {task.regulations?.name}
                     </TableCell>
@@ -100,7 +100,7 @@ export const UrgentTasksTable = ({ savedRegulations }: UrgentTasksTableProps) =>
             </TableBody>
           </Table>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="flex flex-col items-center justify-center py-10 text-center">
             <AlertTriangle className="h-12 w-12 text-muted-foreground mb-3" />
             <h3 className="text-lg font-semibold">No urgent tasks found</h3>
             <p className="text-muted-foreground mt-1">
