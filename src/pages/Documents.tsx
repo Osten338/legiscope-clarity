@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { DocumentsHeader } from "@/components/documents/DocumentsHeader";
@@ -19,13 +19,8 @@ const Documents = () => {
     setUploadDialogOpen(true);
   }, []);
 
-  // Debug component lifecycle
-  useEffect(() => {
-    console.log("Documents page mounted");
-    return () => {
-      console.log("Documents page unmounted");
-    };
-  }, []);
+  // For debugging
+  console.log("Documents page rendering");
 
   return (
     <TopbarLayout>

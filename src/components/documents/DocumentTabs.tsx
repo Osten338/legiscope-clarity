@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DocumentsTable } from "./DocumentsTable";
@@ -27,35 +27,35 @@ export const DocumentTabs = ({
   onReview,
   onDelete,
 }: DocumentTabsProps) => {
-  // Add debugging to track component lifecycle
+  // Add debugging to track tab changes and document data
   useEffect(() => {
-    console.log("DocumentTabs: Mounted with view:", currentView);
-    
-    return () => {
-      console.log("DocumentTabs: Unmounting");
-    };
-  }, []);
+    console.log("DocumentTabs: View or documents changed:", {
+      currentView,
+      documentsCount: documents.length,
+    });
+  }, [currentView, documents]);
 
-  // Add debugging to track view changes
-  useEffect(() => {
-    console.log("DocumentTabs: View changed to:", currentView);
-  }, [currentView]);
-
-  const handleValueChange = (value: string) => {
-    console.log("DocumentTabs: Tab value changing to:", value);
+  // Use useCallback to maintain the same function reference
+  const handleTabChange = useCallback((value: string) => {
+    console.log("DocumentTabs: Tab change handler called with value:", value);
+    // Prevent default to avoid any potential navigation
     onViewChange(value as DocumentViewType);
-  };
+  }, [onViewChange]);
 
   // Prepare filtered documents upfront
   const allDocuments = documents;
   const policyDocuments = documents.filter(doc => doc.document_type === 'Policy');
   const procedureDocuments = documents.filter(doc => doc.document_type === 'Procedure');
+
+  // Debug log when component renders
+  console.log("DocumentTabs rendering with currentView:", currentView);
   
   return (
     <Tabs 
       value={currentView} 
-      onValueChange={handleValueChange} 
+      onValueChange={handleTabChange} 
       className="w-full"
+      defaultValue="all" // Provide a default but it should use the controlled value
     >
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">

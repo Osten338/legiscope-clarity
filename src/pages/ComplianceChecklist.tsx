@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
@@ -122,24 +123,19 @@ const ComplianceChecklist = () => {
     }
   }, [userId, refetch]);
 
-  // Debug component lifecycle
-  useEffect(() => {
-    console.log("ComplianceChecklist: Mounted with tab:", activeTab);
-    
-    return () => {
-      console.log("ComplianceChecklist: Unmounting");
-    };
-  }, []);
-
   // Debug tab changes
   useEffect(() => {
-    console.log("ComplianceChecklist: Tab changed to:", activeTab);
+    console.log("ComplianceChecklist: Active tab changed to:", activeTab);
   }, [activeTab]);
 
-  const handleValueChange = (value: string) => {
-    console.log("ComplianceChecklist: Tab value changing to:", value);
+  // Use a stable reference with useCallback
+  const handleTabChange = useCallback((value: string) => {
+    console.log("ComplianceChecklist: Tab change handler called with value:", value);
     setActiveTab(value);
-  };
+  }, []);
+
+  // Debug component rendering
+  console.log("ComplianceChecklist rendering with activeTab:", activeTab);
 
   if (isLoading) {
     return (
@@ -178,8 +174,9 @@ const ComplianceChecklist = () => {
           <CardContent>
             <Tabs 
               value={activeTab} 
-              onValueChange={handleValueChange} 
+              onValueChange={handleTabChange} 
               className="w-full"
+              defaultValue="overview" // Add a default but use controlled value
             >
               <TabsList className="mb-4">
                 <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
@@ -205,7 +202,7 @@ const ComplianceChecklist = () => {
                             <div 
                               key={reg.id} 
                               className="border rounded-lg p-4 hover:bg-slate-50 cursor-pointer"
-                              onClick={() => handleValueChange(reg.id)}
+                              onClick={() => handleTabChange(reg.id)}
                             >
                               <h3 className="font-medium text-lg">{reg.name}</h3>
                               <p className="text-slate-600 mt-2 text-sm">{reg.description}</p>

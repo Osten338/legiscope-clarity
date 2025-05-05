@@ -10,26 +10,21 @@ import { DisplaySettings } from "@/components/settings/DisplaySettings";
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("account");
 
-  const handleTabChange = (value: string) => {
-    console.log("Settings: Tab changed to", value);
-    setActiveTab(value);
-  };
-
   return (
     <TopbarLayout>
       <div className="container mx-auto px-6 md:px-8 lg:px-10 py-8 max-w-7xl">
         <h1 className="text-2xl font-semibold mb-6">Settings</h1>
 
         <Card className="w-full">
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <Tabs defaultValue={activeTab} className="w-full">
             <TabsList className="p-4">
-              <TabsTrigger value="account">
+              <TabsTrigger value="account" onClick={() => setActiveTab("account")}>
                 Account
               </TabsTrigger>
-              <TabsTrigger value="notifications">
+              <TabsTrigger value="notifications" onClick={() => setActiveTab("notifications")}>
                 Notifications
               </TabsTrigger>
-              <TabsTrigger value="display">
+              <TabsTrigger value="display" onClick={() => setActiveTab("display")}>
                 Display
               </TabsTrigger>
             </TabsList>
