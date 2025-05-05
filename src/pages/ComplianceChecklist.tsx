@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
@@ -107,7 +107,7 @@ const ComplianceChecklist = () => {
         );
 
         console.log("Fetched regulations with items:", regulationsWithItems);
-        return regulationsWithItems as RegulationType[];
+        return regulationsWithItems;
       } catch (error) {
         console.error("Error in query function:", error);
         throw error;
@@ -128,10 +128,11 @@ const ComplianceChecklist = () => {
     console.log("ComplianceChecklist: Active tab changed to:", activeTab);
   }, [activeTab]);
 
-  const handleTabChange = (value: string) => {
+  // Use a stable reference with useCallback
+  const handleTabChange = useCallback((value: string) => {
     console.log("ComplianceChecklist: Tab change handler called with value:", value);
     setActiveTab(value);
-  };
+  }, []);
 
   // Debug component rendering
   console.log("ComplianceChecklist rendering with activeTab:", activeTab);
@@ -175,11 +176,16 @@ const ComplianceChecklist = () => {
               value={activeTab} 
               onValueChange={handleTabChange} 
               className="w-full"
+              defaultValue="overview" // Add a default but use controlled value
             >
               <TabsList className="mb-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
                 {regulations?.map((regulation) => (
-                  <TabsTrigger key={regulation.id} value={regulation.id}>
+                  <TabsTrigger 
+                    key={regulation.id} 
+                    value={regulation.id}
+                    data-testid={`tab-regulation-${regulation.id}`}
+                  >
                     {regulation.name}
                   </TabsTrigger>
                 ))}

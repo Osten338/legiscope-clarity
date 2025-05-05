@@ -1,10 +1,10 @@
 
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
 import { Box, House, PanelsTopLeft } from "lucide-react";
-import { useState, useEffect } from "react";
 
 interface RegulationTabsProps {
   currentView: ViewType;
@@ -31,37 +31,38 @@ export const RegulationTabs = ({
   onRemoveRegulation,
   sortRegulations,
 }: RegulationTabsProps) => {
-  // Prepare the data to display for each tab - move inside component to ensure fresh reference
-  const [activeData, setActiveData] = useState<RegulationListItem[]>([]);
-  const [upcomingData, setUpcomingData] = useState<RegulationListItem[]>([]);
-  const [tasksData, setTasksData] = useState<RegulationListItem[]>([]);
-  
-  // Update the data whenever the props change
-  useEffect(() => {
-    console.log("Updating tab data based on new props");
-    setActiveData(sortRegulations(searchFilteredRegulations));
-    setUpcomingData(sortRegulations(upcomingRegulations));
-    setTasksData(sortRegulations(tasksRegulations));
-  }, [searchFilteredRegulations, upcomingRegulations, tasksRegulations, sortColumn, sortDirection, sortRegulations]);
-
   // Enhanced debugging to track tab changes and data state
   useEffect(() => {
-    console.log("RegulationTabs: View or data changed:", {
-      currentView,
-      activeDataLength: activeData.length,
-      upcomingDataLength: upcomingData.length,
-      tasksDataLength: tasksData.length,
-      firstActiveItem: activeData[0]?.regulations?.name || "none",
-      firstUpcomingItem: upcomingData[0]?.regulations?.name || "none",
-      firstTasksItem: tasksData[0]?.regulations?.name || "none"
+    console.log("RegulationTabs: Current view:", currentView);
+    console.log("RegulationTabs data counts:", {
+      active: searchFilteredRegulations.length,
+      upcoming: upcomingRegulations.length,
+      tasks: tasksRegulations.length
     });
-  }, [currentView, activeData, upcomingData, tasksData]);
+  }, [currentView, searchFilteredRegulations, upcomingRegulations, tasksRegulations]);
 
-  // The handler for tab changes
-  const handleTabChange = (value: string) => {
-    console.log("Tab change handler called with value:", value);
+  // Memoize sorted data to avoid unnecessary recalculations
+  const activeData = useMemo(() => 
+    sortRegulations(searchFilteredRegulations), 
+    [searchFilteredRegulations, sortRegulations]
+  );
+  
+  const upcomingData = useMemo(() => 
+    sortRegulations(upcomingRegulations), 
+    [upcomingRegulations, sortRegulations]
+  );
+  
+  const tasksData = useMemo(() => 
+    sortRegulations(tasksRegulations), 
+    [tasksRegulations, sortRegulations]
+  );
+
+  // The handler for tab changes, stabilized with useCallback
+  const handleTabChange = useCallback((value: string) => {
+    console.log("RegulationTabs: Tab change handler called with value:", value);
+    // Make the change immediately
     onViewChange(value as ViewType);
-  };
+  }, [onViewChange]);
 
   // Debug log when component renders to track component lifecycle
   console.log("RegulationTabs rendering with currentView:", currentView);
@@ -71,12 +72,14 @@ export const RegulationTabs = ({
       value={currentView}
       onValueChange={handleTabChange} 
       className="w-full mt-4"
+      defaultValue="active" // Provide a default but it should use the controlled value
     >
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
           <TabsTrigger
             value="active"
             className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+            data-testid="tab-active-regulations"
           >
             <House
               className="-ms-0.5 me-1.5 opacity-60"
@@ -89,6 +92,7 @@ export const RegulationTabs = ({
           <TabsTrigger
             value="upcoming"
             className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+            data-testid="tab-upcoming-regulations"
           >
             <PanelsTopLeft
               className="-ms-0.5 me-1.5 opacity-60"
@@ -101,6 +105,7 @@ export const RegulationTabs = ({
           <TabsTrigger
             value="tasks"
             className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary"
+            data-testid="tab-tasks-regulations"
           >
             <Box
               className="-ms-0.5 me-1.5 opacity-60"

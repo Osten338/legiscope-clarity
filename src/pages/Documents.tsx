@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { DocumentsHeader } from "@/components/documents/DocumentsHeader";
@@ -13,9 +13,14 @@ const Documents = () => {
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [selectedRegulation, setSelectedRegulation] = useState<string | undefined>("all");
 
-  const handleOpenUploadDialog = () => {
+  // Use useCallback to maintain stable function references
+  const handleOpenUploadDialog = useCallback(() => {
+    console.log("Opening upload dialog");
     setUploadDialogOpen(true);
-  };
+  }, []);
+
+  // For debugging
+  console.log("Documents page rendering");
 
   return (
     <TopbarLayout>

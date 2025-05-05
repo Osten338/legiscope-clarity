@@ -1,8 +1,19 @@
 
 import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { ComplianceOverview } from "@/components/dashboard/ComplianceOverview";
+import { useEffect } from "react";
 
 const ComplianceOverviewPage = () => {
+  // Add debug logging for the page
+  useEffect(() => {
+    console.log("ComplianceOverviewPage mounted");
+    return () => {
+      console.log("ComplianceOverviewPage unmounted");
+    };
+  }, []);
+
+  console.log("ComplianceOverviewPage rendering");
+
   return (
     <TopbarLayout>
       <div className="flex flex-col">
