@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -26,34 +26,29 @@ export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedR
     pending: "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
   };
 
-  // Debug tab changes
+  // Debug component lifecycle
   useEffect(() => {
-    console.log("ComplianceTasks: Active tab state:", activeTab);
-  }, [activeTab]);
-
-  // Use useCallback to stabilize the handler function reference
-  const handleTabChange = useCallback((value: string) => {
-    console.log("ComplianceTasks: Tab change handler called with value:", value);
-    // Prevent any default behavior
-    setActiveTab(value);
+    console.log("ComplianceTasks: Mounted with tab:", activeTab);
+    
+    return () => {
+      console.log("ComplianceTasks: Unmounting");
+    };
   }, []);
 
-  // Log component render
-  console.log("ComplianceTasks rendering with activeTab:", activeTab);
+  // Debug tab changes
+  useEffect(() => {
+    console.log("ComplianceTasks: Tab changed to:", activeTab);
+  }, [activeTab]);
 
-  // Filter regulations based on active tab
-  const filteredRegulations = useCallback(() => {
-    console.log("Filtering regulations for tab:", activeTab);
-    switch (activeTab) {
-      case "completed":
-        return savedRegulations.filter(reg => reg.status === 'compliant');
-      case "pending":
-        return savedRegulations.filter(reg => reg.status !== 'compliant');
-      case "all":
-      default:
-        return savedRegulations;
-    }
-  }, [activeTab, savedRegulations]);
+  const handleValueChange = (value: string) => {
+    console.log("ComplianceTasks: Tab value changing to:", value);
+    setActiveTab(value);
+  };
+
+  // Calculate filtered items for each tab once per render to avoid recalculation
+  const allItems = savedRegulations;
+  const completedItems = savedRegulations.filter(reg => reg.status === 'compliant');
+  const pendingItems = savedRegulations.filter(reg => reg.status !== 'compliant');
 
   const TaskList = ({ items }: { items: SavedRegulation[] }) => {
     console.log("TaskList rendering with", items.length, "items");
@@ -105,11 +100,6 @@ export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedR
     );
   };
 
-  // Calculate filtered items for each tab once per render to avoid recalculation
-  const allItems = savedRegulations;
-  const completedItems = savedRegulations.filter(reg => reg.status === 'compliant');
-  const pendingItems = savedRegulations.filter(reg => reg.status !== 'compliant');
-
   return (
     <Card className="border shadow-sm">
       <CardContent className="p-6">
@@ -120,7 +110,7 @@ export const ComplianceTasks = ({ savedRegulations }: { savedRegulations: SavedR
         
         <Tabs 
           value={activeTab} 
-          onValueChange={handleTabChange} 
+          onValueChange={handleValueChange} 
           className="w-full"
         >
           <TabsList className="mb-4">

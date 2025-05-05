@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RegulationsTable } from "./RegulationsTable";
@@ -31,15 +31,18 @@ export const RegulationTabs = ({
   onRemoveRegulation,
   sortRegulations,
 }: RegulationTabsProps) => {
-  // Enhanced debugging to track tab changes and data state
+  // Logging for debugging
   useEffect(() => {
-    console.log("RegulationTabs: Current view:", currentView);
-    console.log("RegulationTabs data counts:", {
-      active: searchFilteredRegulations.length,
-      upcoming: upcomingRegulations.length,
-      tasks: tasksRegulations.length
-    });
-  }, [currentView, searchFilteredRegulations, upcomingRegulations, tasksRegulations]);
+    console.log("RegulationTabs: Mounted with view:", currentView);
+    
+    return () => {
+      console.log("RegulationTabs: Unmounting");
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("RegulationTabs: View changed to:", currentView);
+  }, [currentView]);
 
   // Memoize sorted data to avoid unnecessary recalculations
   const activeData = useMemo(() => 
@@ -57,22 +60,16 @@ export const RegulationTabs = ({
     [tasksRegulations, sortRegulations]
   );
 
-  // The handler for tab changes, stabilized with useCallback
-  const handleTabChange = useCallback((value: string) => {
-    console.log("RegulationTabs: Tab change handler called with value:", value);
-    // Make the change immediately
+  const handleValueChange = (value: string) => {
+    console.log("RegulationTabs: Tab value changing to:", value);
     onViewChange(value as ViewType);
-  }, [onViewChange]);
-
-  // Debug log when component renders to track component lifecycle
-  console.log("RegulationTabs rendering with currentView:", currentView);
+  };
 
   return (
     <Tabs 
       value={currentView}
-      onValueChange={handleTabChange} 
+      onValueChange={handleValueChange} 
       className="w-full mt-4"
-      defaultValue="active" // Provide a default but it should use the controlled value
     >
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">

@@ -1,7 +1,7 @@
 
+import { useEffect } from "react";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { ComplianceOverview } from "@/components/dashboard/ComplianceOverview";
-import { useEffect } from "react";
 
 const ComplianceOverviewPage = () => {
   // Add debug logging for the page
@@ -11,8 +11,6 @@ const ComplianceOverviewPage = () => {
       console.log("ComplianceOverviewPage unmounted");
     };
   }, []);
-
-  console.log("ComplianceOverviewPage rendering");
 
   return (
     <TopbarLayout>
