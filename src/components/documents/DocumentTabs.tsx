@@ -5,6 +5,7 @@ import { DocumentsTable } from "./DocumentsTable";
 import { DocumentViewType, DocumentViewProps } from "./types";
 import { FileText, FileCog, FileStack } from "lucide-react";
 import { DocumentSortColumn } from "./DocumentTableHeader";
+import { useEffect } from "react";
 
 interface DocumentTabsProps extends DocumentViewProps {
   sortColumn: DocumentSortColumn;
@@ -26,8 +27,28 @@ export const DocumentTabs = ({
   onReview,
   onDelete,
 }: DocumentTabsProps) => {
+  // Add debugging to track tab changes and document data
+  useEffect(() => {
+    console.log("DocumentTabs: View or documents changed:", {
+      currentView,
+      documentsCount: documents.length,
+    });
+  }, [currentView, documents]);
+
+  const handleTabChange = (value: string) => {
+    console.log("DocumentTabs: Tab change handler called with value:", value);
+    onViewChange(value as DocumentViewType);
+  };
+
+  // Debug log when component renders
+  console.log("DocumentTabs rendering with currentView:", currentView);
+  
   return (
-    <Tabs defaultValue={currentView} onValueChange={(value) => onViewChange(value as DocumentViewType)} className="w-full">
+    <Tabs 
+      value={currentView} 
+      onValueChange={handleTabChange} 
+      className="w-full"
+    >
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
           <TabsTrigger

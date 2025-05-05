@@ -123,6 +123,19 @@ const ComplianceChecklist = () => {
     }
   }, [userId, refetch]);
 
+  // Debug tab changes
+  useEffect(() => {
+    console.log("ComplianceChecklist: Active tab changed to:", activeTab);
+  }, [activeTab]);
+
+  const handleTabChange = (value: string) => {
+    console.log("ComplianceChecklist: Tab change handler called with value:", value);
+    setActiveTab(value);
+  };
+
+  // Debug component rendering
+  console.log("ComplianceChecklist rendering with activeTab:", activeTab);
+
   if (isLoading) {
     return (
       <TopbarLayout>
@@ -158,7 +171,11 @@ const ComplianceChecklist = () => {
             <CardTitle>Compliance Checklist</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs 
+              value={activeTab} 
+              onValueChange={handleTabChange} 
+              className="w-full"
+            >
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 {regulations?.map((regulation) => (
@@ -179,7 +196,7 @@ const ComplianceChecklist = () => {
                             <div 
                               key={reg.id} 
                               className="border rounded-lg p-4 hover:bg-slate-50 cursor-pointer"
-                              onClick={() => setActiveTab(reg.id)}
+                              onClick={() => handleTabChange(reg.id)}
                             >
                               <h3 className="font-medium text-lg">{reg.name}</h3>
                               <p className="text-slate-600 mt-2 text-sm">{reg.description}</p>

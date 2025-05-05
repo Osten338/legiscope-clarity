@@ -63,12 +63,14 @@ export const RegulationTabs = ({
     onViewChange(value as ViewType);
   };
 
+  // Debug log when component renders to track component lifecycle
+  console.log("RegulationTabs rendering with currentView:", currentView);
+
   return (
     <Tabs 
-      value={currentView} 
+      value={currentView}
       onValueChange={handleTabChange} 
       className="w-full mt-4"
-      defaultValue="active"
     >
       <ScrollArea>
         <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
@@ -112,7 +114,6 @@ export const RegulationTabs = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* Remove the conditional rendering here to let the TabsContent handle it */}
       <TabsContent value="active">
         <RegulationsTable
           regulations={activeData}
