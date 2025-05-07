@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { RegulationFilters } from "./regulations/RegulationFilters";
-import { RegulationTabs } from "./regulations/RegulationTabs";
+import { RegulationCardTabs } from "./regulations/RegulationCardTabs";
 import { useRegulationsFilters } from "./regulations/useRegulationsFilters";
 import { RegulationListItem, ViewType } from "./types";
 
@@ -44,10 +44,6 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
       upcomingCount: upcomingRegulations?.length || 0,
       tasksCount: tasksRegulations?.length || 0,
       currentView,
-      activeTabId: `${currentView}-tab`,
-      firstFilteredItem: searchFilteredRegulations?.[0]?.regulations?.name || "none",
-      firstUpcomingItem: upcomingRegulations?.[0]?.regulations?.name || "none",
-      firstTasksItem: tasksRegulations?.[0]?.regulations?.name || "none"
     });
   }, [savedRegulations, searchFilteredRegulations, upcomingRegulations, tasksRegulations, currentView]);
 
@@ -82,7 +78,7 @@ export const RegulationsList = ({ savedRegulations }: RegulationsListProps) => {
           currentView={currentView}
         />
         
-        <RegulationTabs
+        <RegulationCardTabs
           currentView={currentView}
           onViewChange={handleViewChange}
           searchFilteredRegulations={searchFilteredRegulations}
