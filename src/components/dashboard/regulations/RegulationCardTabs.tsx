@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegulationCardGrid } from "./RegulationCardGrid";
 import { RegulationListItem, SortColumn, ViewType } from "../types";
@@ -53,7 +52,7 @@ export const RegulationCardTabs = ({
 
   return (
     <Tabs value={currentView} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full justify-start mb-6">
+      <TabsList>
         <TabsTrigger value="active" className="gap-1.5">
           <Clock className="h-4 w-4" />
           <span>Active</span>
