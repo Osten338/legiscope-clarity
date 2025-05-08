@@ -1,5 +1,8 @@
 
-export { DashboardLayout } from './DashboardLayout';
-export { AppSidebar } from './AppSidebar';
-export { TopbarLayout } from './TopbarLayout';
-export { MainNavbar } from './MainNavbar';
+import { TopbarLayout } from "./TopbarLayout";
+
+// Export TopbarLayout as DashboardLayout for backward compatibility
+export { 
+  TopbarLayout,
+  TopbarLayout as DashboardLayout 
+};

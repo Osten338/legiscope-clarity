@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   ShieldCheck,
@@ -6,7 +7,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import { useTheme } from "@/components/ui/use-theme";
+import { useTheme } from "../ui/use-theme";
 import {
   Sheet,
   SheetContent,
