@@ -14,36 +14,39 @@ import NoMatch from "./pages/NoMatch";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
+import { ThemeProvider } from "./components/ui/use-theme";
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/auth" element={<Login />} />
-          <Route path="/analysis/:id" element={<Analysis />} />
-          
-          {/* Protected routes */}
-          <Route element={<AuthGuard />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/compliance-overview" element={<ComplianceOverviewPage />} />
-            <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
+    <ThemeProvider defaultTheme="system" storageKey="ui-theme">
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<Login />} />
+            <Route path="/analysis/:id" element={<Analysis />} />
             
-            {/* Admin routes */}
-            <Route path="/admin/regulations" element={<RegulationsAdmin />} />
-            <Route path="/admin/regulations/:id/checklist" element={<ChecklistEditor />} />
-            <Route path="/admin/regulations/gdpr-preset" element={<GdprPreset />} />
-          </Route>
-          
-          {/* Catch all route */}
-          <Route path="*" element={<NoMatch />} />
-        </Routes>
-        <Toaster />
-      </QueryClientProvider>
-    </BrowserRouter>
+            {/* Protected routes */}
+            <Route element={<AuthGuard />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/compliance-overview" element={<ComplianceOverviewPage />} />
+              <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
+              
+              {/* Admin routes */}
+              <Route path="/admin/regulations" element={<RegulationsAdmin />} />
+              <Route path="/admin/regulations/:id/checklist" element={<ChecklistEditor />} />
+              <Route path="/admin/regulations/gdpr-preset" element={<GdprPreset />} />
+            </Route>
+            
+            {/* Catch all route */}
+            <Route path="*" element={<NoMatch />} />
+          </Routes>
+          <Toaster />
+        </QueryClientProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

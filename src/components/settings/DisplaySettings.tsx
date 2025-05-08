@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Moon, Sun, Settings2 } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/ui/use-theme";
 
 export const DisplaySettings = () => {
   const { theme, setTheme } = useTheme();
