@@ -34,162 +34,209 @@ serve(async (req) => {
       try {
         console.log("Generating AI analysis using Perplexity API");
         
-        const response = await fetch("https://api.perplexity.ai/chat/completions", {
+        // First analyze the business description for a comprehensive assessment
+        const analysisResponse = await fetch("https://api.perplexity.ai/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${perplexityApiKey}`
           },
           body: JSON.stringify({
-            model: "llama-3.1-sonar-large-128k-online", // Using a more sophisticated model
+            model: "llama-3.1-sonar-large-128k-online",
             messages: [
               {
                 role: "system",
-                content: "You are a detailed compliance and regulatory expert with deep domain knowledge. Analyze the business description thoroughly and provide a comprehensive compliance assessment. Include specific regulatory frameworks that apply, detailed requirements, potential risks, and mitigation strategies. Be thorough in your analysis and provide actionable, practical guidance. Cover all relevant areas including data protection, industry-specific regulations, environmental compliance, labor laws, and financial regulations."
+                content: "You are a detailed compliance and regulatory expert with deep domain knowledge. Analyze the business description thoroughly and provide a comprehensive compliance assessment. Include potential risks, and mitigation strategies. Be thorough in your analysis and provide actionable, practical guidance. Cover all relevant areas including data protection, industry-specific regulations, environmental compliance, labor laws, and financial regulations."
               },
               {
                 role: "user",
                 content: `Provide a detailed and comprehensive compliance assessment for this business description: ${description}`
               }
             ],
-            temperature: 0.1, // Lower temperature for more consistent results
-            max_tokens: 4000, // Increased token limit for more detailed responses
+            temperature: 0.1,
+            max_tokens: 4000,
             top_p: 0.9
           })
         });
 
-        const data = await response.json();
+        const analysisData = await analysisResponse.json();
         
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-          aiAnalysis = data.choices[0].message.content;
+        if (analysisData.choices && analysisData.choices[0] && analysisData.choices[0].message) {
+          aiAnalysis = analysisData.choices[0].message.content;
           console.log("Successfully generated AI analysis");
         } else {
-          console.error("Unexpected Perplexity API response structure:", data);
+          console.error("Unexpected Perplexity API response structure:", analysisData);
+        }
+        
+        // Now, identify which regulations from our catalog apply to this business
+        console.log("Fetching available regulations catalog");
+        const { data: regulationsCatalog, error: catalogError } = await supabaseAdmin
+          .from('regulations')
+          .select('id, name, description, motivation, requirements');
+          
+        if (catalogError) {
+          throw new Error(`Failed to fetch regulations catalog: ${catalogError.message}`);
+        }
+        
+        console.log(`Found ${regulationsCatalog.length} regulations in catalog`);
+        
+        // Use AI to determine which regulations apply to this business
+        const regulationPrompt = `
+          I have a business described as: "${description}"
+          
+          Below is a list of possible regulations that might apply to this business:
+          ${regulationsCatalog.map(reg => `ID: ${reg.id}, Name: ${reg.name}, Description: ${reg.description}`).join('\n\n')}
+          
+          For each regulation, respond with ONLY the regulation ID if it applies to this business, or "N/A" if it doesn't apply.
+          Format your response as a simple JSON array of regulation IDs that apply, like this:
+          ["id1", "id2", "id3"]
+          If no regulations apply, return an empty array: []
+        `;
+        
+        console.log("Determining applicable regulations with AI");
+        
+        const regulationResponse = await fetch("https://api.perplexity.ai/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${perplexityApiKey}`
+          },
+          body: JSON.stringify({
+            model: "llama-3.1-sonar-large-128k-online",
+            messages: [
+              {
+                role: "system",
+                content: "You are a regulatory compliance expert. Your task is to determine which regulations apply to a business based on its description. Respond ONLY with the IDs of applicable regulations in a JSON array format."
+              },
+              {
+                role: "user",
+                content: regulationPrompt
+              }
+            ],
+            temperature: 0.1,
+            max_tokens: 1000,
+            top_p: 0.9
+          })
+        });
+
+        const regulationData = await regulationResponse.json();
+        
+        if (regulationData.choices && regulationData.choices[0] && regulationData.choices[0].message) {
+          try {
+            // Extract just the JSON array from the response
+            const responseText = regulationData.choices[0].message.content;
+            // Find anything that looks like a JSON array in the response
+            const jsonMatch = responseText.match(/\[.*\]/s);
+            
+            if (jsonMatch) {
+              const applicableRegulationIds = JSON.parse(jsonMatch[0]);
+              console.log("Identified applicable regulations:", applicableRegulationIds);
+              
+              // Filter the catalog to just the applicable regulations
+              const applicableRegulations = regulationsCatalog.filter(reg => 
+                applicableRegulationIds.includes(reg.id)
+              );
+              
+              // Create a business analysis record with the AI assessment
+              const { data: analysisData, error: analysisError } = await supabaseAdmin
+                .from('business_analyses')
+                .insert({
+                  id: assessment_id,
+                  description,
+                  analysis: aiAnalysis
+                })
+                .select()
+                .single();
+
+              if (analysisError) {
+                console.error("Error creating analysis:", analysisError);
+                throw analysisError;
+              }
+
+              console.log("Created analysis record:", analysisData);
+
+              // Link the applicable regulations to the business analysis
+              if (applicableRegulations.length > 0) {
+                const businessRegulationsData = applicableRegulations.map(reg => ({
+                  business_analysis_id: assessment_id,
+                  regulation_id: reg.id
+                }));
+                
+                const { error: linkError } = await supabaseAdmin
+                  .from('business_regulations')
+                  .insert(businessRegulationsData);
+                
+                if (linkError) {
+                  console.error("Error linking regulations to analysis:", linkError);
+                  throw linkError;
+                }
+                
+                console.log(`Linked ${applicableRegulations.length} regulations to analysis`);
+              } else {
+                console.log("No applicable regulations found for this business");
+              }
+            } else {
+              throw new Error("Failed to extract JSON array from AI response");
+            }
+          } catch (parseError) {
+            console.error("Error parsing regulation IDs:", parseError);
+            console.log("Raw response:", regulationData.choices[0].message.content);
+            
+            // Fallback: Create analysis without linking regulations
+            const { data: analysisData, error: analysisError } = await supabaseAdmin
+              .from('business_analyses')
+              .insert({
+                id: assessment_id,
+                description,
+                analysis: aiAnalysis
+              })
+              .select()
+              .single();
+
+            if (analysisError) {
+              throw analysisError;
+            }
+          }
+        } else {
+          console.error("Unexpected Perplexity API response structure for regulations:", regulationData);
+          throw new Error("Failed to determine applicable regulations");
         }
       } catch (aiError) {
-        console.error("Error generating AI analysis:", aiError);
+        console.error("Error in AI processing:", aiError);
+        
+        // Create a business analysis record even if AI processing fails
+        const { data: analysisData, error: analysisError } = await supabaseAdmin
+          .from('business_analyses')
+          .insert({
+            id: assessment_id,
+            description,
+            analysis: "Failed to generate analysis due to an error. Please try again later."
+          })
+          .select()
+          .single();
+
+        if (analysisError) {
+          throw analysisError;
+        }
       }
     } else {
-      console.log("No Perplexity API key found, skipping enhanced analysis");
-    }
+      console.log("No Perplexity API key found, creating basic analysis without AI");
+      
+      // Create a basic business analysis record without AI enhancement
+      const { data: analysisData, error: analysisError } = await supabaseAdmin
+        .from('business_analyses')
+        .insert({
+          id: assessment_id,
+          description,
+          analysis: "Analysis pending. Please check back later."
+        })
+        .select()
+        .single();
 
-    // First create a business analysis record
-    const { data: analysisData, error: analysisError } = await supabaseAdmin
-      .from('business_analyses')
-      .insert({
-        id: assessment_id, // Use the same ID as the assessment
-        description,
-        analysis: aiAnalysis
-      })
-      .select()
-      .single();
-
-    if (analysisError) {
-      console.error("Error creating analysis:", analysisError);
-      throw analysisError;
-    }
-
-    console.log("Created analysis record:", analysisData);
-
-    // Generate more detailed and industry-specific regulations based on the AI analysis
-    const regulations = [
-      {
-        name: "Data Protection Regulation",
-        description: "Comprehensive data protection requirements for businesses handling personal information",
-        motivation: "Your business handles personal data and needs to ensure proper protection measures",
-        requirements: "Implement data protection measures, maintain records of processing activities, ensure secure storage, provide privacy notices, and obtain consent where necessary",
-        checklist_items: [
-          "Implement data encryption for stored personal data",
-          "Create a data breach response plan",
-          "Maintain records of data processing activities",
-          "Appoint a data protection officer if required",
-          "Implement privacy by design in all data handling processes",
-          "Establish a process for handling data subject requests",
-          "Conduct regular data protection impact assessments",
-          "Ensure lawful basis for all data processing activities"
-        ]
-      },
-      {
-        name: "Digital Security Standards",
-        description: "Security standards for digital business operations",
-        motivation: "Your business operates online and handles sensitive information",
-        requirements: "Implement cybersecurity measures, regular security audits, incident response planning",
-        checklist_items: [
-          "Implement strong password policies",
-          "Regular security training for employees",
-          "Setup multi-factor authentication",
-          "Regular security audits",
-          "Network security monitoring",
-          "Application security testing",
-          "Develop an incident response procedure",
-          "Implement endpoint protection solutions",
-          "Conduct regular vulnerability scanning"
-        ]
-      },
-      {
-        name: "Industry Compliance Framework",
-        description: "Specific compliance requirements for your industry sector",
-        motivation: "Based on your business activities, specialized industry regulations may apply",
-        requirements: "Sector-specific requirements related to your business operations, reporting, and risk management",
-        checklist_items: [
-          "Identify all industry-specific regulations applicable to your business",
-          "Establish a compliance calendar for industry reporting requirements",
-          "Document industry-standard processes and procedures",
-          "Conduct regular compliance reviews against industry standards",
-          "Join industry associations to stay updated on regulatory changes",
-          "Perform regular industry-specific risk assessments",
-          "Develop compliance training specific to your industry"
-        ]
-      },
-      {
-        name: "Financial Compliance Requirements",
-        description: "Financial and accounting compliance standards for businesses",
-        motivation: "Businesses must maintain proper financial records and comply with tax regulations",
-        requirements: "Implement accounting standards, financial controls, tax compliance measures, and regular financial reporting",
-        checklist_items: [
-          "Establish proper accounting procedures",
-          "Implement financial controls and segregation of duties",
-          "Ensure compliance with tax filing requirements",
-          "Maintain records for required retention periods",
-          "Conduct regular financial audits",
-          "Document financial policies and procedures",
-          "Implement anti-fraud measures"
-        ]
-      },
-      {
-        name: "Health and Safety Regulations",
-        description: "Workplace health and safety requirements",
-        motivation: "Ensuring employee safety and compliance with occupational health regulations",
-        requirements: "Implement safety procedures, conduct risk assessments, provide proper training, and maintain safe working environments",
-        checklist_items: [
-          "Conduct workplace risk assessments",
-          "Develop health and safety policies",
-          "Provide safety training for all employees",
-          "Maintain safety equipment and first aid supplies",
-          "Establish incident reporting procedures",
-          "Conduct regular safety inspections",
-          "Appoint safety representatives if required"
-        ]
+      if (analysisError) {
+        throw analysisError;
       }
-    ];
-
-    console.log("Processing regulations:", regulations);
-
-    // Use the process_analysis_regulations function to insert the regulations
-    const { data: regulationsData, error: regulationsError } = await supabaseAdmin.rpc(
-      'process_analysis_regulations',
-      {
-        p_analysis_id: assessment_id,
-        p_regulations: regulations
-      }
-    );
-
-    if (regulationsError) {
-      console.error("Error processing regulations:", regulationsError);
-      throw regulationsError;
     }
-
-    console.log("Regulations processed successfully:", regulationsData);
 
     return new Response(
       JSON.stringify({ 

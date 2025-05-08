@@ -1,0 +1,411 @@
+
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Edit, Trash2, ClipboardList } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { TopbarLayout } from "@/components/dashboard/new-ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+type Regulation = {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
+  created_at: string;
+  updated_at: string;
+};
+
+const RegulationsAdmin = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [regulations, setRegulations] = useState<Regulation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRegulationDialogOpen, setIsRegulationDialogOpen] = useState(false);
+  const [isChecklistDialogOpen, setIsChecklistDialogOpen] = useState(false);
+  const [currentRegulation, setCurrentRegulation] = useState<Regulation | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    motivation: "",
+    requirements: ""
+  });
+
+  useEffect(() => {
+    fetchRegulations();
+  }, []);
+
+  const fetchRegulations = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("regulations")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setRegulations(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error fetching regulations",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      motivation: "",
+      requirements: ""
+    });
+    setCurrentRegulation(null);
+  };
+
+  const openRegulationDialog = (regulation?: Regulation) => {
+    if (regulation) {
+      setCurrentRegulation(regulation);
+      setFormData({
+        name: regulation.name,
+        description: regulation.description,
+        motivation: regulation.motivation,
+        requirements: regulation.requirements
+      });
+    } else {
+      resetForm();
+    }
+    setIsRegulationDialogOpen(true);
+  };
+
+  const openChecklistDialog = (regulation: Regulation) => {
+    setCurrentRegulation(regulation);
+    setIsChecklistDialogOpen(true);
+  };
+
+  const handleDeleteRegulation = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this regulation? This will also delete all associated checklist items.")) {
+      return;
+    }
+
+    try {
+      // First, delete the checklist items
+      const { error: checklistError } = await supabase
+        .from("checklist_items")
+        .delete()
+        .eq("regulation_id", id);
+
+      if (checklistError) throw checklistError;
+
+      // Then delete the regulation
+      const { error } = await supabase
+        .from("regulations")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Regulation deleted",
+        description: "The regulation and its checklist items have been deleted successfully."
+      });
+      
+      fetchRegulations();
+    } catch (error: any) {
+      toast({
+        title: "Error deleting regulation",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveRegulation = async () => {
+    try {
+      if (!formData.name.trim()) {
+        throw new Error("Regulation name is required");
+      }
+
+      if (currentRegulation) {
+        // Update existing regulation
+        const { error } = await supabase
+          .from("regulations")
+          .update({
+            name: formData.name,
+            description: formData.description,
+            motivation: formData.motivation,
+            requirements: formData.requirements
+          })
+          .eq("id", currentRegulation.id);
+
+        if (error) throw error;
+        
+        toast({
+          title: "Regulation updated",
+          description: "The regulation has been updated successfully."
+        });
+      } else {
+        // Create new regulation
+        const { error } = await supabase
+          .from("regulations")
+          .insert({
+            name: formData.name,
+            description: formData.description,
+            motivation: formData.motivation,
+            requirements: formData.requirements
+          });
+
+        if (error) throw error;
+        
+        toast({
+          title: "Regulation created",
+          description: "The regulation has been created successfully."
+        });
+      }
+
+      setIsRegulationDialogOpen(false);
+      resetForm();
+      fetchRegulations();
+    } catch (error: any) {
+      toast({
+        title: "Error saving regulation",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const navigateToChecklistEditor = (regulationId: string) => {
+    navigate(`/admin/regulations/${regulationId}/checklist`);
+  };
+
+  return (
+    <TopbarLayout>
+      <div className="container mx-auto p-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Regulations Administration</h1>
+            <p className="text-muted-foreground">
+              Manage compliance regulations and expert checklists
+            </p>
+          </div>
+          <Button onClick={() => openRegulationDialog()}>
+            <Plus className="mr-2 h-4 w-4" /> Add Regulation
+          </Button>
+        </div>
+
+        <Tabs defaultValue="regulations">
+          <TabsList className="mb-6">
+            <TabsTrigger value="regulations">Regulations</TabsTrigger>
+            <TabsTrigger value="import">Import/Export</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="regulations">
+            {isLoading ? (
+              <div className="flex justify-center p-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : regulations.length === 0 ? (
+              <Card className="text-center p-12">
+                <p className="text-muted-foreground mb-4">
+                  No regulations found. Add your first regulation to get started.
+                </p>
+                <Button onClick={() => openRegulationDialog()}>
+                  <Plus className="mr-2 h-4 w-4" /> Add Regulation
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {regulations.map((regulation) => (
+                  <Card key={regulation.id} className="overflow-hidden">
+                    <CardHeader className="bg-muted/50">
+                      <CardTitle className="line-clamp-2">{regulation.name}</CardTitle>
+                      <CardDescription className="line-clamp-3">
+                        {regulation.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-center">
+                        <div className="space-y-1">
+                          <p className="text-sm text-muted-foreground">
+                            Last updated: {new Date(regulation.updated_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openRegulationDialog(regulation)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => navigateToChecklistEditor(regulation.id)}
+                          >
+                            <ClipboardList className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteRegulation(regulation.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="import">
+            <Card>
+              <CardHeader>
+                <CardTitle>Import/Export Regulations and Checklists</CardTitle>
+                <CardDescription>
+                  Bulk import or export regulations and their associated checklists
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Import Regulations</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Upload a CSV or JSON file with regulation data to import in bulk.
+                  </p>
+                  <div className="flex gap-4">
+                    <Input type="file" accept=".csv,.json" />
+                    <Button>Upload and Import</Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Export Regulations</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Download all regulations and their checklists as a CSV or JSON file.
+                  </p>
+                  <div className="flex gap-4">
+                    <Button variant="outline">Export as CSV</Button>
+                    <Button variant="outline">Export as JSON</Button>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-muted-foreground">
+                    Note: Import and export functionality is coming soon. This will allow you to 
+                    easily transfer regulations between environments or create backups.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Regulation Dialog */}
+        <Dialog open={isRegulationDialogOpen} onOpenChange={setIsRegulationDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>
+                {currentRegulation ? "Edit Regulation" : "Add New Regulation"}
+              </DialogTitle>
+              <DialogDescription>
+                Enter the details for this compliance regulation
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Regulation Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="e.g., GDPR, HIPAA, PCI-DSS"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Brief description of the regulation and its purpose"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="motivation">Applicability / Motivation</Label>
+                <Textarea
+                  id="motivation"
+                  name="motivation"
+                  value={formData.motivation}
+                  onChange={handleInputChange}
+                  placeholder="When does this regulation apply to a business?"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="requirements">Requirements</Label>
+                <Textarea
+                  id="requirements"
+                  name="requirements"
+                  value={formData.requirements}
+                  onChange={handleInputChange}
+                  placeholder="Key requirements and obligations"
+                  rows={4}
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsRegulationDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveRegulation}>
+                {currentRegulation ? "Update Regulation" : "Add Regulation"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </TopbarLayout>
+  );
+};
+
+export default RegulationsAdmin;

@@ -36,7 +36,7 @@ export const RegulationDetailsDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] flex flex-col p-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
-        <DialogHeader className="p-6 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex flex-row items-start justify-between sticky top-0 z-10">
+        <DialogHeader className="p-6 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex flex-row items-start justify-between sticky top-0 z-10">
           <div className="space-y-2">
             <DialogTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
               {regulation.regulations?.name}
@@ -78,6 +78,18 @@ export const RegulationDetailsDialog = ({
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Requirements</h3>
                 <RegulationRequirementsTable regulation={regulation} />
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Compliance Actions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button variant="outline" className="w-full">
+                    View Full Checklist
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    Download Compliance Report
+                  </Button>
+                </div>
               </div>
             </div>
           </ScrollArea>
