@@ -2,6 +2,7 @@
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { RegulationListItem } from "../types";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface RequirementItem {
   id: string;
@@ -69,29 +70,35 @@ export const RegulationRequirementsTable = ({
 
   if (!requirementItems.length) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="bg-muted/30 text-center py-8 rounded-md border border-border text-muted-foreground">
         No specific requirements found for this regulation.
       </div>
     );
   }
 
   return (
-    <div className="border rounded-md overflow-hidden">
+    <div className="rounded-md overflow-hidden border bg-card">
       <Table>
-        <TableHeader className="bg-muted/50">
-          <TableRow>
-            <TableHead className="w-[250px]">Requirement</TableHead>
-            <TableHead className="w-[200px]">Applicability</TableHead>
-            <TableHead className="w-[180px]">Law Recitals & Articles</TableHead>
-            <TableHead>Description</TableHead>
+        <TableHeader>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="w-[250px] font-medium">Requirement</TableHead>
+            <TableHead className="w-[200px] font-medium">Applicability</TableHead>
+            <TableHead className="w-[180px] font-medium">Law References</TableHead>
+            <TableHead className="font-medium">Description</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {requirementItems.map((item) => (
-            <TableRow key={item.id}>
+          {requirementItems.map((item, index) => (
+            <TableRow 
+              key={item.id}
+              className={cn(
+                "transition-colors",
+                index % 2 === 0 ? "bg-background" : "bg-muted/20"
+              )}
+            >
               <TableCell className="font-medium">{item.requirement}</TableCell>
               <TableCell>{item.applicability}</TableCell>
-              <TableCell>{item.lawReferences}</TableCell>
+              <TableCell className="font-mono text-xs">{item.lawReferences}</TableCell>
               <TableCell>{item.description}</TableCell>
             </TableRow>
           ))}
