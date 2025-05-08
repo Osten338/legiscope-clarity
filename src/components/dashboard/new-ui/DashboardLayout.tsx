@@ -1,23 +1,16 @@
 
 import { ReactNode } from "react";
-import { Sidebar, SidebarProvider } from "@/components/ui/sidebar-new";
-import { AppSidebar } from "./AppSidebar";
+import { TopbarLayout } from "./TopbarLayout";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+// This is a wrapper component that uses TopbarLayout for backward compatibility
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen h-screen flex w-full bg-background overflow-x-hidden">
-        <AppSidebar />
-        <div className="flex-1 overflow-x-hidden">
-          <main className="overflow-x-hidden">
-            {children}
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+    <TopbarLayout>
+      {children}
+    </TopbarLayout>
   );
 }
