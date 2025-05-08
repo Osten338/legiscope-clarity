@@ -70,21 +70,21 @@ export const RegulationRequirementsTable = ({
 
   if (!requirementItems.length) {
     return (
-      <div className="bg-muted/30 text-center py-8 rounded-md border border-border text-muted-foreground">
+      <div className="bg-gray-50 dark:bg-gray-800 text-center py-8 rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300">
         No specific requirements found for this regulation.
       </div>
     );
   }
 
   return (
-    <div className="rounded-md overflow-hidden border bg-card">
+    <div className="rounded-md overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="w-[250px] font-medium">Requirement</TableHead>
-            <TableHead className="w-[200px] font-medium">Applicability</TableHead>
-            <TableHead className="w-[180px] font-medium">Law References</TableHead>
-            <TableHead className="font-medium">Description</TableHead>
+          <TableRow className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <TableHead className="w-[250px] font-medium text-gray-900 dark:text-gray-100">Requirement</TableHead>
+            <TableHead className="w-[200px] font-medium text-gray-900 dark:text-gray-100">Applicability</TableHead>
+            <TableHead className="w-[180px] font-medium text-gray-900 dark:text-gray-100">Law References</TableHead>
+            <TableHead className="font-medium text-gray-900 dark:text-gray-100">Description</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -93,13 +93,13 @@ export const RegulationRequirementsTable = ({
               key={item.id}
               className={cn(
                 "transition-colors",
-                index % 2 === 0 ? "bg-background" : "bg-muted/20"
+                index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"
               )}
             >
-              <TableCell className="font-medium">{item.requirement}</TableCell>
-              <TableCell>{item.applicability}</TableCell>
-              <TableCell className="font-mono text-xs">{item.lawReferences}</TableCell>
-              <TableCell>{item.description}</TableCell>
+              <TableCell className="font-medium text-gray-900 dark:text-gray-100">{item.requirement}</TableCell>
+              <TableCell className="text-gray-700 dark:text-gray-300">{item.applicability}</TableCell>
+              <TableCell className="font-mono text-xs text-gray-700 dark:text-gray-300">{item.lawReferences}</TableCell>
+              <TableCell className="text-gray-700 dark:text-gray-300">{item.description}</TableCell>
             </TableRow>
           ))}
         </TableBody>

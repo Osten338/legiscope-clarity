@@ -35,13 +35,13 @@ export const RegulationDetailsDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] flex flex-col p-0 bg-background border shadow-lg">
-        <DialogHeader className="p-6 bg-muted/40 border-b flex flex-row items-start justify-between sticky top-0 z-10">
+      <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] flex flex-col p-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-xl">
+        <DialogHeader className="p-6 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex flex-row items-start justify-between sticky top-0 z-10">
           <div className="space-y-2">
-            <DialogTitle className="text-2xl font-semibold text-foreground">
+            <DialogTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
               {regulation.regulations?.name}
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
+            <DialogDescription className="text-gray-600 dark:text-gray-300">
               Detailed information about regulation compliance status and requirements
             </DialogDescription>
             <div className="flex flex-wrap gap-4 text-sm">
@@ -65,18 +65,18 @@ export const RegulationDetailsDialog = ({
           </Button>
         </DialogHeader>
         
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900">
           <ScrollArea className="h-[calc(90vh-150px)]">
             <div className="p-6 space-y-6">
-              <div className="bg-card rounded-md p-4 border">
-                <h3 className="text-lg font-medium mb-2 text-foreground">Description</h3>
-                <p className="text-muted-foreground">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">Description</h3>
+                <p className="text-gray-700 dark:text-gray-300">
                   {regulation.regulations?.description}
                 </p>
               </div>
               
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-foreground">Requirements</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Requirements</h3>
                 <RegulationRequirementsTable regulation={regulation} />
               </div>
             </div>
