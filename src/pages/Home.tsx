@@ -1,5 +1,5 @@
 
-import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import LandingNavbar from "@/components/landing/LandingNavbar";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { KeyFeatures } from "@/components/landing/KeyFeatures";
 import { LandingFooter } from "@/components/landing/LandingFooter";

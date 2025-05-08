@@ -1,8 +1,10 @@
 
 import { TopbarLayout } from "./TopbarLayout";
+import { DashboardLayout } from "./DashboardLayout";
 
-// Export TopbarLayout as DashboardLayout for backward compatibility
 export { 
   TopbarLayout,
-  TopbarLayout as DashboardLayout 
+  DashboardLayout,
+  // For backward compatibility
+  TopbarLayout as DashboardLayout_Old 
 };
