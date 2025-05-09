@@ -351,7 +351,7 @@ const RegulationsAdmin = () => {
         </div>
 
         {getDuplicatesCount() > 0 && (
-          <Alert variant="warning" className="mb-8">
+          <Alert variant="destructive" className="mb-8">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Duplicate Regulations Detected</AlertTitle>
             <AlertDescription>
