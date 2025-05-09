@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,10 +16,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, ClipboardList } from "lucide-react";
+import { Plus, Edit, Trash2, ClipboardList, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
@@ -43,6 +55,8 @@ const RegulationsAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRegulationDialogOpen, setIsRegulationDialogOpen] = useState(false);
   const [isChecklistDialogOpen, setIsChecklistDialogOpen] = useState(false);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [duplicates, setDuplicates] = useState<{[key: string]: Regulation[]}>({});
   const [currentRegulation, setCurrentRegulation] = useState<Regulation | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -65,6 +79,26 @@ const RegulationsAdmin = () => {
 
       if (error) throw error;
       setRegulations(data || []);
+      
+      // Check for duplicates
+      const duplicateMap: {[key: string]: Regulation[]} = {};
+      data?.forEach(reg => {
+        const normName = reg.name.trim().toLowerCase();
+        if (!duplicateMap[normName]) {
+          duplicateMap[normName] = [];
+        }
+        duplicateMap[normName].push(reg);
+      });
+      
+      // Filter out non-duplicates
+      const duplicatesOnly = Object.entries(duplicateMap)
+        .filter(([_, regs]) => regs.length > 1)
+        .reduce((acc, [key, regs]) => {
+          acc[key] = regs;
+          return acc;
+        }, {} as {[key: string]: Regulation[]});
+      
+      setDuplicates(duplicatesOnly);
     } catch (error: any) {
       toast({
         title: "Error fetching regulations",
@@ -111,6 +145,33 @@ const RegulationsAdmin = () => {
     setIsChecklistDialogOpen(true);
   };
 
+  // New function to check for existing regulations by name
+  const checkExistingRegulation = async (name: string, id?: string): Promise<boolean> => {
+    const normalizedName = name.trim().toLowerCase();
+    let query = supabase
+      .from("regulations")
+      .select("id")
+      .ilike("name", normalizedName);
+    
+    // Exclude current regulation when updating
+    if (id) {
+      query = query.neq("id", id);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      toast({
+        title: "Error checking for duplicates",
+        description: error.message,
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return data && data.length > 0;
+  };
+
   const handleDeleteRegulation = async (id: string) => {
     if (!confirm("Are you sure you want to delete this regulation? This will also delete all associated checklist items.")) {
       return;
@@ -148,10 +209,73 @@ const RegulationsAdmin = () => {
     }
   };
 
+  const handleDeleteDuplicates = async (regulations: Regulation[]) => {
+    if (regulations.length <= 1) return;
+    
+    // Keep the first one, delete the rest
+    const toKeep = regulations[0];
+    const toDelete = regulations.slice(1);
+    
+    try {
+      for (const reg of toDelete) {
+        // Move all checklist items to the regulation we're keeping
+        const { data: checklistItems, error: fetchError } = await supabase
+          .from("checklist_items")
+          .select("*")
+          .eq("regulation_id", reg.id);
+        
+        if (fetchError) throw fetchError;
+        
+        // Update checklist items to point to the kept regulation
+        if (checklistItems && checklistItems.length > 0) {
+          for (const item of checklistItems) {
+            const { error: updateError } = await supabase
+              .from("checklist_items")
+              .update({ regulation_id: toKeep.id })
+              .eq("id", item.id);
+              
+            if (updateError) throw updateError;
+          }
+        }
+        
+        // Now delete the duplicate regulation
+        const { error: deleteError } = await supabase
+          .from("regulations")
+          .delete()
+          .eq("id", reg.id);
+          
+        if (deleteError) throw deleteError;
+      }
+      
+      toast({
+        title: "Duplicates merged",
+        description: `Merged ${toDelete.length} duplicate(s) of "${toKeep.name}" successfully.`
+      });
+      
+      fetchRegulations();
+    } catch (error: any) {
+      toast({
+        title: "Error merging duplicates",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSaveRegulation = async () => {
     try {
       if (!formData.name.trim()) {
         throw new Error("Regulation name is required");
+      }
+
+      // Check for duplicates before saving
+      const exists = await checkExistingRegulation(
+        formData.name, 
+        currentRegulation?.id
+      );
+      
+      if (exists) {
+        throw new Error("A regulation with this name already exists");
       }
 
       if (currentRegulation) {
@@ -207,6 +331,10 @@ const RegulationsAdmin = () => {
     navigate(`/admin/regulations/${regulationId}/checklist`);
   };
 
+  const getDuplicatesCount = () => {
+    return Object.keys(duplicates).length;
+  };
+
   return (
     <TopbarLayout>
       <div className="container mx-auto p-8">
@@ -221,6 +349,24 @@ const RegulationsAdmin = () => {
             <Plus className="mr-2 h-4 w-4" /> Add Regulation
           </Button>
         </div>
+
+        {getDuplicatesCount() > 0 && (
+          <Alert variant="warning" className="mb-8">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Duplicate Regulations Detected</AlertTitle>
+            <AlertDescription>
+              We found {getDuplicatesCount()} regulation name(s) with duplicates. 
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="ml-4"
+                onClick={() => setIsDuplicateDialogOpen(true)}
+              >
+                Manage Duplicates
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs defaultValue="regulations">
           <TabsList className="mb-6">
@@ -399,6 +545,74 @@ const RegulationsAdmin = () => {
               </Button>
               <Button onClick={handleSaveRegulation}>
                 {currentRegulation ? "Update Regulation" : "Add Regulation"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicates Management Dialog */}
+        <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
+          <DialogContent className="sm:max-w-[800px]">
+            <DialogHeader>
+              <DialogTitle>Manage Duplicate Regulations</DialogTitle>
+              <DialogDescription>
+                We found multiple regulations with the same name. You can merge these duplicates
+                by selecting which one to keep. The checklist items from all duplicates will be 
+                preserved and assigned to the regulation you choose to keep.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              {Object.entries(duplicates).map(([name, regs]) => (
+                <Card key={name} className="mb-4">
+                  <CardHeader className="bg-muted/50 py-2">
+                    <CardTitle className="text-lg">{regs[0].name}</CardTitle>
+                    <CardDescription>{regs.length} duplicate entries found</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {regs.map((reg) => (
+                          <TableRow key={reg.id}>
+                            <TableCell className="font-mono text-xs">{reg.id.substring(0, 8)}...</TableCell>
+                            <TableCell>{new Date(reg.created_at).toLocaleDateString()}</TableCell>
+                            <TableCell className="max-w-[300px] truncate">{reg.description}</TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => navigateToChecklistEditor(reg.id)}
+                              >
+                                View Checklist
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    <div className="mt-4 flex justify-end">
+                      <Button 
+                        onClick={() => handleDeleteDuplicates(regs)}
+                      >
+                        Merge Duplicates
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDuplicateDialogOpen(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>
