@@ -11,6 +11,11 @@ import RegulationsAdmin from "./pages/Admin/RegulationsAdmin";
 import ChecklistEditor from "./pages/Admin/ChecklistEditor";
 import GdprPreset from "./pages/Admin/GdprPreset";
 import NoMatch from "./pages/NoMatch";
+import Alerts from "./pages/Alerts";
+import LegislationPage from "./pages/LegislationPage";
+import Documentation from "./pages/Documentation";
+import ComplianceChat from "./pages/ComplianceChat";
+import ComplianceCalendar from "./pages/ComplianceCalendar";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
@@ -31,6 +36,11 @@ function App() {
             {/* Protected routes */}
             <Route element={<AuthGuard />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/legislation" element={<LegislationPage />} />
+              <Route path="/documentation" element={<Documentation />} />
+              <Route path="/compliance-chat" element={<ComplianceChat />} />
+              <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
               <Route path="/compliance-overview" element={<ComplianceOverviewPage />} />
               <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
               
