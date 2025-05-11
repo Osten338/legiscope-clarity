@@ -1,3 +1,4 @@
+
 import React from "react";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { MoveRight, PhoneCall } from "lucide-react";
 const Home = () => {
   // Updated media content for the hero section with video
   const heroContent = {
-    src: "https://gorrissenfederspiel.com/wp-content/uploads/2022/05/v2_3.mp4",
+    src: "https://cdn.jsdelivr.net/gh/joakimnenzen/vargas/aira_flying_cloth_lightroom_1-1.mp4",
     background: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop",
     title: "Compliance Made Simple",
     date: "Regulatory Intelligence",
