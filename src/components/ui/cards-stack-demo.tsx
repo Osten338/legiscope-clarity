@@ -94,26 +94,6 @@ const Work = () => {
   return;
 };
 const Achievements = () => {
-  return <div className="container min-h-svh place-content-center bg-stone-50 px-6 text-stone-900 xl:px-12 py-24">
-      <div className="text-center max-w-2xl mx-auto mb-16">
-        <h5 className="text-xs uppercase tracking-wide">our achievements</h5>
-        <h2 className="mb-6 mt-4 text-4xl font-bold tracking-tight">
-          What we've <span className="text-black">accomplished</span> so far
-        </h2>
-        <p className="max-w-prose mx-auto text-sm">
-          Our journey has been marked by notable achievements that reflect our dedication and expertise in delivering exceptional solutions.
-        </p>
-      </div>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {ACHIEVEMENTS.map(achievement => <div key={achievement.id} className="p-8 rounded-2xl flex flex-col items-center justify-center text-center aspect-square" style={{
-        backgroundColor: achievement.bg,
-        color: 'white'
-      }}>
-            <h3 className="text-4xl md:text-5xl font-bold mb-2">{achievement.title}</h3>
-            <p className="text-sm opacity-90">{achievement.description}</p>
-          </div>)}
-      </div>
-    </div>;
+  return;
 };
 export { Process, Work, Achievements };
