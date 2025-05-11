@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MoveRight, PhoneCall } from "lucide-react";
 import { Process, Work, Achievements } from "@/components/ui/cards-stack-demo";
 import { Testimonials } from "@/components/ui/testimonials-demo";
+import Navbar from "@/components/ui/navbar";
 
 const Home = () => {
   // Updated media content for the hero section with video
@@ -15,8 +16,18 @@ const Home = () => {
     date: "Regulatory Intelligence",
     scrollToExpand: "Scroll to Explore"
   };
-  return <div className="min-h-screen bg-background">
-      <ScrollExpandMedia mediaType="video" mediaSrc={heroContent.src} bgImageSrc={heroContent.background} title={heroContent.title} date={heroContent.date} scrollToExpand={heroContent.scrollToExpand} />
+  
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <ScrollExpandMedia 
+        mediaType="video" 
+        mediaSrc={heroContent.src} 
+        bgImageSrc={heroContent.background} 
+        title={heroContent.title} 
+        date={heroContent.date} 
+        scrollToExpand={heroContent.scrollToExpand} 
+      />
       
       <div className="max-w-4xl mx-auto">
         
@@ -27,6 +38,8 @@ const Home = () => {
       <Work />
       <Testimonials />
       <Achievements />
-    </div>;
+    </div>
+  );
 };
+
 export default Home;
