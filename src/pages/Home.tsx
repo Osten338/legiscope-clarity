@@ -1,8 +1,11 @@
+
 import React from "react";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { Button } from "@/components/ui/button";
 import { MoveRight, PhoneCall } from "lucide-react";
 import { Process, Work, Achievements } from "@/components/ui/cards-stack-demo";
+import { Testimonials } from "@/components/ui/testimonials-demo";
+
 const Home = () => {
   // Updated media content for the hero section with video
   const heroContent = {
@@ -22,6 +25,7 @@ const Home = () => {
       {/* Card Stack Components */}
       <Process />
       <Work />
+      <Testimonials />
       <Achievements />
     </div>;
 };
