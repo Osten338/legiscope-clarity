@@ -94,20 +94,6 @@ const Work = () => {
   return;
 };
 const Achievements = () => {
-  return <ContainerScroll className="min-h-[400vh] place-items-center space-y-8 p-12 text-center text-zinc-50">
-        {ACHIEVEMENTS.map((achievement, index) => <CardSticky key={achievement.id} incrementY={20} index={index + 2} className="flex h-72 w-[420px] flex-col place-content-center justify-evenly rounded-2xl  border border-current p-8 shadow-md" style={{
-      rotate: index + 2,
-      background: achievement.bg
-    }}>
-            <h1 className="text-left text-6xl font-semibold opacity-80">
-              {achievement.title}
-            </h1>
-            <div className="place-items-end text-right">
-              <h3 className="max-w-[10ch] text-wrap  text-4xl font-semibold capitalize tracking-tight">
-                {achievement.description}
-              </h3>
-            </div>
-          </CardSticky>)}
-      </ContainerScroll>;
+  return;
 };
 export { Process, Work, Achievements };
