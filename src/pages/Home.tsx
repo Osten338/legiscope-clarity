@@ -3,6 +3,7 @@ import React from "react";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { Button } from "@/components/ui/button";
 import { MoveRight, PhoneCall } from "lucide-react";
+import { FlickeringGrid } from "@/components/ui/flickering-grid";
 
 const Home = () => {
   // Sample media content for the hero section

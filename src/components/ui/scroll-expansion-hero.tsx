@@ -10,6 +10,7 @@ import {
   WheelEvent,
 } from 'react';
 import { motion } from 'framer-motion';
+import { FlickeringGrid } from './flickering-grid';
 
 interface ScrollExpandMediaProps {
   mediaType?: 'video' | 'image';
@@ -181,15 +182,16 @@ const ScrollExpandMedia = ({
             animate={{ opacity: 1 - scrollProgress }}
             transition={{ duration: 0.1 }}
           >
-            <img
-              src={bgImageSrc}
-              alt='Background'
-              className='w-screen h-screen'
-              style={{
-                objectFit: 'cover',
-                objectPosition: 'center',
-              }}
-            />
+            <div className="absolute inset-0 w-full h-full">
+              <FlickeringGrid 
+                className="w-full h-full"
+                squareSize={4}
+                gridGap={6}
+                color="#6B7280"
+                maxOpacity={0.3}
+                flickerChance={0.1}
+              />
+            </div>
             <div className='absolute inset-0 bg-black/10' />
           </motion.div>
 
