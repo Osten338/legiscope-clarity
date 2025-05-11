@@ -1,4 +1,3 @@
-
 import { ContainerScroll, CardSticky } from "@/components/ui/cards-stack"
 
 const PROCESS_PHASES = [
@@ -84,6 +83,7 @@ const ACHIEVEMENTS = [
     bg: "rgb(135,95,195)",
   },
 ]
+
 const Process = () => {
   return (
     <div className="container min-h-svh place-content-center bg-stone-50 px-6 text-stone-900 xl:px-12">
@@ -92,7 +92,7 @@ const Process = () => {
           <h5 className=" text-xs uppercase tracking-wide">our process</h5>
           <h2 className="mb-6 mt-4 text-4xl font-bold tracking-tight">
             Planning your{" "}
-            <span className="text-indigo-500">project development</span> journey
+            <span className="text-black">project development</span> journey
           </h2>
           <p className="max-w-prose text-sm">
             Our journey begins with a deep dive into your vision. In the
@@ -112,7 +112,7 @@ const Process = () => {
                 <h2 className="my-6 text-2xl font-bold tracking-tighter">
                   {phase.title}
                 </h2>
-                <h3 className="text-2xl font-bold text-indigo-500">
+                <h3 className="text-2xl font-bold text-black">
                   {String(index + 1).padStart(2, "0")}
                 </h3>
               </div>
