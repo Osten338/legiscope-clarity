@@ -1,14 +1,12 @@
-
 import React from "react";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { Button } from "@/components/ui/button";
 import { MoveRight, PhoneCall } from "lucide-react";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
 
 const Home = () => {
-  // Sample media content for the hero section
+  // Updated media content for the hero section with video
   const heroContent = {
-    src: "https://images.unsplash.com/photo-1682687982501-1e58ab814714?q=80&w=1280&auto=format&fit=crop",
+    src: "https://gorrissenfederspiel.com/wp-content/uploads/2022/05/v2_3.mp4",
     background: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop",
     title: "Compliance Made Simple",
     date: "Regulatory Intelligence",
@@ -18,7 +16,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background">
       <ScrollExpandMedia
-        mediaType="image"
+        mediaType="video"
         mediaSrc={heroContent.src}
         bgImageSrc={heroContent.background}
         title={heroContent.title}
