@@ -1,4 +1,3 @@
-
 import { ContainerScroll, CardSticky } from "@/components/ui/cards-stack";
 const PROCESS_PHASES = [{
   id: "process-1",
@@ -92,68 +91,14 @@ const Process = () => {
     </div>;
 };
 const Work = () => {
-  return (
-    <div className="container min-h-svh place-content-center bg-slate-900 p-12 text-stone-50">
-      <div className="text-center">
-        <h5 className=" text-xs uppercase tracking-wide">latest projects</h5>
-        <h2 className="mb-4 mt-1 text-4xl font-bold tracking-tight">
-          Get a glimpse of <span className="text-black">our work</span>
-        </h2>
-        <p className="mx-auto max-w-prose text-sm text-muted/80">
-          From ecommerce to startup landing pages and singl/multi page websites,
-          building fully responsive and functional website that showcase your
-          product and your unique identity.
-        </p>
-      </div>
-      <ContainerScroll className="min-h-[500vh] py-12">
-        {WORK_PROJECTS.map((project, index) => (
-          <CardSticky
-            key={project.id}
-            index={index}
-            className="w-full overflow-hidden rounded-sm border border-x-black border-y-black bg-slate-800"
-            incrementY={60}
-            incrementZ={5}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4">
-              <h2 className="text-2xl font-bold tracking-tighter">
-                {project.title}
-              </h2>
-              <div className="flex flex-wrap gap-1">
-                {project.services.map((service) => (
-                  <div
-                    key={service}
-                    className="flex rounded-xl bg-slate-700 px-2 py-1"
-                  >
-                    <span className="text-xs tracking-tighter text-muted">
-                      {service}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <img
-              className="size-full object-cover"
-              width="100%"
-              height="100%"
-              src={project.imageUrl}
-            />
-          </CardSticky>
-        ))}
-      </ContainerScroll>
-    </div>
-  );
+  return;
 };
 const Achievements = () => {
-  return (
-    <ContainerScroll className="min-h-[400vh] place-items-center space-y-8 p-12 text-center text-zinc-50">
-      {ACHIEVEMENTS.map((achievement, index) => (
-        <CardSticky
-          key={achievement.id}
-          incrementY={20}
-          index={index + 2}
-          className="flex h-72 w-[420px] flex-col place-content-center justify-evenly rounded-2xl border border-current p-8 shadow-md"
-          style={{ rotate: index + 2, background: achievement.bg }}
-        >
+  return <ContainerScroll className="min-h-[400vh] place-items-center space-y-8 p-12 text-center text-zinc-50">
+      {ACHIEVEMENTS.map((achievement, index) => <CardSticky key={achievement.id} incrementY={20} index={index + 2} className="flex h-72 w-[420px] flex-col place-content-center justify-evenly rounded-2xl border border-current p-8 shadow-md" style={{
+      rotate: index + 2,
+      background: achievement.bg
+    }}>
           <h1 className="text-left text-6xl font-semibold opacity-80">
             {achievement.title}
           </h1>
@@ -162,9 +107,7 @@ const Achievements = () => {
               {achievement.description}
             </h3>
           </div>
-        </CardSticky>
-      ))}
-    </ContainerScroll>
-  );
+        </CardSticky>)}
+    </ContainerScroll>;
 };
 export { Process, Work, Achievements };
