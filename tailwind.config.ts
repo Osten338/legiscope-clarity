@@ -106,8 +106,7 @@ export default {
         marquee: 'marquee var(--duration) linear infinite',
         shimmer: "shimmer 2s linear infinite",
         appear: "appear 0.3s ease-out forwards",
-        "appear-zoom": "appear-zoom 0.3s ease-out forwards",
-        'wave-pulse': 'wave-pulse 4s ease-in-out infinite',
+        "appear-zoom": "appear-zoom 0.3s ease-out forwards"
       },
       keyframes: {
         "accordion-down": {
@@ -163,11 +162,7 @@ export default {
         "appear-zoom": {
           "0%": { opacity: "0", transform: "scale(0.98)" },
           "100%": { opacity: "1", transform: "scale(1)" }
-        },
-        'wave-pulse': {
-          '0%, 100%': { opacity: '0.4' },
-          '50%': { opacity: '0.7' },
-        },
+        }
       },
     },
   },
