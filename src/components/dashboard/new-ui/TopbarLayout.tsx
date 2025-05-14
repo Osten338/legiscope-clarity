@@ -8,11 +8,11 @@ interface TopbarLayoutProps {
 
 export function TopbarLayout({ children }: TopbarLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen bg-background">
       <MainNavbar />
-      <main className="flex-1 overflow-x-hidden">
+      <div className="lg:pl-[240px] pt-16 lg:pt-0 min-h-screen">
         {children}
-      </main>
+      </div>
     </div>
   );
 }

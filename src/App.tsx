@@ -1,62 +1,61 @@
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import AuthGuard from "./components/auth/AuthGuard";
-import Analysis from "./pages/Analysis";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import ComplianceChecklist from "./pages/ComplianceChecklist";
-import ComplianceOverviewPage from "./pages/ComplianceOverview";
-import RegulationsAdmin from "./pages/Admin/RegulationsAdmin";
-import ChecklistEditor from "./pages/Admin/ChecklistEditor";
-import GdprPreset from "./pages/Admin/GdprPreset";
-import NoMatch from "./pages/NoMatch";
-import Alerts from "./pages/Alerts";
-import LegislationPage from "./pages/LegislationPage";
-import Documentation from "./pages/Documentation";
-import ComplianceChat from "./pages/ComplianceChat";
-import ComplianceCalendar from "./pages/ComplianceCalendar";
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "./components/ui/toaster";
-import { ThemeProvider } from "./components/ui/use-theme";
+import { useEffect } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
+// Pages
+import Home from "@/pages/Home";
+import Dashboard from "@/pages/Dashboard";
+import Login from "@/pages/Login";
+import NotFound from "@/pages/NotFound";
+import Assessment from "@/pages/Assessment"; 
+import ComplianceOverview from "@/pages/ComplianceOverview";
+import ComplianceChat from "@/pages/ComplianceChat";
+import Documentation from "@/pages/Documentation";
+import Alerts from "@/pages/Alerts";
+import Documents from "@/pages/Documents";
+import Legislation from "@/pages/Legislation";
+import Settings from "@/pages/Settings";
+import ComplianceCalendar from "@/pages/ComplianceCalendar";
+import AdminTools from "@/pages/AdminTools";
+
+// Create a client
 const queryClient = new QueryClient();
 
 function App() {
+  // Apply saved theme on app load
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
   return (
-    <ThemeProvider defaultTheme="system" storageKey="ui-theme">
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/auth" element={<Login />} />
-            <Route path="/analysis/:id" element={<Analysis />} />
-            
-            {/* Protected routes */}
-            <Route element={<AuthGuard />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/alerts" element={<Alerts />} />
-              <Route path="/legislation" element={<LegislationPage />} />
-              <Route path="/documentation" element={<Documentation />} />
-              <Route path="/compliance-chat" element={<ComplianceChat />} />
-              <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
-              <Route path="/compliance-overview" element={<ComplianceOverviewPage />} />
-              <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
-              
-              {/* Admin routes */}
-              <Route path="/admin/regulations" element={<RegulationsAdmin />} />
-              <Route path="/admin/regulations/:id/checklist" element={<ChecklistEditor />} />
-              <Route path="/admin/regulations/gdpr-preset" element={<GdprPreset />} />
-            </Route>
-            
-            {/* Catch all route */}
-            <Route path="*" element={<NoMatch />} />
-          </Routes>
-          <Toaster />
-        </QueryClientProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/compliance-overview" element={<ComplianceOverview />} />
+          <Route path="/compliance-chat" element={<ComplianceChat />} />
+          <Route path="/documentation" element={<Documentation />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/documents" element={<Documents />} />
+          <Route path="/legislation" element={<Legislation />} />
+          <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/admin-tools" element={<AdminTools />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster position="bottom-right" />
+      </Router>
+    </QueryClientProvider>
   );
 }
 
