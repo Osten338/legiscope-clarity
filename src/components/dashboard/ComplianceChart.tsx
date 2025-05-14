@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface ComplianceChartProps {
   completedRegulations: number;
@@ -18,6 +18,11 @@ export function ComplianceChart({ completedRegulations, totalRegulations }: Comp
     { name: 'Compliant', value: completedRegulations, color: '#10B981' }, // green
     { name: 'Non-compliant', value: incompleteRegulations, color: '#F87171' } // red
   ].filter(item => item.value > 0); // Only show segments with values > 0
+  
+  const COLORS = [
+    "#10B981", // green for compliant
+    "#F87171"  // red for non-compliant
+  ];
   
   return (
     <Card className="h-full">
@@ -37,15 +42,62 @@ export function ComplianceChart({ completedRegulations, totalRegulations }: Comp
                     cy="50%"
                     innerRadius={60}
                     outerRadius={80}
-                    paddingAngle={2}
+                    paddingAngle={5}
                     dataKey="value"
-                    labelLine={false}
                   >
                     {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={COLORS[index % COLORS.length]}
+                        className="stroke-background hover:opacity-80"
+                      />
                     ))}
                   </Pie>
-                  <Legend />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  {payload[0].name}
+                                </span>
+                                <span className="font-bold text-muted-foreground">
+                                  {payload[0].value} regulations
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    content={({ payload }) => {
+                      if (payload && payload.length) {
+                        return (
+                          <div className="flex justify-center gap-4">
+                            {payload.map((entry, index) => (
+                              <div key={`item-${index}`} className="flex items-center gap-1">
+                                <div
+                                  className="h-2 w-2 rounded-full"
+                                  style={{ backgroundColor: entry.color }}
+                                />
+                                <span className="text-sm text-muted-foreground">
+                                  {entry.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
               
