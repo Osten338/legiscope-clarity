@@ -11,9 +11,9 @@ interface HistoryItem {
   id: string;
   created_at: string;
   description: string;
-  version_note: string;
-  category?: string;
-  importance?: number;
+  version_note: string | null;
+  category?: string | null;
+  importance?: number | null;
 }
 
 interface ChecklistItemVersionHistoryProps {

@@ -236,6 +236,7 @@ export interface Database {
           description: string;
           category: string | null;
           estimated_effort: string | null;
+          expert_verified: boolean | null;
         };
         Insert: {
           id?: string;
@@ -246,6 +247,7 @@ export interface Database {
           description: string;
           category?: string | null;
           estimated_effort?: string | null;
+          expert_verified?: boolean | null;
         };
         Update: {
           id?: string;
@@ -256,6 +258,7 @@ export interface Database {
           description?: string;
           category?: string | null;
           estimated_effort?: string | null;
+          expert_verified?: boolean | null;
         };
         Relationships: [
           {
@@ -657,6 +660,44 @@ export interface Database {
           metadata?: Json | null;
         };
         Relationships: [];
+      };
+      checklist_item_history: {
+        Row: {
+          id: string;
+          checklist_item_id: string;
+          description: string;
+          version_note: string | null;
+          category: string | null;
+          importance: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          checklist_item_id: string;
+          description: string;
+          version_note?: string | null;
+          category?: string | null;
+          importance?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          checklist_item_id?: string;
+          description?: string;
+          version_note?: string | null;
+          category?: string | null;
+          importance?: number | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "checklist_item_history_checklist_item_id_fkey";
+            columns: ["checklist_item_id"];
+            isOneToOne: false;
+            referencedRelation: "checklist_items";
+            referencedColumns: ["id"];
+          }
+        ];
       };
     };
     Views: {

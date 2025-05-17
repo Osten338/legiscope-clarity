@@ -164,6 +164,44 @@ export type Database = {
           },
         ]
       }
+      checklist_item_history: {
+        Row: {
+          category: string | null
+          checklist_item_id: string
+          created_at: string
+          description: string
+          id: string
+          importance: number | null
+          version_note: string | null
+        }
+        Insert: {
+          category?: string | null
+          checklist_item_id: string
+          created_at?: string
+          description: string
+          id?: string
+          importance?: number | null
+          version_note?: string | null
+        }
+        Update: {
+          category?: string | null
+          checklist_item_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          importance?: number | null
+          version_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_item_history_checklist_item_id_fkey"
+            columns: ["checklist_item_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checklist_item_responses: {
         Row: {
           checklist_item_id: string
@@ -214,6 +252,7 @@ export type Database = {
           created_at: string
           description: string
           estimated_effort: string | null
+          expert_verified: boolean | null
           id: string
           importance: number | null
           regulation_id: string | null
@@ -224,6 +263,7 @@ export type Database = {
           created_at?: string
           description: string
           estimated_effort?: string | null
+          expert_verified?: boolean | null
           id?: string
           importance?: number | null
           regulation_id?: string | null
@@ -234,6 +274,7 @@ export type Database = {
           created_at?: string
           description?: string
           estimated_effort?: string | null
+          expert_verified?: boolean | null
           id?: string
           importance?: number | null
           regulation_id?: string | null

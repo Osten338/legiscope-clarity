@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -159,12 +158,9 @@ const ChecklistEditor = () => {
         description: "Checklist item has been deleted successfully.",
       });
       
-      // Also delete history records
-      await supabase
-        .from("checklist_item_history")
-        .delete()
-        .eq("checklist_item_id", id);
-        
+      // Note: With ON DELETE CASCADE, we don't need to manually delete history records
+      // They will be automatically deleted
+      
       // Refresh the list
       fetchChecklistItems();
     } catch (error: any) {

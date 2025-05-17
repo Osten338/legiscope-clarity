@@ -1,13 +1,19 @@
 
+// Import statements and interfaces
 import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle, Clock, CalendarDays, Clipboard, ClipboardCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { Info, FileText, Bot, ClipboardCheck } from "lucide-react";
-import { GenerateDocumentDialog } from "./GenerateDocumentDialog";
-import { ComplianceBuddyDialog } from "./ComplianceBuddyDialog";
+
+interface Response {
+  status: 'completed' | 'will_do' | 'will_not_do';
+  justification?: string;
+}
 
 interface ChecklistItemProps {
   id: string;
@@ -19,207 +25,180 @@ interface ChecklistItemProps {
   regulationName: string;
   regulationDescription: string;
   expertVerified?: boolean;
-  response?: {
-    status: "completed" | "will_do" | "will_not_do";
-    justification?: string | null;
-  };
+  response?: Response;
 }
 
-export const ChecklistItem = ({ 
-  id, 
-  description, 
-  importance, 
-  category, 
+export const ChecklistItem = ({
+  id,
+  description,
+  importance,
+  category,
   estimatedEffort,
   regulationId,
   regulationName,
-  regulationDescription,
   expertVerified,
-  response 
+  response,
 }: ChecklistItemProps) => {
+  const [status, setStatus] = useState<'completed' | 'will_do' | 'will_not_do'>(
+    response?.status || 'will_do'
+  );
+  const [justification, setJustification] = useState(response?.justification || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showJustification, setShowJustification] = useState(!!response?.justification);
   const { toast } = useToast();
-  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
-  const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
 
-  const handleChecklistResponse = async (
-    status: "completed" | "will_do" | "will_not_do",
-    justification?: string
-  ) => {
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not found");
-
-      const { data: existingResponse } = await supabase
-        .from("checklist_item_responses")
-        .select("id")
-        .eq("checklist_item_id", id)
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      let error;
       
-      if (existingResponse) {
-        const { error: updateError } = await supabase
-          .from("checklist_item_responses")
-          .update({
-            status,
-            justification: status === "will_not_do" ? justification : null,
-            completion_date: status === "completed" ? new Date().toISOString() : null,
-          })
-          .eq("id", existingResponse.id);
-        error = updateError;
-      } else {
-        const { error: insertError } = await supabase
-          .from("checklist_item_responses")
-          .insert({
-            checklist_item_id: id,
-            user_id: user.id,
-            status,
-            justification: status === "will_not_do" ? justification : null,
-            completion_date: status === "completed" ? new Date().toISOString() : null,
-          });
-        error = insertError;
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to save your response",
+          variant: "destructive",
+        });
+        return;
       }
-
+      
+      const { error } = await supabase
+        .from("checklist_item_responses")
+        .upsert({
+          checklist_item_id: id,
+          user_id: user.id,
+          status,
+          justification: justification || null,
+          updated_at: new Date().toISOString(),
+        });
+        
       if (error) throw error;
-
+      
       toast({
         title: "Response saved",
-        description: "Your checklist response has been updated.",
+        description: "Your response has been recorded",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save response. Please try again.",
+        description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  const getImportanceBadge = (importance?: number) => {
+  
+  const getImportanceBadge = () => {
     if (!importance) return null;
-    const colors = {
-      1: "bg-slate-100 text-slate-600",
-      2: "bg-blue-100 text-blue-600",
-      3: "bg-yellow-100 text-yellow-600",
-      4: "bg-orange-100 text-orange-600",
-      5: "bg-red-100 text-red-600",
-    };
+    
+    const labels = [
+      "Low",
+      "Low-Medium",
+      "Medium",
+      "Medium-High",
+      "High"
+    ];
+    
+    const colors = [
+      "bg-slate-100 text-slate-700",
+      "bg-blue-100 text-blue-700",
+      "bg-yellow-100 text-yellow-700",
+      "bg-orange-100 text-orange-700",
+      "bg-red-100 text-red-700"
+    ];
+    
+    const index = Math.min(Math.max(1, importance), 5) - 1;
+    
     return (
-      <Badge className={colors[importance as keyof typeof colors]}>
-        Priority {importance}
+      <Badge className={`${colors[index]} font-normal`}>
+        {labels[index]} Priority
       </Badge>
     );
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start gap-4">
-        <Checkbox
-          checked={response?.status === "completed"}
-          onCheckedChange={(checked) =>
-            handleChecklistResponse(checked ? "completed" : "will_do")
-          }
-        />
-        <div className="space-y-2 flex-1">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-2">
-              <p className="text-sm text-slate-900">{description}</p>
+    <Card className="overflow-hidden">
+      <CardContent className="p-4 space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
               {expertVerified && (
-                <Badge variant="outline" className="shrink-0 bg-green-50 text-green-700 border-green-200 flex gap-1 items-center">
+                <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800 border-green-200">
                   <ClipboardCheck className="h-3 w-3" />
-                  <span className="text-xs">Expert-verified</span>
+                  <span>Expert-verified</span>
                 </Badge>
               )}
-            </div>
-            <div className="flex flex-wrap gap-2 items-center">
-              {importance && getImportanceBadge(importance)}
               {category && (
-                <Badge variant="outline" className="text-sage-600">
-                  {category}
-                </Badge>
+                <Badge variant="outline">{category}</Badge>
               )}
-              {estimatedEffort && (
-                <div className="flex items-center gap-1 text-xs text-slate-500">
-                  <Info className="h-3 w-3" />
-                  Estimated effort: {estimatedEffort}
-                </div>
-              )}
+              {getImportanceBadge()}
             </div>
+            <p className="text-base">{description}</p>
+            {estimatedEffort && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                <span>Est. effort: {estimatedEffort}</span>
+              </div>
+            )}
           </div>
-          {response?.status === "will_not_do" && (
-            <div className="pl-4 border-l-2 border-red-500">
-              <p className="text-sm text-red-600">
-                Justification: {response.justification}
-              </p>
-            </div>
-          )}
-          {!response?.status && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              <Button
-                size="sm"
-                onClick={() => handleChecklistResponse("will_do")}
-              >
-                Will Do
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  const justification = window.prompt(
-                    "Please provide justification for not implementing this requirement:"
-                  );
-                  if (justification) {
-                    handleChecklistResponse("will_not_do", justification);
-                  }
-                }}
-              >
-                Will Not Do
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                className="gap-2"
-                onClick={() => setGenerateDialogOpen(true)}
-              >
-                <FileText className="h-4 w-4" />
-                Generate Documentation
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="gap-2"
-                onClick={() => setBuddyDialogOpen(true)}
-              >
-                <Bot className="h-4 w-4" />
-                Ask Compliance Buddy
-              </Button>
-            </div>
-          )}
+          
+          <div className="flex-shrink-0">
+            <Select value={status} onValueChange={(value: 'completed' | 'will_do' | 'will_not_do') => {
+              setStatus(value);
+              setShowJustification(value === 'will_not_do');
+            }}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="completed" className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Completed</span>
+                </SelectItem>
+                <SelectItem value="will_do" className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-blue-500" />
+                  <span>Will do</span>
+                </SelectItem>
+                <SelectItem value="will_not_do" className="flex items-center gap-2">
+                  <Clipboard className="h-4 w-4 text-slate-500" />
+                  <span>Will not do</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
-
-      <GenerateDocumentDialog 
-        open={generateDialogOpen}
-        onOpenChange={setGenerateDialogOpen}
-        regulation={{
-          id: regulationId,
-          name: regulationName,
-          description: regulationDescription,
-          checklist_items: [{
-            id,
-            description
-          }]
-        }}
-      />
-
-      <ComplianceBuddyDialog
-        open={buddyDialogOpen}
-        onOpenChange={setBuddyDialogOpen}
-        checklistItem={{
-          description
-        }}
-      />
-    </div>
+        
+        {showJustification && (
+          <div className="space-y-2">
+            <label className="text-sm text-muted-foreground">
+              Please provide justification:
+            </label>
+            <Textarea
+              value={justification}
+              onChange={(e) => setJustification(e.target.value)}
+              placeholder="Explain why this item is not applicable to your business..."
+              className="resize-none h-20"
+            />
+          </div>
+        )}
+        
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting || (showJustification && !justification.trim())}
+            size="sm"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></span>
+                Saving...
+              </>
+            ) : (
+              'Save Response'
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

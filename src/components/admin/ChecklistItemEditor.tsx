@@ -19,6 +19,7 @@ interface ChecklistItemEditorProps {
     category?: string;
     importance?: number;
     estimated_effort?: string;
+    expert_verified?: boolean;
   };
   regulationId: string;
   categories: string[];
@@ -37,7 +38,7 @@ export const ChecklistItemEditor = ({
   const [category, setCategory] = useState(item?.category || "general");
   const [importance, setImportance] = useState<number>(item?.importance || 3);
   const [estimatedEffort, setEstimatedEffort] = useState(item?.estimated_effort || "");
-  const [isExpertVerified, setIsExpertVerified] = useState(true);
+  const [isExpertVerified, setIsExpertVerified] = useState(item?.expert_verified || false);
   const [isSaving, setIsSaving] = useState(false);
   const [versionNote, setVersionNote] = useState("");
   

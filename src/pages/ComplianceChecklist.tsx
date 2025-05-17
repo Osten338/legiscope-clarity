@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -210,7 +209,7 @@ const ComplianceChecklist = () => {
               value={activeTab} 
               onValueChange={handleTabChange} 
               className="w-full"
-              defaultValue="overview" // Add a default but use controlled value
+              defaultValue="overview" 
             >
               <TabsList className="mb-4">
                 <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
