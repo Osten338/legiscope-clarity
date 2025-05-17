@@ -74,7 +74,7 @@ export function HeroSection() {
                                     <div key={1} className="bg-foreground/10 rounded-[14px] border p-0.5">
                                         <Button asChild size="lg" className="rounded-xl px-5 text-base">
                                             <Link to="#link">
-                                                <span className="text-nowrap">Start Building</span>
+                                                <span className="text-nowrap">Try for free</span>
                                             </Link>
                                         </Button>
                                     </div>
