@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 // Pages
 import Home from "@/pages/Home";
+import About from "@/pages/About";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
@@ -39,6 +40,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/assessment" element={<Assessment />} />
