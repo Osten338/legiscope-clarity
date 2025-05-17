@@ -1,13 +1,18 @@
 
 import React from "react";
-import { HeroSection } from "@/components/blocks/hero-section-1";
+import { Link } from "react-router-dom";
 import { Footer } from "@/components/blocks/footer";
 import { TimelineDemo } from "@/components/ui/timeline-demo";
 
 const About = () => {
   return (
     <div className="min-h-screen">
-      <HeroSection />
+      <div className="container mx-auto py-4">
+        <nav className="flex justify-end gap-6">
+          <Link to="/" className="text-primary hover:underline">Home</Link>
+          <Link to="/about" className="text-primary hover:underline">About</Link>
+        </nav>
+      </div>
       <div className="container mx-auto py-8">
         <h1 className="text-4xl font-bold mb-6">About Us</h1>
         <p className="text-lg mb-8">
