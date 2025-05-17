@@ -8,14 +8,14 @@ function Feature() {
         <div className="flex flex-col gap-10">
           <div className="flex gap-4 flex-col items-start">
             <div>
-              <Badge variant="outline" className="rounded-full px-4 py-1">AI-Powered Compliance</Badge>
+              <Badge variant="outline" className="rounded-full px-4 py-1">Compliance Tools</Badge>
             </div>
             <div className="flex gap-2 flex-col">
               <h2 className="text-3xl md:text-5xl tracking-tighter max-w-xl font-regular text-left">
-                Simplify Regulatory Compliance
+                Smart Compliance Management
               </h2>
               <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
-                Our AI-driven platform transforms complex legal requirements into actionable insights, saving your business time and reducing compliance risks.
+                Navigate complex regulatory landscapes with AI-powered solutions designed for modern businesses.
               </p>
             </div>
           </div>
@@ -25,7 +25,7 @@ function Feature() {
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">Applicability of Laws Tool</h3>
                 <p className="text-muted-foreground max-w-xs text-base">
-                  Our intelligent system analyzes your business profile to identify which regulations apply to you. Using advanced RAG technology, we deliver precise, expert-authored compliance checklists tailored to your specific needs.
+                  Determine which laws apply to your business through our RAG model trained on specific regulations. Receive expert-written legal checklists for precise compliance.
                 </p>
               </div>
             </div>
@@ -34,7 +34,7 @@ function Feature() {
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">Policy Vault</h3>
                 <p className="text-muted-foreground max-w-xs text-base">
-                  Transform your static policy documents into a dynamic, searchable knowledge base. Our system analyzes your policies and automatically maps them to compliance requirements, highlighting gaps and opportunities.
+                  Upload your internal policies for AI processing, enabling interactive queries and automatic matching against compliance checklists.
                 </p>
               </div>
             </div>
@@ -43,7 +43,7 @@ function Feature() {
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">Curated Legal Chatbot</h3>
                 <p className="text-muted-foreground max-w-xs text-base">
-                  Get reliable legal guidance without the guesswork. Our chatbot draws from verified legal sources and understands your organization's unique context to deliver accurate, actionable compliance advice.
+                  Access accurate legal insights from professionally vetted sources, tailored to your organization's specific framework and policies.
                 </p>
               </div>
             </div>
@@ -52,7 +52,7 @@ function Feature() {
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">Horizon Spotter</h3>
                 <p className="text-muted-foreground max-w-xs text-base">
-                  Never be caught off-guard by regulatory changes again. Our system monitors trusted legal sources and filters updates based on your business profile, giving you early warnings about relevant changes to your compliance landscape.
+                  Stay ahead of regulatory changes with curated updates from reliable legal sources, filtered for relevance to your business profile.
                 </p>
               </div>
             </div>
