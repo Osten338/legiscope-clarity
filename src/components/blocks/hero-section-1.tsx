@@ -56,7 +56,7 @@ export function HeroSection() {
                                         </div>
                                     </Link>
                         
-                                    <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">Compliance work - Cut in half, done right</h1>
+                                    <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">Modern tools for Smarter compliance</h1>
                                     <p className="mx-auto mt-8 max-w-2xl text-balance text-lg">AI-powered tools that determine legal applicability, streamline policy management, answer governance questions, and track regulatory change—freeing your legal team to focus on high-impact work.</p>
                                 </AnimatedGroup>
 
