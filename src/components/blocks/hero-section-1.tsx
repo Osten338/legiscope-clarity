@@ -40,10 +40,7 @@ export function HeroSection() {
                 
                 
                 {/* Feature section with Bento grid added below */}
-                <div className="container mx-auto">
-                    <Feature />
-                    <AnimatedTestimonialsDemo />
-                </div>
+                
             </main>
         </>;
 }
