@@ -68,7 +68,7 @@ export function HeroSection() {
                             <img
                                 src="/lovable-uploads/4518b672-02b2-446d-b6b8-18ddcba5760f.png"
                                 alt="background"
-                                className="absolute inset-x-0 top-56 -z-20 hidden lg:top-32 dark:block"
+                                className="absolute inset-x-0 top-56 -z-20 block lg:top-32"
                                 width="3276"
                                 height="4095"
                             />
