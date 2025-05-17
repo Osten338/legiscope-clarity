@@ -7,10 +7,10 @@ const plans = [
   {
     name: "Starter",
     price: "$99",
-    description: "Perfect for small businesses just getting started with compliance.",
+    description: "Essential compliance tools for small businesses with limited regulatory exposure.",
     features: [
-      "Basic compliance dashboard",
-      "Limited regulatory search",
+      "Law applicability assessment",
+      "Basic policy vault (5 documents)",
       "Monthly regulatory updates",
       "5 user accounts"
     ],
@@ -21,13 +21,13 @@ const plans = [
   {
     name: "Professional",
     price: "$299",
-    description: "Ideal for growing businesses with more complex compliance needs.",
+    description: "Comprehensive compliance management for growing organizations with moderate regulatory needs.",
     features: [
-      "Advanced compliance dashboard",
-      "Full regulatory search",
+      "Advanced law applicability analysis",
+      "Extended policy vault (25 documents)",
       "Weekly regulatory updates",
-      "Compliance assessment tools",
-      "Basic reporting",
+      "Interactive legal chatbot",
+      "Compliance checklists & reporting",
       "20 user accounts"
     ],
     buttonText: "Get Started",
@@ -37,16 +37,16 @@ const plans = [
   {
     name: "Enterprise",
     price: "$799",
-    description: "For large organizations with comprehensive compliance requirements.",
+    description: "Complete compliance solution for large organizations with complex regulatory requirements.",
     features: [
       "Custom compliance dashboard",
-      "Advanced regulatory search",
-      "Real-time regulatory updates",
-      "Advanced compliance assessment",
-      "Automated reporting",
-      "Audit trail logging",
+      "Unlimited policy vault storage",
+      "Real-time regulatory monitoring",
+      "Advanced legal chatbot with custom training",
+      "Custom compliance reporting",
+      "Audit trail & documentation",
       "Unlimited user accounts",
-      "Priority support"
+      "Priority support & legal consultations"
     ],
     buttonText: "Contact Sales",
     buttonAction: "#contact",
@@ -58,8 +58,8 @@ export const PricingPlans = () => {
   return (
     <section className="py-16 px-4 md:px-6 lg:px-8 bg-black" id="pricing">
       <div className="max-w-5xl mx-auto text-center mb-12">
-        <h2 className="text-3xl font-bold text-white mb-3">Simple, transparent pricing</h2>
-        <p className="text-white/80">Choose the plan that's right for your business</p>
+        <h2 className="text-3xl font-bold text-white mb-3">Compliance solutions for every business</h2>
+        <p className="text-white/80">Transparent pricing with no hidden costs</p>
       </div>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

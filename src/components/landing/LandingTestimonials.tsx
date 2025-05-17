@@ -5,42 +5,42 @@ const testimonials = [
   {
     author: {
       name: "Sarah Mitchell",
-      handle: "Corporate Law Partner",
+      handle: "Compliance Director, Enterprise Corp",
       avatar: "/placeholder.svg"
     },
-    text: "CompliAI has revolutionized how we handle regulatory compliance. The AI-driven insights have saved us countless hours of manual review.",
+    text: "CompliAI has transformed our compliance operations. The AI-powered law applicability tool saved us hundreds of hours of legal consultation and gave us confidence in our regulatory approach.",
   },
   {
     author: {
       name: "David Chen",
-      handle: "Tech Law Specialist",
+      handle: "General Counsel, TechInnovate",
       avatar: "/placeholder.svg"
     },
-    text: "Finally, a compliance tool that understands the nuances of technology law. The real-time updates and analysis are game-changing.",
+    text: "The Policy Vault feature is revolutionary. Being able to query our own policies alongside regulatory requirements gives us a comprehensive view of our compliance posture.",
   },
   {
     author: {
       name: "Elena Rodriguez",
-      handle: "Privacy Law Expert",
+      handle: "Data Protection Officer",
       avatar: "/placeholder.svg"
     },
-    text: "The depth of privacy law coverage is impressive. It's like having a dedicated compliance team working 24/7.",
+    text: "As a privacy professional, the accuracy of CompliAI's legal chatbot is impressive. I can trust the responses because they're based on verified legal sources, not AI hallucinations.",
   },
   {
     author: {
       name: "James Wilson",
-      handle: "Managing Partner",
+      handle: "CEO, Financial Services Inc",
       avatar: "/placeholder.svg"
     },
-    text: "This platform has transformed our firm's approach to compliance. The automated updates and risk assessments are invaluable.",
+    text: "The Horizon Spotter has already helped us prepare for three major regulatory changes before our competitors even knew about them. It's like having an early warning system for compliance risks.",
   }
 ]
 
 export function LandingTestimonials() {
   return (
     <TestimonialsSection
-      title="Trusted by Legal Professionals"
-      description="See what lawyers and compliance experts are saying about CompliAI"
+      title="Trusted by Compliance Professionals"
+      description="See how our platform is revolutionizing regulatory compliance across industries"
       testimonials={testimonials}
     />
   )
