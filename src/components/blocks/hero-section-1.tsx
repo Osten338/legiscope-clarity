@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { cn } from '@/lib/utils';
+import { Feature } from '@/components/ui/feature-section-with-bento-grid';
 
 const transitionVariants = {
     item: {
@@ -229,6 +231,9 @@ export function HeroSection() {
                         </div>
                     </div>
                 </section>
+                
+                {/* Feature section with Bento grid added below */}
+                <Feature />
             </main>
         </>
     )
