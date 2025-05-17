@@ -6,9 +6,9 @@ import LandingNavbar from "@/components/landing/LandingNavbar";
 
 const PricingPage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <LandingNavbar />
-      <div className="pt-16">
+      <div className="pt-24">
         <Pricing />
       </div>
       <Footer />
