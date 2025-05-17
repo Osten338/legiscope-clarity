@@ -7,8 +7,10 @@ export function Demo() {
     return (
         <>
             <HeroSection />
-            <FeatureDemo />
-            <AnimatedTestimonialsDemo />
+            <div className="container mx-auto">
+                <FeatureDemo />
+                <AnimatedTestimonialsDemo />
+            </div>
         </>
     )
 }
