@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
@@ -7,7 +6,6 @@ import { AnimatedGroup } from '@/components/ui/animated-group';
 import { cn } from '@/lib/utils';
 import { Feature } from '@/components/ui/feature-section-with-bento-grid';
 import { AnimatedTestimonialsDemo } from '@/components/ui/animated-testimonials-demo';
-
 const transitionVariants = {
   item: {
     hidden: {
@@ -27,7 +25,6 @@ const transitionVariants = {
     }
   }
 };
-
 export function HeroSection() {
   return <>
             <HeroHeader />
@@ -59,12 +56,8 @@ export function HeroSection() {
                                         </div>
                                     </Link>
                         
-                                    <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                                        Modern Solutions for Customer Engagement
-                                    </h1>
-                                    <p className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                                        Highly customizable components for building modern websites and applications that look and feel the way you mean it.
-                                    </p>
+                                    <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">Smarter compliance, less legal overhead</h1>
+                                    <p className="mx-auto mt-8 max-w-2xl text-balance text-lg">AI-powered tools that determine legal applicability, streamline policy management, answer governance questions, and track regulatory change—freeing your legal team to focus on high-impact work.</p>
                                 </AnimatedGroup>
 
                                 <AnimatedGroup variants={{
@@ -126,7 +119,6 @@ export function HeroSection() {
             </main>
         </>;
 }
-
 const menuItems = [{
   name: 'Features',
   href: '#link'
@@ -135,10 +127,10 @@ const menuItems = [{
   href: '#link'
 }, {
   name: 'Pricing',
-  href: '/pricing'  // Changed from '#link' to '/pricing' to properly navigate to the Pricing page
+  href: '/pricing' // Changed from '#link' to '/pricing' to properly navigate to the Pricing page
 }, {
   name: 'About',
-  href: '/about'  
+  href: '/about'
 }];
 const HeroHeader = () => {
   const [menuState, setMenuState] = React.useState(false);
