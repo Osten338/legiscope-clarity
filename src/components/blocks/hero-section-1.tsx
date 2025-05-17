@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
@@ -134,10 +135,10 @@ const menuItems = [{
   href: '#link'
 }, {
   name: 'Pricing',
-  href: '#link'
+  href: '/pricing'  // Changed from '#link' to '/pricing' to properly navigate to the Pricing page
 }, {
   name: 'About',
-  href: '/about'  // Changed from '#link' to '/about' to properly navigate to the About page
+  href: '/about'  
 }];
 const HeroHeader = () => {
   const [menuState, setMenuState] = React.useState(false);

@@ -20,6 +20,7 @@ import Legislation from "@/pages/Legislation";
 import Settings from "@/pages/Settings";
 import ComplianceCalendar from "@/pages/ComplianceCalendar";
 import AdminTools from "@/pages/AdminTools";
+import Pricing from "@/pages/Pricing"; // Add the import for Pricing page
 
 // Create a client
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/pricing" element={<Pricing />} /> {/* Add the pricing route */}
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/assessment" element={<Assessment />} />
