@@ -137,7 +137,7 @@ const menuItems = [{
   href: '#link'
 }, {
   name: 'About',
-  href: '#link'
+  href: '/about'  // Changed from '#link' to '/about' to properly navigate to the About page
 }];
 const HeroHeader = () => {
   const [menuState, setMenuState] = React.useState(false);
