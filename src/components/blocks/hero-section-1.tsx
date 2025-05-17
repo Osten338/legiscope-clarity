@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { cn } from '@/lib/utils';
 import { Feature } from '@/components/ui/feature-section-with-bento-grid';
+import { AnimatedTestimonialsDemo } from '@/components/ui/animated-testimonials-demo';
+
 const transitionVariants = {
   item: {
     hidden: {
@@ -24,6 +26,7 @@ const transitionVariants = {
     }
   }
 };
+
 export function HeroSection() {
   return <>
             <HeroHeader />
@@ -115,10 +118,14 @@ export function HeroSection() {
                 
                 
                 {/* Feature section with Bento grid added below */}
-                <Feature />
+                <div className="container mx-auto">
+                    <Feature />
+                    <AnimatedTestimonialsDemo />
+                </div>
             </main>
         </>;
 }
+
 const menuItems = [{
   name: 'Features',
   href: '#link'
