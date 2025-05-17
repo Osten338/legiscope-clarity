@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
@@ -67,7 +66,7 @@ export function HeroSection() {
                             }}
                             className="absolute inset-0 -z-20">
                             <img
-                                src="https://ik.imagekit.io/lrigu76hy/tailark/night-background.jpg?updatedAt=1745733451120"
+                                src="/lovable-uploads/4518b672-02b2-446d-b6b8-18ddcba5760f.png"
                                 alt="background"
                                 className="absolute inset-x-0 top-56 -z-20 hidden lg:top-32 dark:block"
                                 width="3276"
