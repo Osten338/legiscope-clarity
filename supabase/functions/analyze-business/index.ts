@@ -172,6 +172,21 @@ serve(async (req) => {
                 }
                 
                 console.log(`Linked ${applicableRegulations.length} regulations to analysis`);
+                
+                // Fetch expert-verified status for the checklist items
+                for (const reg of applicableRegulations) {
+                  const { data: checklistItems } = await supabaseAdmin
+                    .from('checklist_items')
+                    .select('id, expert_verified')
+                    .eq('regulation_id', reg.id);
+                    
+                  if (checklistItems && checklistItems.length > 0) {
+                    const expertVerifiedCount = checklistItems.filter(item => item.expert_verified).length;
+                    const totalItems = checklistItems.length;
+                    
+                    console.log(`Regulation ${reg.id} has ${expertVerifiedCount}/${totalItems} expert-verified checklist items`);
+                  }
+                }
               } else {
                 console.log("No applicable regulations found for this business");
               }

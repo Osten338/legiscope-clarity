@@ -1,104 +1,110 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { TopbarLayout } from "@/components/dashboard/new-ui";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-import { TopbarLayout } from "@/components/dashboard/new-ui";
-import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, Plus, Edit, Trash2, AlertCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChecklistItemEditor } from "@/components/admin/ChecklistItemEditor";
+import { BatchChecklistImport } from "@/components/admin/BatchChecklistImport";
+import { ChecklistCategoryManager } from "@/components/admin/ChecklistCategoryManager";
+import { ChecklistItemVersionHistory } from "@/components/admin/ChecklistItemVersionHistory";
+import { AlertTriangle, ChevronLeft, ClipboardCheck, Clock, Edit, Plus, Search, Tag, Trash2 } from "lucide-react";
+import { CheckedState } from "@radix-ui/react-checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-type Regulation = {
+interface ChecklistItem {
+  id: string;
+  description: string;
+  category?: string;
+  importance?: number;
+  estimated_effort?: string;
+  created_at: string;
+  updated_at: string;
+  expert_verified?: boolean;
+}
+
+interface Regulation {
   id: string;
   name: string;
   description: string;
-  motivation: string;
-  requirements: string;
-};
-
-type ChecklistItem = {
-  id: string;
-  regulation_id: string;
-  description: string;
-  importance: number;
-  category: string | null;
-  estimated_effort: string | null;
-  created_at: string;
-  updated_at: string;
-};
+  motivation?: string;
+  requirements?: string;
+}
 
 const ChecklistEditor = () => {
-  const { id: regulationId } = useParams<{ id: string }>();
+  const { regulationId } = useParams<{ regulationId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+
   const [regulation, setRegulation] = useState<Regulation | null>(null);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<ChecklistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState<ChecklistItem | null>(null);
-  const [formData, setFormData] = useState({
-    description: "",
-    importance: "3",
-    category: "",
-    estimated_effort: "",
-  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
+  const [showAddItemForm, setShowAddItemForm] = useState(false);
+  const [activeTab, setActiveTab] = useState("items");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [expertVerifiedOnly, setExpertVerifiedOnly] = useState<CheckedState>(false);
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [selectedHistoryItemId, setSelectedHistoryItemId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (regulationId) {
-      fetchRegulationAndChecklist();
-    }
-  }, [regulationId]);
+  const fetchRegulation = async () => {
+    if (!regulationId) return;
 
-  const fetchRegulationAndChecklist = async () => {
-    setIsLoading(true);
     try {
-      // Fetch regulation details
-      const { data: regulationData, error: regulationError } = await supabase
+      const { data, error } = await supabase
         .from("regulations")
         .select("*")
         .eq("id", regulationId)
         .single();
 
-      if (regulationError) throw regulationError;
-      setRegulation(regulationData);
+      if (error) throw error;
+      
+      setRegulation(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load regulation details",
+        variant: "destructive",
+      });
+      navigate("/admin/regulations");
+    }
+  };
 
-      // Fetch checklist items
-      const { data: checklistData, error: checklistError } = await supabase
+  const fetchChecklistItems = async () => {
+    if (!regulationId) return;
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
         .from("checklist_items")
         .select("*")
         .eq("regulation_id", regulationId)
-        .order("importance", { ascending: false });
+        .order("created_at", { ascending: true });
 
-      if (checklistError) throw checklistError;
-      setChecklistItems(checklistData || []);
+      if (error) throw error;
+      
+      setChecklistItems(data || []);
+      
+      // Extract unique categories
+      const uniqueCategories = Array.from(
+        new Set(data?.map(item => item.category).filter(Boolean) || [])
+      ) as string[];
+      
+      setCategories(uniqueCategories);
     } catch (error: any) {
       toast({
-        title: "Error fetching data",
-        description: error.message,
+        title: "Error",
+        description: "Failed to load checklist items",
         variant: "destructive",
       });
     } finally {
@@ -106,42 +112,37 @@ const ChecklistEditor = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    fetchRegulation();
+    fetchChecklistItems();
+  }, [regulationId]);
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      description: "",
-      importance: "3",
-      category: "",
-      estimated_effort: "",
-    });
-    setCurrentItem(null);
-  };
-
-  const openDialog = (item?: ChecklistItem) => {
-    if (item) {
-      setCurrentItem(item);
-      setFormData({
-        description: item.description,
-        importance: String(item.importance || 3),
-        category: item.category || "",
-        estimated_effort: item.estimated_effort || "",
-      });
-    } else {
-      resetForm();
+  useEffect(() => {
+    // Filter items based on search term and category
+    let filtered = [...checklistItems];
+    
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.description.toLowerCase().includes(lowerSearch) ||
+        (item.category || "").toLowerCase().includes(lowerSearch)
+      );
     }
-    setIsDialogOpen(true);
-  };
+    
+    if (categoryFilter) {
+      filtered = filtered.filter(item => item.category === categoryFilter);
+    }
+    
+    // Filter by expert verification if checked
+    if (expertVerifiedOnly) {
+      filtered = filtered.filter(item => item.expert_verified);
+    }
+    
+    setFilteredItems(filtered);
+  }, [checklistItems, searchTerm, categoryFilter, expertVerifiedOnly]);
 
   const handleDeleteItem = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this checklist item?")) {
+    if (!window.confirm("Are you sure you want to delete this checklist item? This action cannot be undone.")) {
       return;
     }
 
@@ -154,342 +155,298 @@ const ChecklistEditor = () => {
       if (error) throw error;
 
       toast({
-        title: "Checklist item deleted",
-        description: "The checklist item has been deleted successfully."
+        title: "Item Deleted",
+        description: "Checklist item has been deleted successfully.",
       });
       
-      fetchRegulationAndChecklist();
-    } catch (error: any) {
-      toast({
-        title: "Error deleting checklist item",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSaveItem = async () => {
-    try {
-      if (!formData.description.trim()) {
-        throw new Error("Checklist item description is required");
-      }
-
-      if (currentItem) {
-        // Update existing item
-        const { error } = await supabase
-          .from("checklist_items")
-          .update({
-            description: formData.description,
-            importance: parseInt(formData.importance),
-            category: formData.category || null,
-            estimated_effort: formData.estimated_effort || null,
-          })
-          .eq("id", currentItem.id);
-
-        if (error) throw error;
+      // Also delete history records
+      await supabase
+        .from("checklist_item_history")
+        .delete()
+        .eq("checklist_item_id", id);
         
-        toast({
-          title: "Checklist item updated",
-          description: "The checklist item has been updated successfully."
-        });
-      } else {
-        // Create new item
-        const { error } = await supabase
-          .from("checklist_items")
-          .insert({
-            regulation_id: regulationId,
-            description: formData.description,
-            importance: parseInt(formData.importance),
-            category: formData.category || null,
-            estimated_effort: formData.estimated_effort || null,
-          });
-
-        if (error) throw error;
-        
-        toast({
-          title: "Checklist item created",
-          description: "The checklist item has been created successfully."
-        });
-      }
-
-      setIsDialogOpen(false);
-      resetForm();
-      fetchRegulationAndChecklist();
+      // Refresh the list
+      fetchChecklistItems();
     } catch (error: any) {
       toast({
-        title: "Error saving checklist item",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
   };
 
-  const adjustItemImportance = async (item: ChecklistItem, change: number) => {
-    try {
-      const newImportance = Math.max(1, Math.min(5, item.importance + change));
-      
-      if (newImportance === item.importance) return; // No change needed
-      
-      const { error } = await supabase
-        .from("checklist_items")
-        .update({ importance: newImportance })
-        .eq("id", item.id);
-
-      if (error) throw error;
-      
-      fetchRegulationAndChecklist();
-    } catch (error: any) {
-      toast({
-        title: "Error updating priority",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+  const handleHistoryClick = (itemId: string) => {
+    setSelectedHistoryItemId(itemId);
+    setShowHistoryDialog(true);
   };
 
-  const getImportanceLabel = (importance: number) => {
-    const labels = {
-      1: "Low",
-      2: "Medium-Low",
-      3: "Medium",
-      4: "Medium-High",
-      5: "High"
+  const handleCategoriesChange = (updatedCategories: string[]) => {
+    // Just update the UI state, we'll save these with each checklist item
+    setCategories(updatedCategories);
+  };
+
+  const handleImportComplete = () => {
+    fetchChecklistItems();
+    toast({
+      title: "Import Complete",
+      description: "Checklist items have been imported successfully.",
+    });
+  };
+
+  const renderPriorityBadge = (importance?: number) => {
+    if (!importance) return null;
+    
+    const colors: Record<number, string> = {
+      1: "bg-slate-100 text-slate-600",
+      2: "bg-blue-100 text-blue-600",
+      3: "bg-yellow-100 text-yellow-600", 
+      4: "bg-orange-100 text-orange-600",
+      5: "bg-red-100 text-red-600"
     };
-    return labels[importance as keyof typeof labels] || "Medium";
-  };
-
-  const importanceColorClasses = {
-    1: "bg-slate-100 text-slate-700",
-    2: "bg-blue-100 text-blue-700",
-    3: "bg-green-100 text-green-700",
-    4: "bg-amber-100 text-amber-700",
-    5: "bg-red-100 text-red-700"
+    
+    return (
+      <Badge className={colors[importance]}>
+        P{importance}
+      </Badge>
+    );
   };
 
   return (
     <TopbarLayout>
-      <div className="container mx-auto p-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/admin/regulations")}
-          className="mb-6"
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" /> Back to Regulations
-        </Button>
-
-        {isLoading ? (
-          <div className="flex justify-center p-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : !regulation ? (
-          <Card className="text-center p-12">
-            <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
-            <p className="text-xl font-medium mb-4">Regulation not found</p>
-            <Button onClick={() => navigate("/admin/regulations")}>
-              Return to Regulations
-            </Button>
-          </Card>
-        ) : (
-          <>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-              <div>
-                <h1 className="text-3xl font-bold">{regulation.name} Checklist</h1>
-                <p className="text-muted-foreground max-w-3xl">
-                  {regulation.description}
-                </p>
-              </div>
-              <Button onClick={() => openDialog()}>
-                <Plus className="mr-2 h-4 w-4" /> Add Checklist Item
-              </Button>
-            </div>
-
-            <Card className="mb-8">
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate("/admin/regulations")} 
+            className="mb-2"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Regulations
+          </Button>
+          <h1 className="text-2xl font-bold mb-2">
+            {regulation ? regulation.name : "Loading..."} Checklist
+          </h1>
+          {regulation && (
+            <p className="text-muted-foreground">
+              {regulation.description}
+            </p>
+          )}
+        </div>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="items">Checklist Items</TabsTrigger>
+            <TabsTrigger value="batch">Batch Import</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="items" className="space-y-6">
+            <Card>
               <CardHeader>
-                <CardTitle>Regulation Details</CardTitle>
-                <CardDescription>
-                  Reference information for creating checklist items
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="font-medium">Applicability / Motivation</h3>
-                  <p className="text-muted-foreground">{regulation.motivation}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium">Requirements</h3>
-                  <p className="text-muted-foreground">{regulation.requirements}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">
-                Expert Checklist Items ({checklistItems.length})
-              </h2>
-              <div className="text-sm text-muted-foreground">
-                Listed by priority (highest first)
-              </div>
-            </div>
-
-            {checklistItems.length === 0 ? (
-              <Card className="text-center p-8">
-                <p className="text-muted-foreground mb-4">
-                  No checklist items yet. Add your first item to get started.
-                </p>
-                <Button onClick={() => openDialog()}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Checklist Item
-                </Button>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {checklistItems.map((item) => (
-                  <Card key={item.id} className="overflow-hidden">
-                    <div className="flex flex-col lg:flex-row">
-                      <div className="p-5 lg:w-40 flex flex-row lg:flex-col justify-between items-center lg:items-start gap-4 bg-muted/30">
-                        <div>
-                          <div className={`text-xs font-medium px-2 py-1 rounded-full inline-flex items-center ${importanceColorClasses[item.importance as keyof typeof importanceColorClasses] || "bg-slate-100 text-slate-700"}`}>
-                            Priority: {getImportanceLabel(item.importance)}
-                          </div>
-                          {item.category && (
-                            <div className="mt-2 text-xs text-muted-foreground">
-                              Category: {item.category}
-                            </div>
-                          )}
-                          {item.estimated_effort && (
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              Est. effort: {item.estimated_effort}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex lg:flex-col gap-1">
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            onClick={() => adjustItemImportance(item, 1)}
-                            disabled={item.importance >= 5}
-                          >
-                            <ArrowUp className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            onClick={() => adjustItemImportance(item, -1)}
-                            disabled={item.importance <= 1}
-                          >
-                            <ArrowDown className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <CardContent className="p-5 flex-1 flex justify-between items-center gap-4">
-                        <div className="flex-1">
-                          <p>{item.description}</p>
-                        </div>
-                        <div className="flex gap-2 shrink-0">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDialog(item)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteItem(item.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            {/* Checklist Item Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>
-                    {currentItem ? "Edit Checklist Item" : "Add Checklist Item"}
-                  </DialogTitle>
-                  <DialogDescription>
-                    Enter the details for this compliance requirement
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Requirement Description</Label>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      placeholder="Detailed description of the compliance requirement"
-                      rows={4}
-                    />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle>Checklist Items</CardTitle>
+                    <CardDescription>
+                      {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} found
+                    </CardDescription>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="importance">Priority</Label>
-                      <Select 
-                        value={formData.importance}
-                        onValueChange={(value) => handleSelectChange("importance", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">1 - Low</SelectItem>
-                          <SelectItem value="2">2 - Medium-Low</SelectItem>
-                          <SelectItem value="3">3 - Medium</SelectItem>
-                          <SelectItem value="4">4 - Medium-High</SelectItem>
-                          <SelectItem value="5">5 - High</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category (Optional)</Label>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="category"
-                        name="category"
-                        value={formData.category}
-                        onChange={handleInputChange}
-                        placeholder="e.g., Documentation, Process, Technical"
+                        placeholder="Search items..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9 w-full sm:w-[250px]"
                       />
                     </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="estimated_effort">Estimated Effort (Optional)</Label>
-                    <Input
-                      id="estimated_effort"
-                      name="estimated_effort"
-                      value={formData.estimated_effort}
-                      onChange={handleInputChange}
-                      placeholder="e.g., 2-4 hours, 1 week"
-                    />
+                    
+                    <Button onClick={() => setShowAddItemForm(true)}>
+                      <Plus className="mr-2 h-4 w-4" /> Add Item
+                    </Button>
                   </div>
                 </div>
                 
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveItem}>
-                    {currentItem ? "Update Item" : "Add Item"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </>
-        )}
+                {/* Filter controls */}
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <select
+                      className="text-sm border rounded p-1"
+                      value={categoryFilter || ""}
+                      onChange={(e) => setCategoryFilter(e.target.value || null)}
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="expertVerifiedOnly" 
+                      checked={expertVerifiedOnly}
+                      onCheckedChange={setExpertVerifiedOnly}
+                    />
+                    <label 
+                      htmlFor="expertVerifiedOnly" 
+                      className="text-sm cursor-pointer"
+                    >
+                      Expert-verified only
+                    </label>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin h-8 w-8 border-2 border-b-transparent rounded-full mx-auto"></div>
+                    <p className="mt-4 text-muted-foreground">Loading checklist items...</p>
+                  </div>
+                ) : filteredItems.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[50%]">Description</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="align-top">
+                            <div className="flex items-start gap-2">
+                              {item.expert_verified && (
+                                <Badge variant="outline" className="mt-0.5 shrink-0 py-0 px-1.5">
+                                  <ClipboardCheck className="h-3 w-3" />
+                                </Badge>
+                              )}
+                              <span>{item.description}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {item.category && (
+                              <Badge variant="outline">{item.category}</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {renderPriorityBadge(item.importance)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleHistoryClick(item.id)}
+                              >
+                                <Clock className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedItem(item);
+                                  setShowAddItemForm(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteItem(item.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-12">
+                    <AlertTriangle className="mx-auto h-8 w-8 text-muted-foreground" />
+                    <p className="mt-4 text-muted-foreground">
+                      No checklist items found. {searchTerm || categoryFilter ? 
+                        "Try adjusting your filters or search term." : 
+                        "Add your first checklist item to get started."}
+                    </p>
+                    
+                    {(searchTerm || categoryFilter) && (
+                      <Button 
+                        variant="outline" 
+                        className="mt-4"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setCategoryFilter(null);
+                          setExpertVerifiedOnly(false);
+                        }}
+                      >
+                        Clear Filters
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            {showAddItemForm && regulationId && (
+              <ChecklistItemEditor
+                item={selectedItem || undefined}
+                regulationId={regulationId}
+                categories={categories}
+                onSave={() => {
+                  setSelectedItem(null);
+                  setShowAddItemForm(false);
+                  fetchChecklistItems();
+                }}
+                onCancel={() => {
+                  setSelectedItem(null);
+                  setShowAddItemForm(false);
+                }}
+              />
+            )}
+          </TabsContent>
+          
+          <TabsContent value="batch">
+            {regulationId && (
+              <BatchChecklistImport 
+                regulationId={regulationId} 
+                onImportComplete={handleImportComplete} 
+              />
+            )}
+          </TabsContent>
+          
+          <TabsContent value="categories">
+            <ChecklistCategoryManager 
+              existingCategories={categories}
+              onCategoriesChange={handleCategoriesChange}
+            />
+          </TabsContent>
+        </Tabs>
+        
+        <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <CardHeader>
+              <CardTitle>Version History</CardTitle>
+              <CardDescription>
+                View previous versions of this checklist item
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {selectedHistoryItemId && (
+                <ChecklistItemVersionHistory checklistItemId={selectedHistoryItemId} />
+              )}
+            </CardContent>
+          </DialogContent>
+        </Dialog>
       </div>
     </TopbarLayout>
   );

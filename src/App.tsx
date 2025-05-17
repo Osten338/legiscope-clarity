@@ -20,7 +20,10 @@ import Legislation from "@/pages/Legislation";
 import Settings from "@/pages/Settings";
 import ComplianceCalendar from "@/pages/ComplianceCalendar";
 import AdminTools from "@/pages/AdminTools";
-import Pricing from "@/pages/Pricing"; // Add the import for Pricing page
+import Pricing from "@/pages/Pricing";
+import ComplianceChecklist from "@/pages/ComplianceChecklist";
+import RegulationsAdmin from "@/pages/Admin/RegulationsAdmin";
+import ChecklistEditor from "@/pages/Admin/ChecklistEditor";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -42,12 +45,13 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/pricing" element={<Pricing />} /> {/* Add the pricing route */}
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/compliance-overview" element={<ComplianceOverview />} />
           <Route path="/compliance-chat" element={<ComplianceChat />} />
+          <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
           <Route path="/documentation" element={<Documentation />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/documents" element={<Documents />} />
@@ -55,6 +59,8 @@ function App() {
           <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/admin-tools" element={<AdminTools />} />
+          <Route path="/admin/regulations" element={<RegulationsAdmin />} />
+          <Route path="/admin/regulations/:regulationId/checklist" element={<ChecklistEditor />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="bottom-right" />

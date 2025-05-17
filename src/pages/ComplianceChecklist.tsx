@@ -15,6 +15,7 @@ interface ChecklistItemType {
   importance?: number;
   category?: string;
   estimated_effort?: string;
+  expert_verified?: boolean;
 }
 
 interface RegulationType {
@@ -99,9 +100,42 @@ const ComplianceChecklist = () => {
               };
             }
 
+            // Get user responses for these checklist items
+            const { data: responses, error: responsesError } = await supabase
+              .from("checklist_item_responses")
+              .select("*")
+              .eq("user_id", user.id)
+              .in(
+                "checklist_item_id",
+                checklistItems?.map((item) => item.id) || []
+              );
+
+            if (responsesError) {
+              console.error(
+                `Error fetching responses for regulation ${regulation.id}:`,
+                responsesError
+              );
+            }
+
+            // Map responses to checklist items
+            const itemsWithResponses = checklistItems?.map((item) => {
+              const response = responses?.find(
+                (r) => r.checklist_item_id === item.id
+              );
+              return {
+                ...item,
+                response: response
+                  ? {
+                      status: response.status,
+                      justification: response.justification,
+                    }
+                  : undefined,
+              };
+            });
+
             return {
               ...regulation,
-              checklist_items: checklistItems || [],
+              checklist_items: itemsWithResponses || [],
             };
           })
         );
@@ -198,19 +232,33 @@ const ComplianceChecklist = () => {
                       <div className="space-y-4">
                         <p>Select a regulation from the tabs above to view its checklist.</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                          {regulations.map((reg) => (
-                            <div 
-                              key={reg.id} 
-                              className="border rounded-lg p-4 hover:bg-slate-50 cursor-pointer"
-                              onClick={() => handleTabChange(reg.id)}
-                            >
-                              <h3 className="font-medium text-lg">{reg.name}</h3>
-                              <p className="text-slate-600 mt-2 text-sm">{reg.description}</p>
-                              <div className="mt-3 text-sage-600 text-sm">
-                                {reg.checklist_items?.length || 0} checklist items
+                          {regulations.map((reg) => {
+                            // Calculate expert-verified percentage
+                            const totalItems = reg.checklist_items?.length || 0;
+                            const expertVerified = reg.checklist_items?.filter(item => item.expert_verified)?.length || 0;
+                            const expertVerifiedPercentage = totalItems > 0 ? Math.round((expertVerified / totalItems) * 100) : 0;
+                            
+                            return (
+                              <div 
+                                key={reg.id} 
+                                className="border rounded-lg p-4 hover:bg-slate-50 cursor-pointer"
+                                onClick={() => handleTabChange(reg.id)}
+                              >
+                                <h3 className="font-medium text-lg">{reg.name}</h3>
+                                <p className="text-slate-600 mt-2 text-sm line-clamp-3">{reg.description}</p>
+                                <div className="mt-3 flex items-center justify-between">
+                                  <span className="text-sage-600 text-sm">
+                                    {reg.checklist_items?.length || 0} checklist items
+                                  </span>
+                                  {expertVerified > 0 && (
+                                    <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                      {expertVerifiedPercentage}% Expert-verified
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     ) : (
@@ -246,6 +294,8 @@ const ComplianceChecklist = () => {
                               regulationId={regulation.id}
                               regulationName={regulation.name}
                               regulationDescription={regulation.description}
+                              expertVerified={item.expert_verified}
+                              response={item.response}
                             />
                           ))}
                         </div>

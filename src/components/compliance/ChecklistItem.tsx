@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Info, FileText, Bot } from "lucide-react";
+import { Info, FileText, Bot, ClipboardCheck } from "lucide-react";
 import { GenerateDocumentDialog } from "./GenerateDocumentDialog";
 import { ComplianceBuddyDialog } from "./ComplianceBuddyDialog";
 
@@ -18,6 +18,7 @@ interface ChecklistItemProps {
   regulationId: string;
   regulationName: string;
   regulationDescription: string;
+  expertVerified?: boolean;
   response?: {
     status: "completed" | "will_do" | "will_not_do";
     justification?: string | null;
@@ -33,6 +34,7 @@ export const ChecklistItem = ({
   regulationId,
   regulationName,
   regulationDescription,
+  expertVerified,
   response 
 }: ChecklistItemProps) => {
   const { toast } = useToast();
@@ -121,7 +123,15 @@ export const ChecklistItem = ({
         />
         <div className="space-y-2 flex-1">
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-slate-900">{description}</p>
+            <div className="flex items-start gap-2">
+              <p className="text-sm text-slate-900">{description}</p>
+              {expertVerified && (
+                <Badge variant="outline" className="shrink-0 bg-green-50 text-green-700 border-green-200 flex gap-1 items-center">
+                  <ClipboardCheck className="h-3 w-3" />
+                  <span className="text-xs">Expert-verified</span>
+                </Badge>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2 items-center">
               {importance && getImportanceBadge(importance)}
               {category && (
