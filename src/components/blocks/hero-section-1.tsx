@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
@@ -162,8 +163,12 @@ export function HeroSection() {
                                     className="bg-gradient-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
                                 />
                                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
-                                    <div className="aspect-[15/8] relative rounded-2xl bg-muted/50 flex items-center justify-center">
-                                        <p className="text-muted-foreground">Your application dashboard</p>
+                                    <div className="aspect-[15/8] relative rounded-2xl overflow-hidden">
+                                        <img 
+                                            src="/lovable-uploads/b4babd51-4fc6-43bf-b5dc-8c64ce696f4a.png" 
+                                            alt="Compliance Dashboard" 
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
                                 </div>
                             </div>
