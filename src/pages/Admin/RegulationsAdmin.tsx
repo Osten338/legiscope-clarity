@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, ClipboardList, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -60,10 +59,8 @@ const RegulationsAdmin = () => {
   const [currentRegulation, setCurrentRegulation] = useState<Regulation | null>(null);
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
-    motivation: "",
-    requirements: ""
   });
+  const [checklistCounts, setChecklistCounts] = useState<{[key: string]: number}>({});
 
   useEffect(() => {
     fetchRegulations();
@@ -79,6 +76,24 @@ const RegulationsAdmin = () => {
 
       if (error) throw error;
       setRegulations(data || []);
+      
+      // Fetch checklist item counts for each regulation
+      if (data && data.length > 0) {
+        const counts: {[key: string]: number} = {};
+        
+        for (const reg of data) {
+          const { count, error: countError } = await supabase
+            .from("checklist_items")
+            .select("id", { count: 'exact', head: true })
+            .eq("regulation_id", reg.id);
+            
+          if (!countError) {
+            counts[reg.id] = count || 0;
+          }
+        }
+        
+        setChecklistCounts(counts);
+      }
       
       // Check for duplicates
       const duplicateMap: {[key: string]: Regulation[]} = {};
@@ -110,17 +125,14 @@ const RegulationsAdmin = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const resetForm = () => {
     setFormData({
-      name: "",
-      description: "",
-      motivation: "",
-      requirements: ""
+      name: ""
     });
     setCurrentRegulation(null);
   };
@@ -129,10 +141,7 @@ const RegulationsAdmin = () => {
     if (regulation) {
       setCurrentRegulation(regulation);
       setFormData({
-        name: regulation.name,
-        description: regulation.description,
-        motivation: regulation.motivation,
-        requirements: regulation.requirements
+        name: regulation.name
       });
     } else {
       resetForm();
@@ -145,7 +154,7 @@ const RegulationsAdmin = () => {
     setIsChecklistDialogOpen(true);
   };
 
-  // New function to check for existing regulations by name
+  // Check for existing regulations by name
   const checkExistingRegulation = async (name: string, id?: string): Promise<boolean> => {
     const normalizedName = name.trim().toLowerCase();
     let query = supabase
@@ -278,15 +287,18 @@ const RegulationsAdmin = () => {
         throw new Error("A regulation with this name already exists");
       }
 
+      // Placeholder values for description, motivation, and requirements
+      const placeholderText = "Determined by AI based on checklist items";
+
       if (currentRegulation) {
         // Update existing regulation
         const { error } = await supabase
           .from("regulations")
           .update({
             name: formData.name,
-            description: formData.description,
-            motivation: formData.motivation,
-            requirements: formData.requirements
+            description: currentRegulation.description || placeholderText,
+            motivation: currentRegulation.motivation || placeholderText,
+            requirements: currentRegulation.requirements || placeholderText
           })
           .eq("id", currentRegulation.id);
 
@@ -302,16 +314,16 @@ const RegulationsAdmin = () => {
           .from("regulations")
           .insert({
             name: formData.name,
-            description: formData.description,
-            motivation: formData.motivation,
-            requirements: formData.requirements
+            description: placeholderText,
+            motivation: placeholderText,
+            requirements: placeholderText
           });
 
         if (error) throw error;
         
         toast({
           title: "Regulation created",
-          description: "The regulation has been created successfully."
+          description: "The regulation has been created successfully. Add checklist items to help the AI determine when it applies."
         });
       }
 
@@ -394,8 +406,9 @@ const RegulationsAdmin = () => {
                   <Card key={regulation.id} className="overflow-hidden">
                     <CardHeader className="bg-muted/50">
                       <CardTitle className="line-clamp-2">{regulation.name}</CardTitle>
-                      <CardDescription className="line-clamp-3">
-                        {regulation.description}
+                      <CardDescription className="flex items-center gap-1">
+                        <ClipboardList className="h-4 w-4" />
+                        <span>{checklistCounts[regulation.id] || 0} checklist items</span>
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="p-6">
@@ -418,7 +431,7 @@ const RegulationsAdmin = () => {
                             variant="default"
                             onClick={() => navigateToChecklistEditor(regulation.id)}
                           >
-                            <ClipboardList className="h-4 w-4" />
+                            <ClipboardList className="h-4 w-4 mr-2" /> Manage Checklist
                           </Button>
                           <Button
                             size="sm"
@@ -478,7 +491,7 @@ const RegulationsAdmin = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Regulation Dialog */}
+        {/* Simplified Regulation Dialog */}
         <Dialog open={isRegulationDialogOpen} onOpenChange={setIsRegulationDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
@@ -486,7 +499,7 @@ const RegulationsAdmin = () => {
                 {currentRegulation ? "Edit Regulation" : "Add New Regulation"}
               </DialogTitle>
               <DialogDescription>
-                Enter the details for this compliance regulation
+                Enter the name of this compliance regulation. The AI will determine when it applies based on its checklist items.
               </DialogDescription>
             </DialogHeader>
             
@@ -502,40 +515,12 @@ const RegulationsAdmin = () => {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Brief description of the regulation and its purpose"
-                  rows={3}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="motivation">Applicability / Motivation</Label>
-                <Textarea
-                  id="motivation"
-                  name="motivation"
-                  value={formData.motivation}
-                  onChange={handleInputChange}
-                  placeholder="When does this regulation apply to a business?"
-                  rows={3}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="requirements">Requirements</Label>
-                <Textarea
-                  id="requirements"
-                  name="requirements"
-                  value={formData.requirements}
-                  onChange={handleInputChange}
-                  placeholder="Key requirements and obligations"
-                  rows={4}
-                />
+              <div className="bg-muted p-4 rounded-md">
+                <h4 className="text-sm font-medium mb-2">How AI determines applicability</h4>
+                <p className="text-sm text-muted-foreground">
+                  After creating a regulation, add checklist items to define its requirements.
+                  The AI will analyze these items to determine when this regulation applies to a business.
+                </p>
               </div>
             </div>
             
@@ -575,7 +560,7 @@ const RegulationsAdmin = () => {
                         <TableRow>
                           <TableHead>ID</TableHead>
                           <TableHead>Created</TableHead>
-                          <TableHead>Description</TableHead>
+                          <TableHead>Checklist Items</TableHead>
                           <TableHead></TableHead>
                         </TableRow>
                       </TableHeader>
@@ -584,7 +569,7 @@ const RegulationsAdmin = () => {
                           <TableRow key={reg.id}>
                             <TableCell className="font-mono text-xs">{reg.id.substring(0, 8)}...</TableCell>
                             <TableCell>{new Date(reg.created_at).toLocaleDateString()}</TableCell>
-                            <TableCell className="max-w-[300px] truncate">{reg.description}</TableCell>
+                            <TableCell>{checklistCounts[reg.id] || 0} items</TableCell>
                             <TableCell>
                               <Button 
                                 variant="outline" 
