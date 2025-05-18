@@ -173,6 +173,8 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchCh
     fileInputRef.current?.click();
   };
 
+  console.log("Rendering BatchChecklistImport, active tab:", activeTab); // Debug logging
+
   return (
     <Card>
       <CardHeader>
@@ -183,7 +185,10 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchCh
           Import multiple checklist items at once using text input or a CSV file.
         </CardDescription>
         
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "csv")} className="mt-4">
+        <Tabs value={activeTab} onValueChange={(v) => {
+          console.log("Tab changed to:", v); // Debug logging
+          setActiveTab(v as "text" | "csv");
+        }} className="mt-4">
           <TabsList>
             <TabsTrigger value="text">Text Input</TabsTrigger>
             <TabsTrigger value="csv">CSV Upload</TabsTrigger>
