@@ -61,6 +61,7 @@ const RegulationsAdmin = () => {
     name: "",
   });
   const [checklistCounts, setChecklistCounts] = useState<{[key: string]: number}>({});
+  const [activeTab, setActiveTab] = useState("regulations");
 
   useEffect(() => {
     fetchRegulations();
@@ -357,7 +358,12 @@ const RegulationsAdmin = () => {
               Manage compliance regulations and expert checklists
             </p>
           </div>
-          <Button onClick={() => openRegulationDialog()}>
+          <Button 
+            onClick={() => {
+              console.log("Add button clicked");
+              openRegulationDialog();
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" /> Add Regulation
           </Button>
         </div>
@@ -380,7 +386,11 @@ const RegulationsAdmin = () => {
           </Alert>
         )}
 
-        <Tabs defaultValue="regulations">
+        <Tabs 
+          defaultValue="regulations" 
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
           <TabsList className="mb-6">
             <TabsTrigger value="regulations">Regulations</TabsTrigger>
             <TabsTrigger value="import">Import/Export</TabsTrigger>
@@ -396,7 +406,12 @@ const RegulationsAdmin = () => {
                 <p className="text-muted-foreground mb-4">
                   No regulations found. Add your first regulation to get started.
                 </p>
-                <Button onClick={() => openRegulationDialog()}>
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openRegulationDialog();
+                  }}
+                >
                   <Plus className="mr-2 h-4 w-4" /> Add Regulation
                 </Button>
               </Card>
@@ -491,8 +506,14 @@ const RegulationsAdmin = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Simplified Regulation Dialog */}
-        <Dialog open={isRegulationDialogOpen} onOpenChange={setIsRegulationDialogOpen}>
+        {/* Regulation Dialog */}
+        <Dialog 
+          open={isRegulationDialogOpen} 
+          onOpenChange={(open) => {
+            console.log("Dialog open state changed to:", open);
+            setIsRegulationDialogOpen(open);
+          }}
+        >
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>
@@ -525,10 +546,17 @@ const RegulationsAdmin = () => {
             </div>
             
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsRegulationDialogOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsRegulationDialogOpen(false)}
+                type="button"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSaveRegulation}>
+              <Button 
+                onClick={handleSaveRegulation}
+                type="button"
+              >
                 {currentRegulation ? "Update Regulation" : "Add Regulation"}
               </Button>
             </DialogFooter>
