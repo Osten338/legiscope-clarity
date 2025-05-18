@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ClipboardList, Edit, Trash2, Plus } from "lucide-react";
-import { AddRegulationButton } from "./RegulationFormDialog";
 
 type Regulation = {
   id: string;
