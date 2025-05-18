@@ -68,76 +68,167 @@ serve(async (req) => {
           console.error("Unexpected Perplexity API response structure:", analysisData);
         }
         
-        // Now, identify which regulations from our catalog apply to this business
-        console.log("Fetching available regulations catalog");
-        const { data: regulationsCatalog, error: catalogError } = await supabaseAdmin
+        // Now, fetch regulations that have associated checklist items
+        console.log("Fetching regulations with associated checklist items");
+        
+        // For each regulation, fetch a sample of its checklist items to understand what it's about
+        const { data: regulations, error: regulationsError } = await supabaseAdmin
           .from('regulations')
-          .select('id, name, description, motivation, requirements');
+          .select('id, name')
+          .order('name');
           
-        if (catalogError) {
-          throw new Error(`Failed to fetch regulations catalog: ${catalogError.message}`);
+        if (regulationsError) {
+          throw new Error(`Failed to fetch regulations: ${regulationsError.message}`);
         }
         
-        console.log(`Found ${regulationsCatalog.length} regulations in catalog`);
+        console.log(`Found ${regulations.length} regulations to evaluate`);
         
-        // Use AI to determine which regulations apply to this business
-        const regulationPrompt = `
-          I have a business described as: "${description}"
-          
-          Below is a list of possible regulations that might apply to this business:
-          ${regulationsCatalog.map(reg => `ID: ${reg.id}, Name: ${reg.name}, Description: ${reg.description}`).join('\n\n')}
-          
-          For each regulation, respond with ONLY the regulation ID if it applies to this business, or "N/A" if it doesn't apply.
-          Format your response as a simple JSON array of regulation IDs that apply, like this:
-          ["id1", "id2", "id3"]
-          If no regulations apply, return an empty array: []
-        `;
+        // Build a comprehensive understanding of each regulation based on its checklist items
+        const regulationsWithChecklists = [];
         
-        console.log("Determining applicable regulations with AI");
-        
-        const regulationResponse = await fetch("https://api.perplexity.ai/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${perplexityApiKey}`
-          },
-          body: JSON.stringify({
-            model: "llama-3.1-sonar-large-128k-online",
-            messages: [
-              {
-                role: "system",
-                content: "You are a regulatory compliance expert. Your task is to determine which regulations apply to a business based on its description. Respond ONLY with the IDs of applicable regulations in a JSON array format."
-              },
-              {
-                role: "user",
-                content: regulationPrompt
-              }
-            ],
-            temperature: 0.1,
-            max_tokens: 1000,
-            top_p: 0.9
-          })
-        });
-
-        const regulationData = await regulationResponse.json();
-        
-        if (regulationData.choices && regulationData.choices[0] && regulationData.choices[0].message) {
-          try {
-            // Extract just the JSON array from the response
-            const responseText = regulationData.choices[0].message.content;
-            // Find anything that looks like a JSON array in the response
-            const jsonMatch = responseText.match(/\[.*\]/s);
+        for (const regulation of regulations) {
+          const { data: checklistItems, error: itemsError } = await supabaseAdmin
+            .from('checklist_items')
+            .select('description, category, importance')
+            .eq('regulation_id', regulation.id)
+            .limit(50);  // Get a reasonable sample of items
             
-            if (jsonMatch) {
-              const applicableRegulationIds = JSON.parse(jsonMatch[0]);
-              console.log("Identified applicable regulations:", applicableRegulationIds);
+          if (itemsError) {
+            console.error(`Error fetching checklist items for ${regulation.name}: ${itemsError.message}`);
+            continue;
+          }
+          
+          if (checklistItems && checklistItems.length > 0) {
+            regulationsWithChecklists.push({
+              id: regulation.id,
+              name: regulation.name,
+              checklist_items: checklistItems
+            });
+            console.log(`Regulation ${regulation.name} has ${checklistItems.length} checklist items`);
+          } else {
+            console.log(`Regulation ${regulation.name} has no checklist items, skipping`);
+          }
+        }
+        
+        // Use AI to dynamically determine which regulations apply based on checklist content
+        if (regulationsWithChecklists.length > 0) {
+          console.log("Determining applicable regulations with AI based on checklist content");
+          
+          const applicabilityPrompt = `
+            I have a business described as: "${description}"
+            
+            Below is a list of regulations with their associated checklist items. Based ONLY on analyzing the checklist items and what they suggest about the regulation's scope and purpose, determine which regulations would apply to this business:
+            
+            ${regulationsWithChecklists.map(reg => `
+            REGULATION: ${reg.name} (ID: ${reg.id})
+            CHECKLIST ITEMS:
+            ${reg.checklist_items.map((item, i) => `${i+1}. ${item.description}${item.category ? ` [Category: ${item.category}]` : ''}`).join('\n')}
+            `).join('\n\n')}
+            
+            For each regulation, respond with ONLY the regulation ID if it applies to this business, or "N/A" if it doesn't apply.
+            Format your response as a simple JSON array of regulation IDs that apply, like this:
+            ["id1", "id2", "id3"]
+            If no regulations apply, return an empty array: []
+          `;
+          
+          const applicabilityResponse = await fetch("https://api.perplexity.ai/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${perplexityApiKey}`
+            },
+            body: JSON.stringify({
+              model: "llama-3.1-sonar-large-128k-online",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a regulatory compliance expert. Your task is to determine which regulations apply to a business based on the business description and the associated checklist items for each regulation. Respond ONLY with the IDs of applicable regulations in a JSON array format."
+                },
+                {
+                  role: "user",
+                  content: applicabilityPrompt
+                }
+              ],
+              temperature: 0.1,
+              max_tokens: 1000,
+              top_p: 0.9
+            })
+          });
+
+          const applicabilityData = await applicabilityResponse.json();
+          
+          if (applicabilityData.choices && applicabilityData.choices[0] && applicabilityData.choices[0].message) {
+            try {
+              // Extract just the JSON array from the response
+              const responseText = applicabilityData.choices[0].message.content;
+              // Find anything that looks like a JSON array in the response
+              const jsonMatch = responseText.match(/\[.*\]/s);
               
-              // Filter the catalog to just the applicable regulations
-              const applicableRegulations = regulationsCatalog.filter(reg => 
-                applicableRegulationIds.includes(reg.id)
-              );
+              if (jsonMatch) {
+                const applicableRegulationIds = JSON.parse(jsonMatch[0]);
+                console.log("Identified applicable regulations:", applicableRegulationIds);
+                
+                // Create a business analysis record with the AI assessment
+                const { data: analysisData, error: analysisError } = await supabaseAdmin
+                  .from('business_analyses')
+                  .insert({
+                    id: assessment_id,
+                    description,
+                    analysis: aiAnalysis
+                  })
+                  .select()
+                  .single();
+
+                if (analysisError) {
+                  console.error("Error creating analysis:", analysisError);
+                  throw analysisError;
+                }
+
+                console.log("Created analysis record:", analysisData);
+
+                // Link the applicable regulations to the business analysis
+                if (applicableRegulationIds.length > 0) {
+                  const businessRegulationsData = applicableRegulationIds.map(reg => ({
+                    business_analysis_id: assessment_id,
+                    regulation_id: reg
+                  }));
+                  
+                  const { error: linkError } = await supabaseAdmin
+                    .from('business_regulations')
+                    .insert(businessRegulationsData);
+                  
+                  if (linkError) {
+                    console.error("Error linking regulations to analysis:", linkError);
+                    throw linkError;
+                  }
+                  
+                  console.log(`Linked ${applicableRegulationIds.length} regulations to analysis`);
+                  
+                  // Fetch expert-verified status for the checklist items
+                  for (const regId of applicableRegulationIds) {
+                    const { data: checklistItems } = await supabaseAdmin
+                      .from('checklist_items')
+                      .select('id, expert_verified')
+                      .eq('regulation_id', regId);
+                      
+                    if (checklistItems && checklistItems.length > 0) {
+                      const expertVerifiedCount = checklistItems.filter(item => item.expert_verified).length;
+                      const totalItems = checklistItems.length;
+                      
+                      console.log(`Regulation ${regId} has ${expertVerifiedCount}/${totalItems} expert-verified checklist items`);
+                    }
+                  }
+                } else {
+                  console.log("No applicable regulations found for this business");
+                }
+              } else {
+                throw new Error("Failed to extract JSON array from AI response");
+              }
+            } catch (parseError) {
+              console.error("Error parsing regulation IDs:", parseError);
+              console.log("Raw response:", applicabilityData.choices[0].message.content);
               
-              // Create a business analysis record with the AI assessment
+              // Fallback: Create analysis without linking regulations
               const { data: analysisData, error: analysisError } = await supabaseAdmin
                 .from('business_analyses')
                 .insert({
@@ -149,72 +240,28 @@ serve(async (req) => {
                 .single();
 
               if (analysisError) {
-                console.error("Error creating analysis:", analysisError);
                 throw analysisError;
               }
-
-              console.log("Created analysis record:", analysisData);
-
-              // Link the applicable regulations to the business analysis
-              if (applicableRegulations.length > 0) {
-                const businessRegulationsData = applicableRegulations.map(reg => ({
-                  business_analysis_id: assessment_id,
-                  regulation_id: reg.id
-                }));
-                
-                const { error: linkError } = await supabaseAdmin
-                  .from('business_regulations')
-                  .insert(businessRegulationsData);
-                
-                if (linkError) {
-                  console.error("Error linking regulations to analysis:", linkError);
-                  throw linkError;
-                }
-                
-                console.log(`Linked ${applicableRegulations.length} regulations to analysis`);
-                
-                // Fetch expert-verified status for the checklist items
-                for (const reg of applicableRegulations) {
-                  const { data: checklistItems } = await supabaseAdmin
-                    .from('checklist_items')
-                    .select('id, expert_verified')
-                    .eq('regulation_id', reg.id);
-                    
-                  if (checklistItems && checklistItems.length > 0) {
-                    const expertVerifiedCount = checklistItems.filter(item => item.expert_verified).length;
-                    const totalItems = checklistItems.length;
-                    
-                    console.log(`Regulation ${reg.id} has ${expertVerifiedCount}/${totalItems} expert-verified checklist items`);
-                  }
-                }
-              } else {
-                console.log("No applicable regulations found for this business");
-              }
-            } else {
-              throw new Error("Failed to extract JSON array from AI response");
             }
-          } catch (parseError) {
-            console.error("Error parsing regulation IDs:", parseError);
-            console.log("Raw response:", regulationData.choices[0].message.content);
-            
-            // Fallback: Create analysis without linking regulations
-            const { data: analysisData, error: analysisError } = await supabaseAdmin
-              .from('business_analyses')
-              .insert({
-                id: assessment_id,
-                description,
-                analysis: aiAnalysis
-              })
-              .select()
-              .single();
-
-            if (analysisError) {
-              throw analysisError;
-            }
+          } else {
+            console.error("Unexpected Perplexity API response structure for regulations:", applicabilityData);
+            throw new Error("Failed to determine applicable regulations");
           }
         } else {
-          console.error("Unexpected Perplexity API response structure for regulations:", regulationData);
-          throw new Error("Failed to determine applicable regulations");
+          console.log("No regulations with checklist items found");
+          
+          // Create a business analysis without linking any regulations
+          const { error: analysisError } = await supabaseAdmin
+            .from('business_analyses')
+            .insert({
+              id: assessment_id,
+              description,
+              analysis: aiAnalysis
+            });
+
+          if (analysisError) {
+            throw analysisError;
+          }
         }
       } catch (aiError) {
         console.error("Error in AI processing:", aiError);
