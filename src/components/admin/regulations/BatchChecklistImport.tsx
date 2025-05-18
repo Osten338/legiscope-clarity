@@ -1,9 +1,9 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, FileText, AlertTriangle, FileUp } from "lucide-react";
+import { Check, FileText, AlertTriangle, Upload, FileUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,6 +23,7 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchCh
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleTextImport = async () => {
     if (!importText.trim()) {
@@ -138,6 +139,40 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchCh
     onImportComplete();
   };
 
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && fileInputRef.current) {
+      fileInputRef.current.files = files;
+      const event = new Event('change', { bubbles: true });
+      fileInputRef.current.dispatchEvent(event);
+    }
+  }, []);
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -183,7 +218,15 @@ Conduct regular data protection impact assessments"
         
         <TabsContent value="csv">
           <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div 
+              className={`border-2 ${isDragging ? 'border-primary' : 'border-dashed border-gray-300'} 
+                         rounded-lg p-6 cursor-pointer transition-colors duration-200 hover:border-primary hover:bg-primary/5`}
+              onClick={triggerFileInput}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               <Input
                 type="file"
                 ref={fileInputRef}
@@ -192,17 +235,22 @@ Conduct regular data protection impact assessments"
                 onChange={handleCsvFileChange}
                 id="csv-upload"
               />
-              <label htmlFor="csv-upload" className="cursor-pointer">
-                <div className="flex flex-col items-center gap-2">
-                  <FileUp className="h-8 w-8 text-muted-foreground" />
-                  <div className="text-sm text-muted-foreground">
-                    <span className="font-medium text-primary">Click to upload</span> or drag and drop
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    CSV file with checklist items (one item per row)
-                  </div>
+              <div className="flex flex-col items-center gap-2">
+                <Upload className="h-10 w-10 text-muted-foreground" />
+                <div className="text-sm font-medium">
+                  <span className="text-primary underline">Click to upload</span> or drag and drop
                 </div>
-              </label>
+                <div className="text-xs text-muted-foreground text-center">
+                  CSV file with checklist items (one item per row)
+                </div>
+                <Button variant="outline" size="sm" className="mt-2" onClick={(e) => {
+                  e.stopPropagation();
+                  triggerFileInput();
+                }}>
+                  <FileUp className="mr-1 h-4 w-4" />
+                  Select File
+                </Button>
+              </div>
             </div>
             
             {fileName && (
