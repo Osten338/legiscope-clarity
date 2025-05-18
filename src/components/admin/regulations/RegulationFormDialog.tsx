@@ -7,6 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,11 @@ export const RegulationFormDialog = ({
   const [formData, setFormData] = useState({
     name: "",
   });
+
+  // Debug log when dialog state changes
+  useEffect(() => {
+    console.log("RegulationFormDialog - isOpen state:", isOpen);
+  }, [isOpen]);
 
   // Reset form when regulation changes
   useEffect(() => {
@@ -211,19 +217,26 @@ export const RegulationFormDialog = ({
   );
 };
 
+// Button component with fixed direct implementation
 export const AddRegulationButton = ({
   onAddClick
 }: {
   onAddClick: () => void
 }) => {
+  console.log("AddRegulationButton rendered");
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Add regulation button clicked in component");
+    onAddClick();
+  };
+
   return (
     <Button 
       type="button" 
-      onClick={(e) => {
-        e.stopPropagation();
-        console.log("Add regulation button clicked");
-        onAddClick();
-      }}
+      onClick={handleClick}
+      className="z-10"
     >
       <Plus className="mr-2 h-4 w-4" /> Add Regulation
     </Button>

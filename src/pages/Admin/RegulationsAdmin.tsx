@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,10 +43,17 @@ const RegulationsAdmin = () => {
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [currentRegulation, setCurrentRegulation] = useState<Regulation | null>(null);
   const [activeTab, setActiveTab] = useState("regulations");
+  const dialogOpenedRef = useRef(false);
 
-  // Debug logging for dialog state
+  // Extended debug logging for dialog state
   useEffect(() => {
-    console.log("Dialog open state changed:", isRegulationDialogOpen);
+    console.log("RegulationsAdmin - Dialog open state changed:", isRegulationDialogOpen);
+    
+    // Log dialog element presence in the DOM
+    setTimeout(() => {
+      const dialogElements = document.querySelectorAll('[role="dialog"]');
+      console.log("Dialog elements in DOM:", dialogElements.length);
+    }, 100);
   }, [isRegulationDialogOpen]);
 
   const openRegulationDialog = (regulation?: Regulation) => {
@@ -58,13 +65,25 @@ const RegulationsAdmin = () => {
       setCurrentRegulation(null);
     }
     
-    // Use setTimeout to ensure state updates in correct order
+    // Update dialog state directly without setTimeout
+    setIsRegulationDialogOpen(true);
+    dialogOpenedRef.current = true;
+    
+    // Double-check dialog state after a short delay
     setTimeout(() => {
-      setIsRegulationDialogOpen(true);
-    }, 0);
+      console.log("Dialog state after delay:", isRegulationDialogOpen);
+      if (!isRegulationDialogOpen && dialogOpenedRef.current) {
+        console.log("Dialog state inconsistent, forcing update");
+        setIsRegulationDialogOpen(true);
+      }
+    }, 100);
   };
 
-  const handleAddRegulationClick = () => {
+  const handleAddRegulationClick = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     console.log("Add regulation button clicked in parent");
     openRegulationDialog();
   };
@@ -88,7 +107,14 @@ const RegulationsAdmin = () => {
             </p>
           </div>
           
-          <AddRegulationButton onAddClick={handleAddRegulationClick} />
+          {/* Direct button implementation as fallback */}
+          <Button 
+            type="button" 
+            onClick={handleAddRegulationClick} 
+            className="z-10"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Regulation
+          </Button>
         </div>
 
         {getDuplicatesCount() > 0 && (
@@ -135,7 +161,7 @@ const RegulationsAdmin = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Dialogs - moved outside of conditional rendering */}
+        {/* Dialogs - moved outside of Tabs component for better rendering */}
         <RegulationFormDialog
           regulation={currentRegulation}
           isOpen={isRegulationDialogOpen}

@@ -8,7 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Edit, Trash2 } from "lucide-react";
+import { ClipboardList, Edit, Trash2, Plus } from "lucide-react";
 import { AddRegulationButton } from "./RegulationFormDialog";
 
 type Regulation = {
@@ -60,13 +60,15 @@ export const RegulationsList = ({
         </p>
         <Button 
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             console.log("Add regulation button clicked from empty state");
             onAddClick();
           }}
           type="button"
+          className="z-10"
         >
-          Add Regulation
+          <Plus className="mr-2 h-4 w-4" /> Add Regulation
         </Button>
       </Card>
     );
