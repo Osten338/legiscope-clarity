@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,13 +44,29 @@ const RegulationsAdmin = () => {
   const [currentRegulation, setCurrentRegulation] = useState<Regulation | null>(null);
   const [activeTab, setActiveTab] = useState("regulations");
 
+  // Debug logging for dialog state
+  useEffect(() => {
+    console.log("Dialog open state changed:", isRegulationDialogOpen);
+  }, [isRegulationDialogOpen]);
+
   const openRegulationDialog = (regulation?: Regulation) => {
+    console.log("Opening regulation dialog", regulation ? "with regulation" : "for new regulation");
+    
     if (regulation) {
       setCurrentRegulation(regulation);
     } else {
       setCurrentRegulation(null);
     }
-    setIsRegulationDialogOpen(true);
+    
+    // Use setTimeout to ensure state updates in correct order
+    setTimeout(() => {
+      setIsRegulationDialogOpen(true);
+    }, 0);
+  };
+
+  const handleAddRegulationClick = () => {
+    console.log("Add regulation button clicked in parent");
+    openRegulationDialog();
   };
 
   const navigateToChecklistEditor = (regulationId: string) => {
@@ -72,7 +88,7 @@ const RegulationsAdmin = () => {
             </p>
           </div>
           
-          <AddRegulationButton onAddClick={() => openRegulationDialog()} />
+          <AddRegulationButton onAddClick={handleAddRegulationClick} />
         </div>
 
         {getDuplicatesCount() > 0 && (
@@ -109,7 +125,7 @@ const RegulationsAdmin = () => {
               checklistCounts={checklistCounts}
               onEditRegulation={openRegulationDialog}
               onDeleteRegulation={deleteRegulation}
-              onAddClick={() => openRegulationDialog()}
+              onAddClick={handleAddRegulationClick}
               isLoading={isLoading}
             />
           </TabsContent>
@@ -119,7 +135,7 @@ const RegulationsAdmin = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Dialogs */}
+        {/* Dialogs - moved outside of conditional rendering */}
         <RegulationFormDialog
           regulation={currentRegulation}
           isOpen={isRegulationDialogOpen}

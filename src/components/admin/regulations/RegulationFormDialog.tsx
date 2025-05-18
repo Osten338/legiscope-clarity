@@ -7,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -218,7 +217,14 @@ export const AddRegulationButton = ({
   onAddClick: () => void
 }) => {
   return (
-    <Button type="button" onClick={onAddClick}>
+    <Button 
+      type="button" 
+      onClick={(e) => {
+        e.stopPropagation();
+        console.log("Add regulation button clicked");
+        onAddClick();
+      }}
+    >
       <Plus className="mr-2 h-4 w-4" /> Add Regulation
     </Button>
   );

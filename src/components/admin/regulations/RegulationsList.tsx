@@ -58,7 +58,16 @@ export const RegulationsList = ({
         <p className="text-muted-foreground mb-4">
           No regulations found. Add your first regulation to get started.
         </p>
-        <AddRegulationButton onAddClick={onAddClick} />
+        <Button 
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log("Add regulation button clicked from empty state");
+            onAddClick();
+          }}
+          type="button"
+        >
+          Add Regulation
+        </Button>
       </Card>
     );
   }
