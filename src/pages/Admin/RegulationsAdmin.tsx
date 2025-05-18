@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Import refactored components
-import { RegulationFormDialog, AddRegulationButton } from "@/components/admin/regulations/RegulationFormDialog";
+import { RegulationFormDialog } from "@/components/admin/regulations/RegulationFormDialog";
 import { DuplicateRegulationsDialog } from "@/components/admin/regulations/DuplicateRegulationsDialog";
 import { RegulationsList } from "@/components/admin/regulations/RegulationsList";
 import { ImportExportTab } from "@/components/admin/regulations/ImportExportTab";
@@ -64,25 +65,11 @@ const RegulationsAdmin = () => {
       setCurrentRegulation(null);
     }
     
-    // Update dialog state directly without setTimeout
     setIsRegulationDialogOpen(true);
     dialogOpenedRef.current = true;
-    
-    // Double-check dialog state after a short delay
-    setTimeout(() => {
-      console.log("Dialog state after delay:", isRegulationDialogOpen);
-      if (!isRegulationDialogOpen && dialogOpenedRef.current) {
-        console.log("Dialog state inconsistent, forcing update");
-        setIsRegulationDialogOpen(true);
-      }
-    }, 100);
   };
 
-  const handleAddRegulationClick = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handleAddRegulationClick = () => {
     console.log("Add regulation button clicked in parent");
     openRegulationDialog();
   };
@@ -106,10 +93,8 @@ const RegulationsAdmin = () => {
             </p>
           </div>
           
-          {/* Direct button implementation as fallback */}
           <Button 
-            type="button" 
-            onClick={handleAddRegulationClick} 
+            onClick={handleAddRegulationClick}
             className="z-10"
           >
             <Plus className="mr-2 h-4 w-4" /> Add Regulation
