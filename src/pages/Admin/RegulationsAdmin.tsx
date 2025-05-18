@@ -15,6 +15,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger, // Import DialogTrigger for more reliable dialog opening
 } from "@/components/ui/dialog";
 import {
   Alert,
@@ -139,6 +140,7 @@ const RegulationsAdmin = () => {
   };
 
   const openRegulationDialog = (regulation?: Regulation) => {
+    console.log("Opening regulation dialog", regulation);
     if (regulation) {
       setCurrentRegulation(regulation);
       setFormData({
@@ -147,7 +149,11 @@ const RegulationsAdmin = () => {
     } else {
       resetForm();
     }
-    setIsRegulationDialogOpen(true);
+    // Set dialog state with a slight delay to ensure state update happens correctly
+    setTimeout(() => {
+      setIsRegulationDialogOpen(true);
+      console.log("Dialog state set to open");
+    }, 10);
   };
 
   const openChecklistDialog = (regulation: Regulation) => {
@@ -348,6 +354,17 @@ const RegulationsAdmin = () => {
     return Object.keys(duplicates).length;
   };
 
+  // Function to manually toggle dialog
+  const toggleRegulationDialog = (force?: boolean) => {
+    console.log("Manually toggling dialog - current state:", isRegulationDialogOpen, "force:", force);
+    setIsRegulationDialogOpen(typeof force === 'boolean' ? force : !isRegulationDialogOpen);
+  };
+
+  // Debugging useEffect to monitor dialog state changes
+  useEffect(() => {
+    console.log("Dialog state changed:", isRegulationDialogOpen);
+  }, [isRegulationDialogOpen]);
+
   return (
     <TopbarLayout>
       <div className="container mx-auto p-8">
@@ -358,14 +375,70 @@ const RegulationsAdmin = () => {
               Manage compliance regulations and expert checklists
             </p>
           </div>
-          <Button 
-            onClick={() => {
-              console.log("Add button clicked");
-              openRegulationDialog();
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Add Regulation
-          </Button>
+          
+          {/* Use DialogTrigger to ensure reliable opening */}
+          <Dialog open={isRegulationDialogOpen} onOpenChange={toggleRegulationDialog}>
+            <DialogTrigger asChild>
+              <Button 
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Add button clicked via DialogTrigger");
+                  resetForm();
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add Regulation
+              </Button>
+            </DialogTrigger>
+            
+            <DialogContent className="sm:max-w-[600px] z-50">
+              <DialogHeader>
+                <DialogTitle>
+                  {currentRegulation ? "Edit Regulation" : "Add New Regulation"}
+                </DialogTitle>
+                <DialogDescription>
+                  Enter the name of this compliance regulation. The AI will determine when it applies based on its checklist items.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Regulation Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="e.g., GDPR, HIPAA, PCI-DSS"
+                  />
+                </div>
+                
+                <div className="bg-muted p-4 rounded-md">
+                  <h4 className="text-sm font-medium mb-2">How AI determines applicability</h4>
+                  <p className="text-sm text-muted-foreground">
+                    After creating a regulation, add checklist items to define its requirements.
+                    The AI will analyze these items to determine when this regulation applies to a business.
+                  </p>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => toggleRegulationDialog(false)}
+                  type="button"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveRegulation}
+                  type="button"
+                >
+                  {currentRegulation ? "Update Regulation" : "Add Regulation"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {getDuplicatesCount() > 0 && (
@@ -406,14 +479,21 @@ const RegulationsAdmin = () => {
                 <p className="text-muted-foreground mb-4">
                   No regulations found. Add your first regulation to get started.
                 </p>
-                <Button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    openRegulationDialog();
-                  }}
-                >
-                  <Plus className="mr-2 h-4 w-4" /> Add Regulation
-                </Button>
+                
+                <Dialog open={isRegulationDialogOpen} onOpenChange={toggleRegulationDialog}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      type="button" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log("Empty state add button clicked");
+                        resetForm();
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" /> Add Regulation
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
               </Card>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -506,64 +586,7 @@ const RegulationsAdmin = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Regulation Dialog */}
-        <Dialog 
-          open={isRegulationDialogOpen} 
-          onOpenChange={(open) => {
-            console.log("Dialog open state changed to:", open);
-            setIsRegulationDialogOpen(open);
-          }}
-        >
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>
-                {currentRegulation ? "Edit Regulation" : "Add New Regulation"}
-              </DialogTitle>
-              <DialogDescription>
-                Enter the name of this compliance regulation. The AI will determine when it applies based on its checklist items.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Regulation Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="e.g., GDPR, HIPAA, PCI-DSS"
-                />
-              </div>
-              
-              <div className="bg-muted p-4 rounded-md">
-                <h4 className="text-sm font-medium mb-2">How AI determines applicability</h4>
-                <p className="text-sm text-muted-foreground">
-                  After creating a regulation, add checklist items to define its requirements.
-                  The AI will analyze these items to determine when this regulation applies to a business.
-                </p>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsRegulationDialogOpen(false)}
-                type="button"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveRegulation}
-                type="button"
-              >
-                {currentRegulation ? "Update Regulation" : "Add Regulation"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Duplicates Management Dialog */}
+        {/* Duplicates Management Dialog - keep it outside of tabs to prevent issues */}
         <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
           <DialogContent className="sm:max-w-[800px]">
             <DialogHeader>
