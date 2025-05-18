@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChecklistItemEditor } from "@/components/admin/ChecklistItemEditor";
-import { BatchChecklistImport } from "@/components/admin/BatchChecklistImport";
+import { BatchChecklistImport } from "@/components/admin/regulations/BatchChecklistImport";
 import { ChecklistCategoryManager } from "@/components/admin/ChecklistCategoryManager";
 import { ChecklistItemVersionHistory } from "@/components/admin/ChecklistItemVersionHistory";
 import { AlertTriangle, ChevronLeft, ClipboardCheck, Clock, Edit, Plus, Search, Tag, Trash2 } from "lucide-react";
