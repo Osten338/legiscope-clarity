@@ -26,20 +26,33 @@ export const CsvImportTab = ({ onImport, isImporting }: CsvImportTabProps) => {
     
     Papa.parse(file, {
       complete: (results) => {
-        // Extract descriptions from CSV data
-        const items = results.data
-          .filter((row: any) => Array.isArray(row) && row.length > 0)
-          .map((row: any) => row[0]?.toString().trim())
-          .filter((item: string) => item && item.length > 0);
-        
-        setParsedItems(items);
-        
-        toast({
-          title: "CSV Parsed",
-          description: `Found ${items.length} items in the CSV file.`,
-        });
+        try {
+          console.log("CSV parsing results:", results);
+          
+          // Extract descriptions from CSV data
+          const items = results.data
+            .filter((row: any) => Array.isArray(row) && row.length > 0)
+            .map((row: any) => row[0]?.toString().trim())
+            .filter((item: string) => item && item.length > 0);
+          
+          console.log("Extracted items:", items);
+          setParsedItems(items);
+          
+          toast({
+            title: "CSV Parsed",
+            description: `Found ${items.length} items in the CSV file.`,
+          });
+        } catch (error) {
+          console.error("Error processing CSV data:", error);
+          toast({
+            title: "Error processing CSV",
+            description: error instanceof Error ? error.message : "Unknown error parsing CSV",
+            variant: "destructive",
+          });
+        }
       },
       error: (error) => {
+        console.error("Papa parse error:", error);
         toast({
           title: "Error parsing CSV",
           description: error.message,
@@ -50,11 +63,16 @@ export const CsvImportTab = ({ onImport, isImporting }: CsvImportTabProps) => {
   };
 
   const handleCsvImport = async () => {
-    await onImport(parsedItems);
-    // Reset after import
-    setParsedItems([]);
-    setFileName(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    console.log("Importing CSV items:", parsedItems);
+    try {
+      await onImport(parsedItems);
+      // Reset after import
+      setParsedItems([]);
+      setFileName(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (error) {
+      console.error("CSV import error:", error);
+    }
   };
 
   const triggerFileInput = () => {
@@ -67,6 +85,7 @@ export const CsvImportTab = ({ onImport, isImporting }: CsvImportTabProps) => {
       
       <FileUploadArea
         onFileChange={handleCsvFileChange}
+        fileRef={fileInputRef}
       />
       
       <FileReviewImport

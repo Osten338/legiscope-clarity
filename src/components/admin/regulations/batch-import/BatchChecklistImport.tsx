@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { importChecklist } from "./importService";
 import { TextImportTab } from "./TextImportTab";
 import { CsvImportTab } from "./CsvImportTab";
@@ -12,22 +11,13 @@ import { BatchImportProps } from "./types";
 
 export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchImportProps) => {
   const [isImporting, setIsImporting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"text" | "csv">("csv"); // Default to CSV
-  const [renderKey, setRenderKey] = useState(Date.now()); // Force re-render when needed
+  const [activeTab, setActiveTab] = useState<"text" | "csv">("csv");
   const { toast } = useToast();
 
-  // Debug - log when component renders and active tab changes
+  // Debug - log when component renders
   useEffect(() => {
     console.log("BatchChecklistImport rendered with activeTab:", activeTab);
   }, [activeTab]);
-
-  // Force reset if needed
-  useEffect(() => {
-    // Reset component state when first mounted to ensure clean state
-    setActiveTab("csv");
-    setRenderKey(Date.now());
-    console.log("Component initialized with CSV tab active");
-  }, []);
 
   const handleImport = async (items: string[]) => {
     if (items.length === 0) {
@@ -39,9 +29,12 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchIm
       return;
     }
 
+    console.log("Starting import with items:", items);
     setIsImporting(true);
+    
     try {
       const count = await importChecklist(regulationId, items);
+      console.log("Import successful, count:", count);
       
       toast({
         title: "Import Successful",
@@ -50,6 +43,7 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchIm
 
       onImportComplete();
     } catch (error) {
+      console.error("Import failed:", error);
       toast({
         title: "Import Failed",
         description: error instanceof Error ? error.message : "An unknown error occurred",
@@ -60,14 +54,14 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchIm
     }
   };
 
-  // Handle external tab value change (from parent component)
+  // Handle tab value change
   const handleTabChange = (value: string) => {
     console.log("Tab changing to:", value);
     setActiveTab(value as "text" | "csv");
   };
 
   return (
-    <Card className="relative" key={renderKey}>
+    <Card className="relative">
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <FileText className="h-4 w-4" /> Batch Import Checklist Items
@@ -80,7 +74,6 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchIm
           value={activeTab} 
           onValueChange={handleTabChange} 
           className="mt-4"
-          defaultValue="csv" 
         >
           <TabsList className="grid grid-cols-2 w-[300px]">
             <TabsTrigger value="text">Text Input</TabsTrigger>
@@ -109,21 +102,20 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchIm
       </CardHeader>
       
       <CardContent>
-        {activeTab === "csv" && (
-          <div className="text-center mt-2 p-2 text-sm text-slate-600 bg-slate-50 rounded-md">
-            ↑ CSV upload area should be visible above ↑
-          </div>
-        )}
+        <div className="text-xs text-slate-400 mt-2 p-1">
+          {isImporting ? 
+            <div className="text-center text-sm text-slate-600">
+              <div className="animate-spin inline-block h-4 w-4 border-2 border-slate-500 border-t-transparent rounded-full mr-2"></div>
+              Importing items...
+            </div>
+            : null
+          }
+        </div>
       </CardContent>
       
       <CardFooter className="justify-end">
         {/* Footer content if needed */}
       </CardFooter>
-      
-      {/* Debug info - to help troubleshoot rendering issues */}
-      <div className="text-xs text-slate-400 mt-2 p-1">
-        Debug: activeTab={activeTab}, renderKey={renderKey}
-      </div>
     </Card>
   );
 };
