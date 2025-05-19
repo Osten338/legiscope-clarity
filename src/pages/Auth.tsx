@@ -7,8 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { cleanupAuthState } from "@/context/AuthContext";
+
+// Safe debug logging function
+const logDebug = (message: string, data?: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[Auth Page] ${message}`, data ? data : '');
+  }
+};
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -18,95 +25,111 @@ const Auth = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authInProgress, setAuthInProgress] = useState(false);
   const [isBreakingLoop, setIsBreakingLoop] = useState(false);
-  const [authServiceError, setAuthServiceError] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Safely access auth context with error handling
-  const [authState, setAuthState] = useState<{
-    user: any | null;
-    isLoading: boolean;
-    isAuthenticated: boolean;
-    signIn?: Function;
-    signUp?: Function;
-  }>({
-    user: null,
-    isLoading: true,
-    isAuthenticated: false
-  });
-  
-  // Check if auth context is available
-  useEffect(() => {
-    try {
-      const auth = useAuth();
-      setAuthState({
-        user: auth.user,
-        isLoading: auth.isLoading,
-        isAuthenticated: auth.isAuthenticated,
-        signIn: auth.signIn,
-        signUp: auth.signUp
-      });
-      setAuthServiceError(false); // Reset error state if auth is available
-    } catch (err) {
-      console.error("Error accessing auth context:", err);
-      setAuthServiceError(true);
-    }
-  }, []);
-  
+
   // Get the intended destination from location state, defaulting to dashboard
   const from = location.state?.from || "/dashboard";
   
-  // For debugging
-  const logDebug = (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Auth] ${message}`, data ? data : '');
-    }
-  };
-  
-  // Check if we're breaking an auth loop
+  // Initialize component with direct Supabase auth check
   useEffect(() => {
+    // Clear redirect history on mount to prevent redirect loops
+    sessionStorage.removeItem('auth:redirectHistory');
+    
+    // Check if we're breaking an auth loop
     const breakingLoop = sessionStorage.getItem('auth:breakingLoop') === 'true';
     if (breakingLoop) {
       setIsBreakingLoop(true);
       logDebug("Detected we're breaking an authentication loop");
+      
       // Clear the breaking loop flag after a short delay
       setTimeout(() => {
         sessionStorage.removeItem('auth:breakingLoop');
       }, 1000);
     }
-  }, []);
-  
-  // Clear redirect history on mount to prevent redirect loops
-  useEffect(() => {
-    if (isBreakingLoop) {
-      // If we're breaking a loop, don't clear the history yet
-      return;
-    }
     
-    sessionStorage.removeItem('auth:redirectHistory');
-  }, [isBreakingLoop]);
-  
-  useEffect(() => {
-    // If user is already signed in and we're done loading, redirect
-    if (authState.isAuthenticated && authState.user && !authState.isLoading && !isRedirecting && !authInProgress && !authServiceError) {
-      logDebug("Auth page: User is signed in, redirecting to", from);
-      setIsRedirecting(true);
+    const checkSession = async () => {
+      try {
+        // Fast check from sessionStorage first
+        const cachedAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
+        const userId = sessionStorage.getItem('auth:userId');
+        
+        if (cachedAuth && userId) {
+          setUser({ id: userId });
+          setIsAuthenticated(true);
+          logDebug("Using cached auth state, user is authenticated");
+        }
+        
+        // Now check with Supabase directly
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          logDebug("Error checking Supabase session:", error);
+          return;
+        }
+        
+        if (data?.session) {
+          logDebug("Found active Supabase session");
+          setUser(data.session.user);
+          setIsAuthenticated(true);
+          
+          // Store for future fast checks
+          sessionStorage.setItem('auth:isAuthenticated', 'true');
+          sessionStorage.setItem('auth:userId', data.session.user.id);
+          
+          // Redirect after a short delay
+          setTimeout(() => {
+            navigate(from, { replace: true });
+          }, 300);
+        }
+      } catch (err) {
+        logDebug("Error during auth initialization:", err);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+    
+    checkSession();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      logDebug("Auth state changed:", event);
       
-      // Clean up any redirect tracking to prevent loops
-      sessionStorage.removeItem('auth:redirectHistory');
-      
-      // Use setTimeout to ensure state updates have propagated
-      setTimeout(() => {
-        navigate(from, { replace: true });
-      }, 500);
-    }
-  }, [authState.user, authState.isLoading, from, navigate, authState.isAuthenticated, isRedirecting, authInProgress, authServiceError]);
+      if (session) {
+        setUser(session.user);
+        setIsAuthenticated(true);
+        
+        // Store for future fast checks
+        sessionStorage.setItem('auth:isAuthenticated', 'true');
+        sessionStorage.setItem('auth:userId', session.user.id);
+        
+        if (event === 'SIGNED_IN') {
+          // Redirect after a short delay
+          setTimeout(() => {
+            navigate(from, { replace: true });
+          }, 300);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAuthenticated(false);
+        sessionStorage.removeItem('auth:isAuthenticated');
+        sessionStorage.removeItem('auth:userId');
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, from]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (loading || isRedirecting || authInProgress || !authState.signIn || !authState.signUp) {
-      toast.error("Authentication service not available. Please try again later.");
+    if (loading || isRedirecting || authInProgress) {
       return;
     }
     
@@ -119,20 +142,28 @@ const Auth = () => {
       cleanupAuthState();
       
       if (isSignUp) {
-        const { error } = await authState.signUp(email, password);
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/auth/callback'
+          }
+        });
         
         if (error) throw error;
         
         toast.success("Check your email to confirm your account");
         logDebug("Signup successful, check email message shown");
       } else {
-        const { error } = await authState.signIn(email, password);
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
         
         if (error) throw error;
         
         toast.success("Successfully signed in!");
         logDebug("Sign in successful");
-        // We don't need to navigate here as the AuthContext will handle it
       }
     } catch (error: any) {
       logDebug("Authentication error:", error);
@@ -151,61 +182,20 @@ const Auth = () => {
     window.location.reload();
   };
 
-  // Show auth service error state
-  if (authServiceError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-sage-50 p-4">
-        <Card className="w-full max-w-md p-6 space-y-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-900">Authentication Error</h1>
-            <p className="text-slate-600 mt-2">
-              Unable to access authentication service. Please try again later.
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <Button 
-              onClick={handleReloadPage}
-              className="w-full max-w-xs"
-            >
-              Reload Page
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show error state if auth methods aren't available
-  if (!authState.signIn || !authState.signUp) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-sage-50 p-4">
-        <Card className="w-full max-w-md p-6 space-y-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-900">Authentication Error</h1>
-            <p className="text-slate-600 mt-2">
-              Unable to access authentication service. Please try again later.
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <Button 
-              onClick={handleReloadPage}
-              className="w-full max-w-xs"
-            >
-              Reload Page
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   // Don't show loading indicator during initial load to avoid flicker
-  if (authState.isLoading && !loading) {
+  if (!isInitialized) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
       </div>
     );
+  }
+
+  // If user is authenticated, redirect to dashboard
+  if (isAuthenticated && user && !isRedirecting) {
+    setIsRedirecting(true);
+    navigate(from, { replace: true });
+    return null;
   }
 
   return (
@@ -243,7 +233,7 @@ const Auth = () => {
               value={email} 
               onChange={e => setEmail(e.target.value)} 
               required 
-              className="bg-yellow-50"
+              className="bg-white"
               disabled={loading || isRedirecting || authInProgress}
             />
           </div>
@@ -257,7 +247,7 @@ const Auth = () => {
               value={password} 
               onChange={e => setPassword(e.target.value)} 
               required 
-              className="bg-yellow-50"
+              className="bg-white"
               disabled={loading || isRedirecting || authInProgress}
             />
           </div>
@@ -282,13 +272,23 @@ const Auth = () => {
           </button>
         </div>
         
+        <div className="pt-2 flex justify-center">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleReloadPage}
+            className="text-xs"
+          >
+            Reload Page
+          </Button>
+        </div>
+        
         {process.env.NODE_ENV === 'development' && (
           <div className="text-xs text-center text-muted-foreground mt-4">
-            <p>Auth state: {authState.isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
-            <p>Loading: {authState.isLoading ? 'Yes' : 'No'}</p>
+            <p>Initialized: {isInitialized ? 'Yes' : 'No'}</p>
+            <p>Auth state: {isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
             <p>Redirecting: {isRedirecting ? 'Yes' : 'No'}</p>
             <p>Breaking loop: {isBreakingLoop ? 'Yes' : 'No'}</p>
-            <p>Auth service error: {authServiceError ? 'Yes' : 'No'}</p>
           </div>
         )}
       </Card>

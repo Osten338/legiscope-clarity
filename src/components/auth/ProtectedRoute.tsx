@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 /**
  * ProtectedRoute component with enhanced stability
@@ -12,14 +13,32 @@ const ProtectedRoute = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState<Error | null>(null);
+  const [recoveryAttempts, setRecoveryAttempts] = useState(0);
   const location = useLocation();
   const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   // Debug logging function
   const logDebug = (message: string, data?: any) => {
     if (process.env.NODE_ENV === 'development') {
       console.log(`[ProtectedRoute] ${message}`, data ? data : '');
     }
+  };
+
+  // Handle recovery attempts
+  const handleRetry = () => {
+    setRecoveryAttempts(prev => prev + 1);
+    window.location.reload();
+  };
+
+  // Force break auth loops
+  const forceBreakLoop = () => {
+    logDebug("Forcing auth loop break");
+    sessionStorage.removeItem('auth:redirectHistory');
+    sessionStorage.removeItem('auth:userId');
+    sessionStorage.removeItem('auth:isAuthenticated');
+    sessionStorage.setItem('auth:breakingLoop', 'true');
+    window.location.href = '/auth';
   };
 
   useEffect(() => {
@@ -30,26 +49,25 @@ const ProtectedRoute = () => {
     // Check for potential redirect loops
     const recentRedirects = redirectHistory.filter(
       (entry: {path: string, time: number}) => 
-        Date.now() - entry.time < 10000 && entry.path === currentPath
+        Date.now() - entry.time < 15000 && entry.path === currentPath
     );
     
     // Enhanced loop detection - if we detect a potential loop, force break it
     if (recentRedirects.length > 2) {
       logDebug("Potential redirect loop detected! Breaking cycle.");
+      setIsRecoveryMode(true);
       
-      // Force a specific path to break the cycle
-      if (currentPath === '/auth') {
-        logDebug("Breaking loop by allowing access to protected route despite auth status");
-        setIsCheckingAuth(false);
-        setIsAuthenticated(true); // Force authenticated to break the loop
+      // Force a specific path to break the cycle after several attempts
+      if (recoveryAttempts > 2) {
+        forceBreakLoop();
         return;
-      } else {
-        logDebug("Breaking loop by forcing logged out state");
-        // Clear any auth data that might be causing problems
-        sessionStorage.removeItem('auth:userId');
-        sessionStorage.removeItem('auth:isAuthenticated');
-        sessionStorage.setItem('auth:breakingLoop', 'true');
-        setShouldRedirect(true);
+      }
+      
+      // Try fast path first - check session storage
+      const cachedAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
+      if (cachedAuth) {
+        logDebug("Using cached auth to break loop");
+        setIsAuthenticated(true);
         setIsCheckingAuth(false);
         return;
       }
@@ -110,27 +128,44 @@ const ProtectedRoute = () => {
     };
     
     checkSession();
-  }, [location.pathname]);
+  }, [location.pathname, recoveryAttempts]);
   
   // Handle auth error
   if (authError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <div className="text-red-500 text-xl mb-4">Authentication Error</div>
-        <p className="text-gray-700 mb-4">Unable to verify your authentication status.</p>
-        <p className="text-sm text-gray-500 mb-4">{authError.message}</p>
-        <button
-          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-          onClick={() => window.location.href = "/auth"}
-        >
-          Go to Login
-        </button>
-        <button
-          className="mt-2 text-sm text-primary hover:underline"
-          onClick={() => window.location.reload()}
-        >
-          Refresh Page
-        </button>
+        <div className="max-w-md w-full p-6 bg-white shadow-lg rounded-lg border border-gray-100">
+          <div className="text-red-500 text-xl mb-4 text-center">Authentication Error</div>
+          <p className="text-gray-700 mb-4 text-center">Unable to verify your authentication status.</p>
+          <p className="text-sm text-gray-500 mb-4 text-center">{authError.message}</p>
+          
+          <div className="space-y-2">
+            <Button
+              className="w-full"
+              onClick={() => window.location.href = "/auth"}
+            >
+              Go to Login
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleRetry}
+            >
+              Refresh Page {recoveryAttempts > 0 ? `(${recoveryAttempts})` : ''}
+            </Button>
+            
+            {recoveryAttempts > 2 && (
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={forceBreakLoop}
+              >
+                Force Reset Auth
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -141,6 +176,18 @@ const ProtectedRoute = () => {
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary mb-4"></div>
         <p className="text-sm text-muted-foreground">Verifying authentication...</p>
+        
+        {/* Show retry button after delay */}
+        {isRecoveryMode && (
+          <Button
+            variant="outline" 
+            size="sm"
+            className="mt-4"
+            onClick={handleRetry}
+          >
+            Retry Authentication
+          </Button>
+        )}
       </div>
     );
   }
