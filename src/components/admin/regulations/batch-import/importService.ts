@@ -25,7 +25,8 @@ export async function importChecklist(regulationId: string, items: any[]) {
         regulation_id: regulationId,
         description: item,
         importance: 3, // Medium importance by default
-        category: "general"
+        category: "general",
+        is_subtask: false
       };
     } else {
       // New format with full structure
@@ -37,7 +38,8 @@ export async function importChecklist(regulationId: string, items: any[]) {
         department: item.department || "",
         importance: item.importance || 3,
         category: item.category || "general",
-        is_subtask: false,
+        is_subtask: item.is_subtask === true,
+        parent_id: item.parent_id || null,
         subtasks: Array.isArray(item.subtasks) ? JSON.stringify(item.subtasks) : "[]"
       };
       
