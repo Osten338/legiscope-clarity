@@ -123,16 +123,23 @@ export const useComplianceChecklist = () => {
               );
             }
 
+            // Add is_subtask and parent_id fields with type assertion
+            const typedItems = allChecklistItems?.map(item => ({
+              ...item,
+              is_subtask: !!item.is_subtask,
+              parent_id: item.parent_id || null
+            })) || [];
+
             // Identify main tasks (not subtasks) and subtasks
-            const mainTasks = allChecklistItems?.filter(item => {
+            const mainTasks = typedItems.filter(item => {
               // Ensure is_subtask exists and is a boolean, default to false if undefined
               return item.is_subtask === false || item.is_subtask === undefined || item.is_subtask === null;
-            }) || [];
+            });
             
-            const subtasks = allChecklistItems?.filter(item => {
+            const subtasks = typedItems.filter(item => {
               // Ensure is_subtask is explicitly true
               return item.is_subtask === true;
-            }) || [];
+            });
             
             // Map responses to checklist items
             const itemsWithResponses: ChecklistItemType[] = mainTasks.map((item) => {
