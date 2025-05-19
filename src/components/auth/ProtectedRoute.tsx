@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { isAuthenticatedSync } from "@/context/AuthContext";
+import { useAuth, isAuthenticatedSync } from "@/context/AuthContext";
 
 /**
  * ProtectedRoute component with enhanced stability
@@ -10,11 +9,13 @@ import { isAuthenticatedSync } from "@/context/AuthContext";
  * to prevent premature redirects and auth loops
  */
 const ProtectedRoute = () => {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const auth = useAuth(); // This will be used conditionally
+  const { user, isLoading, isAuthenticated } = auth;
   const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [verificationAttempts, setVerificationAttempts] = useState(0);
+  const [authContextAvailable, setAuthContextAvailable] = useState(true);
   
   // Debug logging function
   const logDebug = (message: string, data?: any) => {
@@ -22,6 +23,17 @@ const ProtectedRoute = () => {
       console.log(`[ProtectedRoute] ${message}`, data ? data : '');
     }
   };
+
+  // Check if auth context is available
+  useEffect(() => {
+    if (!auth) {
+      logDebug("Auth context is not available!");
+      setAuthContextAvailable(false);
+    } else {
+      logDebug("Auth context is available", auth);
+      setAuthContextAvailable(true);
+    }
+  }, [auth]);
   
   useEffect(() => {
     // Track redirects to prevent loops
@@ -79,7 +91,8 @@ const ProtectedRoute = () => {
         syncAuthCheck,
         sessionAuthCheck,
         contextAuthCheck,
-        isLoading
+        isLoading,
+        authContextAvailable
       });
       
       if (syncAuthCheck || sessionAuthCheck || contextAuthCheck) {
@@ -109,9 +122,19 @@ const ProtectedRoute = () => {
     return () => {
       clearTimeout(verificationTimer);
     };
-  }, [isLoading, user, isAuthenticated, location.pathname, verificationAttempts]);
+  }, [isLoading, user, isAuthenticated, location.pathname, verificationAttempts, authContextAvailable]);
   
   // Show loading state while checking authentication
+  if (!authContextAvailable) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary mb-4"></div>
+        <p className="text-sm text-muted-foreground">Initializing authentication...</p>
+        <p className="text-xs text-muted-foreground mt-2">Auth context not available yet</p>
+      </div>
+    );
+  }
+  
   if (isLoading || isCheckingAuth) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
