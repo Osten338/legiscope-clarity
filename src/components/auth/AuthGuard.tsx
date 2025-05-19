@@ -2,6 +2,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 
 /**
  * AuthGuard component that protects routes requiring authentication
@@ -9,21 +10,28 @@ import { supabase } from "@/integrations/supabase/client";
  */
 const AuthGuard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const location = useLocation();
 
   useEffect(() => {
+    // Set up auth state listener first
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log("Auth state changed:", event);
+        setIsAuthenticated(!!currentSession);
+        setSession(currentSession);
+      }
+    );
+
+    // Then check for existing session
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
+      console.log("Current session:", data.session ? "exists" : "none");
       setIsAuthenticated(!!data.session);
+      setSession(data.session);
     };
 
     checkAuth();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setIsAuthenticated(!!session);
-      }
-    );
 
     return () => {
       authListener?.subscription?.unsubscribe();

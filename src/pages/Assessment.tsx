@@ -1,9 +1,7 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { BusinessAssessmentForm } from "@/components/BusinessAssessmentForm";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { BusinessDescription } from "@/components/business-assessment/BusinessDescription";
@@ -11,37 +9,7 @@ import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { Card, CardContent } from "@/components/ui/card";
 
 const Assessment = () => {
-  const navigate = useNavigate();
   const [assessmentMethod, setAssessmentMethod] = useState<"form" | "description">("form");
-
-  useEffect(() => {
-    console.log("Assessment page loaded, checking authentication...");
-    
-    const checkAuth = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error || !session) {
-        console.log("No active session, redirecting to auth");
-        navigate("/auth");
-      } else {
-        console.log("User authenticated:", session.user.id);
-      }
-    };
-
-    checkAuth();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event);
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate("/auth");
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
 
   return (
     <TopbarLayout>

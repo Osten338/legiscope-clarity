@@ -1,8 +1,9 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 // Pages
 import Home from "@/pages/Home";
@@ -44,25 +45,31 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/compliance-overview" element={<ComplianceOverview />} />
-          <Route path="/compliance-chat" element={<ComplianceChat />} />
-          <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
           <Route path="/documentation" element={<Documentation />} />
-          <Route path="/alerts" element={<Alerts />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/legislation" element={<Legislation />} />
-          <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/admin-tools" element={<AdminTools />} />
-          <Route path="/admin/regulations" element={<RegulationsAdmin />} />
-          <Route path="/admin/regulations/:regulationId/checklist" element={<ChecklistEditor />} />
+          
+          {/* Protected routes that require authentication */}
+          <Route element={<AuthGuard />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/assessment" element={<Assessment />} />
+            <Route path="/compliance-overview" element={<ComplianceOverview />} />
+            <Route path="/compliance-chat" element={<ComplianceChat />} />
+            <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
+            <Route path="/alerts" element={<Alerts />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route path="/legislation" element={<Legislation />} />
+            <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/admin-tools" element={<AdminTools />} />
+            <Route path="/admin/regulations" element={<RegulationsAdmin />} />
+            <Route path="/admin/regulations/:regulationId/checklist" element={<ChecklistEditor />} />
+          </Route>
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="bottom-right" />
