@@ -9,14 +9,15 @@ import { useAuth, isAuthenticatedSync } from "@/context/AuthContext";
  * to prevent premature redirects and auth loops
  */
 const ProtectedRoute = () => {
-  const auth = useAuth(); // This will be used conditionally
-  const { user, isLoading, isAuthenticated } = auth;
+  // Safely access auth context
+  const [authContextError, setAuthContextError] = useState<Error | null>(null);
+  const [auth, setAuth] = useState<any>(null);
   const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [verificationAttempts, setVerificationAttempts] = useState(0);
-  const [authContextAvailable, setAuthContextAvailable] = useState(true);
-  
+  const [authContextAvailable, setAuthContextAvailable] = useState(false);
+
   // Debug logging function
   const logDebug = (message: string, data?: any) => {
     if (process.env.NODE_ENV === 'development') {
@@ -24,18 +25,46 @@ const ProtectedRoute = () => {
     }
   };
 
-  // Check if auth context is available
+  // Safely get auth context without crashing if it's not ready
   useEffect(() => {
-    if (!auth) {
-      logDebug("Auth context is not available!");
-      setAuthContextAvailable(false);
-    } else {
-      logDebug("Auth context is available", auth);
+    try {
+      const authContext = useAuth();
+      setAuth(authContext);
       setAuthContextAvailable(true);
+      logDebug("Auth context retrieved successfully", authContext);
+    } catch (err) {
+      logDebug("Error retrieving auth context:", err);
+      setAuthContextError(err instanceof Error ? err : new Error("Unknown auth error"));
+      setAuthContextAvailable(false);
+      
+      // Retry getting auth context after a delay
+      const retryTimer = setTimeout(() => {
+        try {
+          const authContext = useAuth();
+          setAuth(authContext);
+          setAuthContextAvailable(true);
+          logDebug("Auth context retrieved successfully on retry", authContext);
+        } catch (retryErr) {
+          logDebug("Failed to retrieve auth context on retry:", retryErr);
+          // If we still can't get auth context, we'll handle it below
+        }
+      }, 1000);
+      
+      return () => clearTimeout(retryTimer);
     }
-  }, [auth]);
+  }, []);
   
   useEffect(() => {
+    if (!authContextAvailable) {
+      // Don't proceed with auth checks if the context isn't available
+      return;
+    }
+
+    // Extract auth state from context if available
+    const user = auth?.user;
+    const isLoading = auth?.isLoading || false;
+    const isAuthenticated = auth?.isAuthenticated || false;
+    
     // Track redirects to prevent loops
     const redirectHistory = JSON.parse(sessionStorage.getItem('auth:redirectHistory') || '[]');
     const currentPath = location.pathname;
@@ -46,11 +75,24 @@ const ProtectedRoute = () => {
         Date.now() - entry.time < 10000 && entry.path === currentPath
     );
     
-    if (recentRedirects.length > 3) {
+    // Enhanced loop detection - if we detect a potential loop, force break it
+    if (recentRedirects.length > 2) {
       logDebug("Potential redirect loop detected! Breaking cycle.");
-      setIsCheckingAuth(false);
-      setShouldRedirect(false);
-      return;
+      // Force a specific path to break the cycle - don't get stuck between auth and protected routes
+      if (currentPath === '/auth') {
+        logDebug("Breaking loop by allowing access to protected route despite auth status");
+        // Let the protected route render, the component error boundary will handle issues
+        setIsCheckingAuth(false);
+        setShouldRedirect(false);
+        return;
+      } else {
+        logDebug("Breaking loop by redirecting to auth with a marker");
+        // Add a special marker to indicate we're breaking a loop
+        sessionStorage.setItem('auth:breakingLoop', 'true');
+        setShouldRedirect(true);
+        setIsCheckingAuth(false);
+        return;
+      }
     }
     
     // Fast check from session storage first
@@ -122,9 +164,32 @@ const ProtectedRoute = () => {
     return () => {
       clearTimeout(verificationTimer);
     };
-  }, [isLoading, user, isAuthenticated, location.pathname, verificationAttempts, authContextAvailable]);
+  }, [auth, isCheckingAuth, verificationAttempts, location.pathname, authContextAvailable]);
   
-  // Show loading state while checking authentication
+  // Handle auth context error
+  if (authContextError && !authContextAvailable) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="text-red-500 text-xl mb-4">Authentication Error</div>
+        <p className="text-gray-700 mb-4">Unable to access authentication service.</p>
+        <p className="text-sm text-gray-500 mb-4">{authContextError.message}</p>
+        <button
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+          onClick={() => window.location.href = "/auth"}
+        >
+          Go to Login
+        </button>
+        <button
+          className="mt-2 text-sm text-primary hover:underline"
+          onClick={() => window.location.reload()}
+        >
+          Refresh Page
+        </button>
+      </div>
+    );
+  }
+  
+  // Show loading state while checking authentication or waiting for context
   if (!authContextAvailable) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -135,7 +200,7 @@ const ProtectedRoute = () => {
     );
   }
   
-  if (isLoading || isCheckingAuth) {
+  if (auth?.isLoading || isCheckingAuth) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary mb-4"></div>

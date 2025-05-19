@@ -17,9 +17,38 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authInProgress, setAuthInProgress] = useState(false);
+  const [isBreakingLoop, setIsBreakingLoop] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isLoading, isAuthenticated, signIn, signUp } = useAuth();
+  
+  // Safely access auth context
+  const [authState, setAuthState] = useState<{
+    user: any | null;
+    isLoading: boolean;
+    isAuthenticated: boolean;
+    signIn?: Function;
+    signUp?: Function;
+  }>({
+    user: null,
+    isLoading: true,
+    isAuthenticated: false
+  });
+  
+  // Check if auth context is available
+  useEffect(() => {
+    try {
+      const auth = useAuth();
+      setAuthState({
+        user: auth.user,
+        isLoading: auth.isLoading,
+        isAuthenticated: auth.isAuthenticated,
+        signIn: auth.signIn,
+        signUp: auth.signUp
+      });
+    } catch (err) {
+      console.error("Error accessing auth context:", err);
+    }
+  }, []);
   
   // Get the intended destination from location state, defaulting to dashboard
   const from = location.state?.from || "/dashboard";
@@ -31,14 +60,32 @@ const Auth = () => {
     }
   };
   
+  // Check if we're breaking an auth loop
+  useEffect(() => {
+    const breakingLoop = sessionStorage.getItem('auth:breakingLoop') === 'true';
+    if (breakingLoop) {
+      setIsBreakingLoop(true);
+      logDebug("Detected we're breaking an authentication loop");
+      // Clear the breaking loop flag after a short delay
+      setTimeout(() => {
+        sessionStorage.removeItem('auth:breakingLoop');
+      }, 1000);
+    }
+  }, []);
+  
   // Clear redirect history on mount to prevent redirect loops
   useEffect(() => {
+    if (isBreakingLoop) {
+      // If we're breaking a loop, don't clear the history yet
+      return;
+    }
+    
     sessionStorage.removeItem('auth:redirectHistory');
-  }, []);
+  }, [isBreakingLoop]);
   
   useEffect(() => {
     // If user is already signed in and we're done loading, redirect
-    if (isAuthenticated && user && !isLoading && !isRedirecting && !authInProgress) {
+    if (authState.isAuthenticated && authState.user && !authState.isLoading && !isRedirecting && !authInProgress) {
       logDebug("Auth page: User is signed in, redirecting to", from);
       setIsRedirecting(true);
       
@@ -50,12 +97,15 @@ const Auth = () => {
         navigate(from, { replace: true });
       }, 500);
     }
-  }, [user, isLoading, from, navigate, isAuthenticated, isRedirecting, authInProgress]);
+  }, [authState.user, authState.isLoading, from, navigate, authState.isAuthenticated, isRedirecting, authInProgress]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (loading || isRedirecting || authInProgress) return;
+    if (loading || isRedirecting || authInProgress || !authState.signIn || !authState.signUp) {
+      toast.error("Authentication service not available. Please try again later.");
+      return;
+    }
     
     setLoading(true);
     setAuthInProgress(true);
@@ -66,14 +116,14 @@ const Auth = () => {
       cleanupAuthState();
       
       if (isSignUp) {
-        const { error } = await signUp(email, password);
+        const { error } = await authState.signUp(email, password);
         
         if (error) throw error;
         
         toast.success("Check your email to confirm your account");
         logDebug("Signup successful, check email message shown");
       } else {
-        const { error } = await signIn(email, password);
+        const { error } = await authState.signIn(email, password);
         
         if (error) throw error;
         
@@ -94,8 +144,32 @@ const Auth = () => {
     }
   };
 
+  // Show error state if auth methods aren't available
+  if (!authState.signIn || !authState.signUp) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-sage-50 p-4">
+        <Card className="w-full max-w-md p-6 space-y-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-900">Authentication Error</h1>
+            <p className="text-slate-600 mt-2">
+              Unable to access authentication service. Please try again later.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <Button 
+              onClick={() => window.location.reload()}
+              className="w-full max-w-xs"
+            >
+              Reload Page
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   // Don't show loading indicator during initial load to avoid flicker
-  if (isLoading && !loading) {
+  if (authState.isLoading && !loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
@@ -111,6 +185,14 @@ const Auth = () => {
       className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-sage-50 p-4"
     >
       <Card className="w-full max-w-md p-6 space-y-6">
+        {isBreakingLoop && (
+          <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md mb-3">
+            <p className="text-sm text-yellow-800">
+              Authentication issue detected. Please sign in again or try refreshing the page.
+            </p>
+          </div>
+        )}
+
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-900">
             {isSignUp ? "Create an Account" : "Welcome Back"}
@@ -171,9 +253,10 @@ const Auth = () => {
         
         {process.env.NODE_ENV === 'development' && (
           <div className="text-xs text-center text-muted-foreground mt-4">
-            <p>Auth state: {isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
-            <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+            <p>Auth state: {authState.isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
+            <p>Loading: {authState.isLoading ? 'Yes' : 'No'}</p>
             <p>Redirecting: {isRedirecting ? 'Yes' : 'No'}</p>
+            <p>Breaking loop: {isBreakingLoop ? 'Yes' : 'No'}</p>
           </div>
         )}
       </Card>

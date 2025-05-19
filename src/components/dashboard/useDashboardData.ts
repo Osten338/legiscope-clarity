@@ -3,11 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect } from "react";
 import type { SavedRegulation } from "./types";
 
 export const useDashboardData = () => {
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const [authState, setAuthState] = useState<{
+    user: any | null;
+    isAuthenticated: boolean;
+  }>({ user: null, isAuthenticated: false });
+  const [authError, setAuthError] = useState<Error | null>(null);
   
   // Enhanced debug logger
   const logDebug = (message: string, data?: any) => {
@@ -16,30 +21,54 @@ export const useDashboardData = () => {
     }
   };
 
+  // Safely get auth context
+  useEffect(() => {
+    try {
+      const { user, isAuthenticated } = useAuth();
+      setAuthState({ user, isAuthenticated });
+      logDebug("Auth context retrieved", { userId: user?.id, isAuthenticated });
+    } catch (err) {
+      logDebug("Error accessing auth context:", err);
+      setAuthError(err instanceof Error ? err : new Error("Unknown auth error"));
+      
+      // Try to recover user ID from session storage as fallback
+      const fallbackUserId = sessionStorage.getItem('auth:userId');
+      const fallbackAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
+      
+      if (fallbackUserId && fallbackAuth) {
+        logDebug("Using fallback user ID from session storage:", fallbackUserId);
+        setAuthState({ 
+          user: { id: fallbackUserId },
+          isAuthenticated: true
+        });
+      }
+    }
+  }, []);
+
   const {
     data: savedRegulations,
     isLoading,
     error,
     refetch
   } = useQuery({
-    queryKey: ['savedRegulations', user?.id],
+    queryKey: ['savedRegulations', authState.user?.id],
     queryFn: async () => {
       try {
         logDebug('Starting to fetch saved regulations');
         
         // Verify we have a valid user ID
-        if (!user?.id) {
+        if (!authState.user?.id) {
           logDebug('No user ID available, cannot fetch data');
           throw new Error("User ID required to fetch regulations");
         }
         
-        return fetchUserRegulations(user.id);
+        return fetchUserRegulations(authState.user.id);
       } catch (err) {
         logDebug("Error in query function:", err);
         throw err;
       }
     },
-    enabled: Boolean(user?.id && isAuthenticated),
+    enabled: Boolean(authState.user?.id && authState.isAuthenticated),
     staleTime: 5 * 60 * 1000, // 5 minutes cache validity
     retry: (failureCount, error) => {
       // Only retry a few times with increasing backoff
@@ -115,6 +144,7 @@ export const useDashboardData = () => {
     savedRegulations,
     isLoading,
     error,
+    authError,
     refetch
   };
 };
