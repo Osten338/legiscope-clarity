@@ -36,9 +36,10 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const authCheckCompleted = useRef(false);
+  const authInProgress = useRef(false);
   
   // Get the intended destination from location state, defaulting to assessment
-  const from = location.state?.from || "/assessment";
+  const from = location.state?.from || "/dashboard";
   
   useEffect(() => {
     // Only check session once to prevent loops
@@ -46,19 +47,17 @@ const Auth = () => {
       return;
     }
     
+    // Set the flag to avoid repeated checks
+    authCheckCompleted.current = true;
+    
     // Check if user is already signed in
     const checkSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
         
-        // Mark that we've completed the check
-        authCheckCompleted.current = true;
-        
         if (data.session) {
-          // Short delay to prevent race conditions with AuthGuard
-          setTimeout(() => {
-            navigate(from, { replace: true });
-          }, 100);
+          console.log("Auth page: Session found, no need to login");
+          // AuthGuard will handle the redirect, we just need to finish checking
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -70,29 +69,16 @@ const Auth = () => {
     
     checkSession();
     
-    // Set up one-time auth listener for this component
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          // Add slight delay to prevent race conditions
-          setTimeout(() => {
-            navigate(from, { replace: true });
-          }, 100);
-        }
-      }
-    );
-    
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
+    // We don't need an auth listener here since AuthGuard will handle that
   }, [from, navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (loading) return;
+    if (loading || authInProgress.current) return;
     
     setLoading(true);
+    authInProgress.current = true;
     
     try {
       // Clean up existing auth state
@@ -109,13 +95,17 @@ const Auth = () => {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/auth/callback'
+          }
         });
         
         if (error) throw error;
         
         toast.success("Check your email to confirm your account");
         setLoading(false);
+        authInProgress.current = false;
       } else {
         const { error, data } = await supabase.auth.signInWithPassword({
           email,
@@ -126,12 +116,13 @@ const Auth = () => {
         
         if (data.user) {
           toast.success("Successfully signed in!");
-          // No need to navigate here, the auth state listener will handle it
+          // Let AuthGuard handle the redirect based on the session state
         }
       }
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || "Authentication failed");
       setLoading(false);
+      authInProgress.current = false;
     }
   };
 
