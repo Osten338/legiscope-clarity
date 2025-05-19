@@ -1,3 +1,4 @@
+
 export type ChecklistItem = {
   id: string;
   description: string;
@@ -40,3 +41,18 @@ export type RegulationListItem = {
     description: string;
   };
 };
+
+export interface ChecklistItemType {
+  id: string;
+  description: string;
+  importance?: number | null;
+  category?: string | null;
+  estimated_effort?: string | null;
+  expert_verified?: boolean | null;
+  task?: string | null;
+  best_practices?: string | null;
+  department?: string | null;
+  parent_id?: string | null;
+  is_subtask: boolean | null;
+  subtasks?: ChecklistItemType[];
+}

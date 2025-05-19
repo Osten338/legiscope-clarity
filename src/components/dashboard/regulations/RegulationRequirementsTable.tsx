@@ -1,26 +1,11 @@
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { RegulationListItem } from "../types";
+import { RegulationListItem, ChecklistItemType } from "../types";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronDown, ChevronUp, Check } from "lucide-react";
-
-interface ChecklistItemType {
-  id: string;
-  description: string;
-  importance: number | null;
-  category: string | null;
-  estimated_effort: string | null;
-  expert_verified: boolean | null;
-  task?: string | null;
-  best_practices?: string | null;
-  department?: string | null;
-  subtasks?: any[];
-  parent_id?: string | null;
-  is_subtask: boolean | null;
-}
 
 interface RegulationRequirementsTableProps {
   regulation: RegulationListItem;
@@ -59,7 +44,23 @@ export const RegulationRequirementsTable = ({
             throw error;
           }
           
-          setRequirementItems(data || []);
+          // Transform the data to match ChecklistItemType
+          const transformedData: ChecklistItemType[] = (data || []).map(item => ({
+            id: item.id,
+            description: item.description,
+            importance: item.importance,
+            category: item.category,
+            estimated_effort: item.estimated_effort,
+            expert_verified: item.expert_verified,
+            task: item.task,
+            best_practices: item.best_practices,
+            department: item.department,
+            parent_id: item.parent_id,
+            is_subtask: item.is_subtask === null ? false : item.is_subtask,
+            subtasks: item.subtasks || []
+          }));
+          
+          setRequirementItems(transformedData);
         }
       } catch (error) {
         console.error("Failed to fetch requirements:", error);
@@ -77,11 +78,19 @@ export const RegulationRequirementsTable = ({
               category: "Security",
               estimated_effort: "1-2 weeks",
               expert_verified: true,
+              is_subtask: false,
               subtasks: [
-                { id: "sub-1", description: "Implement encryption for data at rest" },
-                { id: "sub-2", description: "Implement encryption for data in transit" }
-              ],
-              is_subtask: false
+                { 
+                  id: "sub-1", 
+                  description: "Implement encryption for data at rest",
+                  is_subtask: true
+                },
+                { 
+                  id: "sub-2", 
+                  description: "Implement encryption for data in transit",
+                  is_subtask: true
+                }
+              ]
             },
             {
               id: "req-2",
@@ -93,8 +102,8 @@ export const RegulationRequirementsTable = ({
               category: "Documentation",
               estimated_effort: "1 week",
               expert_verified: true,
-              subtasks: [],
-              is_subtask: false
+              is_subtask: false,
+              subtasks: []
             },
             {
               id: "req-3",
@@ -106,8 +115,8 @@ export const RegulationRequirementsTable = ({
               category: "Risk Management",
               estimated_effort: "1-2 weeks",
               expert_verified: false,
-              subtasks: [],
-              is_subtask: false
+              is_subtask: false,
+              subtasks: []
             }
           ];
           
@@ -244,7 +253,7 @@ export const RegulationRequirementsTable = ({
                           <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Subtasks:</h4>
                             <ul className="list-disc pl-5 mt-1 space-y-1">
-                              {item.subtasks.map((subtask: any) => (
+                              {item.subtasks.map((subtask) => (
                                 <li key={subtask.id} className="text-sm text-gray-600 dark:text-gray-400">
                                   {subtask.description}
                                 </li>
