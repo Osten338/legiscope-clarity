@@ -124,8 +124,15 @@ export const useComplianceChecklist = () => {
             }
 
             // Identify main tasks (not subtasks) and subtasks
-            const mainTasks = allChecklistItems?.filter(item => !item.is_subtask) || [];
-            const subtasks = allChecklistItems?.filter(item => item.is_subtask) || [];
+            const mainTasks = allChecklistItems?.filter(item => {
+              // Ensure is_subtask exists and is a boolean, default to false if undefined
+              return item.is_subtask === false || item.is_subtask === undefined || item.is_subtask === null;
+            }) || [];
+            
+            const subtasks = allChecklistItems?.filter(item => {
+              // Ensure is_subtask is explicitly true
+              return item.is_subtask === true;
+            }) || [];
             
             // Map responses to checklist items
             const itemsWithResponses: ChecklistItemType[] = mainTasks.map((item) => {
@@ -143,6 +150,7 @@ export const useComplianceChecklist = () => {
                 
                 return {
                   ...subtask,
+                  is_subtask: true, // Ensure is_subtask is explicitly set
                   response: subtaskResponse
                     ? {
                         status: subtaskResponse.status,
@@ -154,6 +162,8 @@ export const useComplianceChecklist = () => {
               
               return {
                 ...item,
+                is_subtask: false, // Ensure is_subtask is explicitly set
+                parent_id: item.parent_id || null, // Ensure parent_id exists, even if null
                 subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
                 response: response
                   ? {
