@@ -237,7 +237,7 @@ export const BatchChecklistImport = ({ regulationId, onImportComplete }: BatchCh
             <TabsTrigger value="text">Text Input</TabsTrigger>
             <TabsTrigger value="csv" className="relative">
               CSV Upload
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5 animate-pulse">
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
                 Recommended
               </span>
             </TabsTrigger>
@@ -290,9 +290,9 @@ Conduct regular data protection impact assessments"
           <TabsContent value="csv" className="mt-4 min-h-[500px] block">
             <div className="space-y-4">
               {/* Step 1: Download sample with better visibility */}
-              <div className="bg-blue-50 p-6 rounded-md mb-6 border-2 border-blue-200 shadow-sm">
+              <div className="bg-slate-100 p-6 rounded-md mb-6 border-2 border-slate-200 shadow-sm">
                 <div className="flex items-center mb-2">
-                  <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">1</div>
+                  <div className="bg-slate-700 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">1</div>
                   <h3 className="font-medium text-base">Start with a template (optional)</h3>
                 </div>
                 <p className="text-sm text-slate-600 ml-11 mb-3">Download our sample CSV file to get started quickly</p>
@@ -307,9 +307,9 @@ Conduct regular data protection impact assessments"
               </div>
               
               {/* Step 2: Upload area with enhanced visibility */}
-              <div className="bg-blue-50 p-6 rounded-md border-2 border-blue-200 shadow-sm mb-6">
+              <div className="bg-slate-100 p-6 rounded-md border-2 border-slate-200 shadow-sm mb-6">
                 <div className="flex items-center mb-3">
-                  <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">2</div>
+                  <div className="bg-slate-700 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">2</div>
                   <h3 className="font-medium text-base">Upload your CSV file</h3>
                 </div>
                 <p className="text-sm text-slate-600 ml-11 mb-3">Click the upload area or drag and drop your CSV file</p>
@@ -318,10 +318,10 @@ Conduct regular data protection impact assessments"
                   className={`
                     relative border-4 ml-11
                     ${isDragging 
-                      ? 'border-blue-500 bg-blue-100' 
-                      : 'border-dashed border-blue-400 hover:border-blue-500 hover:bg-blue-50'} 
+                      ? 'border-slate-500 bg-slate-200' 
+                      : 'border-dashed border-slate-300 hover:border-slate-500 hover:bg-slate-50'} 
                     rounded-lg p-8 cursor-pointer transition-all duration-300 
-                    ${!fileName ? 'animate-pulse' : ''} min-h-[200px]
+                    min-h-[200px]
                   `}
                   onClick={triggerFileInput}
                   onDragEnter={handleDragEnter}
@@ -339,12 +339,12 @@ Conduct regular data protection impact assessments"
                     id="csv-upload"
                   />
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-1 group-hover:bg-blue-200 transition-colors">
-                      <Upload className="h-10 w-10 text-blue-600" />
-                      <ArrowDown className="h-6 w-6 text-blue-600 absolute animate-bounce mt-10" />
+                    <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mb-1 group-hover:bg-slate-300 transition-colors">
+                      <Upload className="h-10 w-10 text-slate-600" />
+                      <ArrowDown className="h-6 w-6 text-slate-600 absolute mt-10" />
                     </div>
                     <div className="text-lg font-medium text-center">
-                      <span className="text-blue-600 underline font-bold">Click to upload</span> or drag and drop
+                      <span className="text-slate-700 underline font-bold">Click to upload</span> or drag and drop
                     </div>
                     <div className="text-sm text-slate-600 text-center max-w-sm">
                       Upload a CSV file with checklist items in the first column
@@ -353,7 +353,7 @@ Conduct regular data protection impact assessments"
                     <Button 
                       variant="default" 
                       size="lg" 
-                      className="mt-3 bg-blue-600 hover:bg-blue-700 animate-pulse hover:animate-none transition-all hover:scale-105"
+                      className="mt-3 bg-slate-700 hover:bg-slate-800 transition-all hover:scale-105"
                       onClick={(e) => {
                         e.stopPropagation();
                         triggerFileInput();
@@ -367,9 +367,9 @@ Conduct regular data protection impact assessments"
               </div>
               
               {/* Step 3: Uploaded file info & import button */}
-              <div className="bg-blue-50 p-6 rounded-md border-2 border-blue-200 shadow-sm">
+              <div className="bg-slate-100 p-6 rounded-md border-2 border-slate-200 shadow-sm">
                 <div className="flex items-center mb-3">
-                  <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">3</div>
+                  <div className="bg-slate-700 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm font-bold">3</div>
                   <h3 className="font-medium text-base">Import your data</h3>
                 </div>
                 <p className="text-sm text-slate-600 ml-11 mb-3">Review and import your checklist items</p>
@@ -377,8 +377,8 @@ Conduct regular data protection impact assessments"
                 {fileName ? (
                   <div className="bg-white p-4 rounded-md border flex items-center justify-between mb-3 ml-11">
                     <div className="flex items-center gap-2">
-                      <div className="bg-blue-100 p-2 rounded">
-                        <FileText className="h-6 w-6 text-blue-600" />
+                      <div className="bg-slate-100 p-2 rounded">
+                        <FileText className="h-6 w-6 text-slate-600" />
                       </div>
                       <div>
                         <div className="text-sm font-medium">{fileName}</div>
@@ -403,7 +403,7 @@ Conduct regular data protection impact assessments"
                   <Button 
                     onClick={handleCsvImport}
                     disabled={isImporting || parsedItems.length === 0}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full bg-slate-700 hover:bg-slate-800"
                     size="lg"
                   >
                     {isImporting ? (
@@ -442,7 +442,7 @@ Conduct regular data protection impact assessments"
       <CardContent>
         {/* Adding explicit notice when CSV tab is active but not showing properly */}
         {activeTab === "csv" && (
-          <div className="text-center mt-2 p-2 text-sm text-blue-600 bg-blue-50 rounded-md">
+          <div className="text-center mt-2 p-2 text-sm text-slate-600 bg-slate-50 rounded-md">
             ↑ CSV upload area should be visible above ↑
           </div>
         )}
