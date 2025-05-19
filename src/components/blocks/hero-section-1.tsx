@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
@@ -28,7 +29,7 @@ const transitionVariants = {
 };
 
 export function HeroSection() {
-  return <>
+    return <>
             <HeroHeader />
             <main className="overflow-hidden">
                 <div aria-hidden className="z-[2] absolute inset-0 pointer-events-none isolate opacity-50 contain-strict hidden lg:block">
@@ -185,17 +186,17 @@ const HeroHeader = () => {
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                                 <Button asChild variant="outline" size="sm" className={cn(isScrolled && 'lg:hidden')}>
-                                    <Link to="/login">
+                                    <Link to="/auth">
                                         <span>Login</span>
                                     </Link>
                                 </Button>
                                 <Button asChild size="sm" className={cn(isScrolled && 'lg:hidden')}>
-                                    <Link to="/login">
+                                    <Link to="/auth">
                                         <span>Sign Up</span>
                                     </Link>
                                 </Button>
                                 <Button asChild size="sm" className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}>
-                                    <Link to="/login">
+                                    <Link to="/auth">
                                         <span>Get Started</span>
                                     </Link>
                                 </Button>

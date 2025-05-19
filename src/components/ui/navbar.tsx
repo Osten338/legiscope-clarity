@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MenuIcon, X } from "lucide-react";
@@ -80,7 +81,7 @@ const Navbar = () => {
         {/* CTA Button */}
         <div className="hidden md:flex items-center gap-4">
           <Button asChild className="rounded-full px-6">
-            <Link to="/login">Get Started</Link>
+            <Link to="/auth">Get Started</Link>
           </Button>
         </div>
 
@@ -108,7 +109,7 @@ const Navbar = () => {
               </Link>
             ))}
             <Button asChild className="mt-4 w-full rounded-full">
-              <Link to="/login">Get Started</Link>
+              <Link to="/auth">Get Started</Link>
             </Button>
           </div>
         </div>
