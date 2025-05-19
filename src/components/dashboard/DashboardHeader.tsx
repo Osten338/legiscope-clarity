@@ -3,9 +3,23 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export function DashboardHeader() {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const handleAddRegulation = () => {
+    // Navigate to the regulations admin page where users can add new regulations
+    navigate("/admin/regulations");
+    
+    toast({
+      title: "Navigation",
+      description: "Redirecting to Regulations Admin page where you can add new regulations.",
+    });
+  };
   
   return (
     <div className="bg-white dark:bg-slate-900 border-b py-4 px-4 md:px-6 lg:px-8">
@@ -28,7 +42,10 @@ export function DashboardHeader() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="default">
+            <Button 
+              variant="default"
+              onClick={handleAddRegulation}
+            >
               Add Regulation
             </Button>
           </div>
