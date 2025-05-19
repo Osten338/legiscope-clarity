@@ -1,15 +1,18 @@
 
+import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ActionButtonProps {
-    icon: React.ReactNode;
+    icon: ReactNode;
     label: string;
     onClick?: () => void;
     disabled?: boolean;
+    tooltip?: string;
 }
 
-export function ActionButton({ icon, label, onClick, disabled }: ActionButtonProps) {
-    return (
+export function ActionButton({ icon, label, onClick, disabled, tooltip }: ActionButtonProps) {
+    const button = (
         <button
             type="button"
             onClick={onClick}
@@ -23,4 +26,21 @@ export function ActionButton({ icon, label, onClick, disabled }: ActionButtonPro
             <span className="text-xs">{label}</span>
         </button>
     );
+
+    if (tooltip) {
+        return (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        {button}
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{tooltip}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        );
+    }
+
+    return button;
 }
