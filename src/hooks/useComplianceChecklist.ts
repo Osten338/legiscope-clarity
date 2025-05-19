@@ -32,6 +32,25 @@ export interface RegulationType {
   checklist_items: ChecklistItemType[];
 }
 
+// Define an interface that matches what comes from the database
+interface RawChecklistItem {
+  id: string;
+  regulation_id: string | null;
+  created_at: string;
+  updated_at: string;
+  importance: number | null;
+  description: string;
+  category: string | null;
+  estimated_effort: string | null;
+  expert_verified: boolean | null;
+  task?: string | null;
+  best_practices?: string | null;
+  department?: string | null;
+  parent_id?: string | null;
+  is_subtask?: boolean | null;
+  subtasks?: any[];
+}
+
 export const useComplianceChecklist = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [userId, setUserId] = useState<string | null>(null);
@@ -124,11 +143,11 @@ export const useComplianceChecklist = () => {
             }
 
             // Add is_subtask and parent_id fields with type assertion
-            const typedItems = allChecklistItems?.map(item => ({
+            const typedItems = (allChecklistItems as RawChecklistItem[] || []).map(item => ({
               ...item,
               is_subtask: !!item.is_subtask,
               parent_id: item.parent_id || null
-            })) || [];
+            }));
 
             // Identify main tasks (not subtasks) and subtasks
             const mainTasks = typedItems.filter(item => {
@@ -164,7 +183,7 @@ export const useComplianceChecklist = () => {
                         justification: subtaskResponse.justification,
                       }
                     : undefined,
-                };
+                } as ChecklistItemType;
               });
               
               return {
@@ -178,7 +197,7 @@ export const useComplianceChecklist = () => {
                       justification: response.justification,
                     }
                   : undefined,
-              };
+              } as ChecklistItemType;
             });
 
             return {
