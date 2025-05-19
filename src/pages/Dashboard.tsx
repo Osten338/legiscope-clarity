@@ -14,14 +14,41 @@ const Dashboard = () => {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { savedRegulations, isLoading: dataLoading } = useDashboardData();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [renderStage, setRenderStage] = useState<'initial' | 'loading' | 'ready'>('initial');
   
-  // Set a flag after initial render to avoid flickering
+  // Track the render stages and provide a smoother loading experience
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Initial stage - show quick loading screen
+    const initialTimer = setTimeout(() => {
       setIsInitialLoad(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
+      
+      // If still loading, move to loading stage
+      if (authLoading || dataLoading || !isAuthenticated || !user) {
+        setRenderStage('loading');
+      } else {
+        setRenderStage('ready');
+      }
+    }, 400); // Short delay for initial render
+    
+    // If still in loading stage after 2 seconds, show proper loading UI
+    const loadingTimer = setTimeout(() => {
+      if (renderStage !== 'ready') {
+        setRenderStage('loading');
+      }
+    }, 2000);
+    
+    return () => {
+      clearTimeout(initialTimer);
+      clearTimeout(loadingTimer);
+    };
+  }, [authLoading, dataLoading, isAuthenticated, user, renderStage]);
+  
+  // When auth and data loading are complete, move to ready stage
+  useEffect(() => {
+    if (!authLoading && !dataLoading && isAuthenticated && user) {
+      setRenderStage('ready');
+    }
+  }, [authLoading, dataLoading, isAuthenticated, user]);
 
   // Calculate stats only if data is available
   const upcomingDeadlines = savedRegulations?.filter(reg => 
@@ -34,13 +61,21 @@ const Dashboard = () => {
 
   const totalRegulations = savedRegulations?.length || 0;
   
-  // Show loading state if either auth or data is loading - but only after initialization is done
-  if ((authLoading || dataLoading || isInitialLoad) && (!isAuthenticated || !user)) {
+  // Show loading state if not ready yet
+  if (renderStage !== 'ready') {
     return (
       <TopbarLayout>
         <div className="flex flex-col items-center justify-center h-screen">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary mb-4"></div>
           <p className="text-sm text-muted-foreground">Loading dashboard data...</p>
+          {renderStage === 'loading' && process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 text-xs text-muted-foreground">
+              <p>Auth state: {isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
+              <p>User: {user ? 'Available' : 'Not available'}</p>
+              <p>Auth loading: {authLoading ? 'Yes' : 'No'}</p>
+              <p>Data loading: {dataLoading ? 'Yes' : 'No'}</p>
+            </div>
+          )}
         </div>
       </TopbarLayout>
     );

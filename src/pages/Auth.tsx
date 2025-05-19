@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { cleanupAuthState } from "@/context/AuthContext";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [authInProgress, setAuthInProgress] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLoading, isAuthenticated, signIn, signUp } = useAuth();
@@ -29,28 +31,40 @@ const Auth = () => {
     }
   };
   
+  // Clear redirect history on mount to prevent redirect loops
+  useEffect(() => {
+    sessionStorage.removeItem('auth:redirectHistory');
+  }, []);
+  
   useEffect(() => {
     // If user is already signed in and we're done loading, redirect
-    if (isAuthenticated && user && !isLoading && !isRedirecting) {
+    if (isAuthenticated && user && !isLoading && !isRedirecting && !authInProgress) {
       logDebug("Auth page: User is signed in, redirecting to", from);
       setIsRedirecting(true);
+      
+      // Clean up any redirect tracking to prevent loops
+      sessionStorage.removeItem('auth:redirectHistory');
       
       // Use setTimeout to ensure state updates have propagated
       setTimeout(() => {
         navigate(from, { replace: true });
-      }, 300);
+      }, 500);
     }
-  }, [user, isLoading, from, navigate, isAuthenticated, isRedirecting]);
+  }, [user, isLoading, from, navigate, isAuthenticated, isRedirecting, authInProgress]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (loading || isRedirecting) return;
+    if (loading || isRedirecting || authInProgress) return;
     
     setLoading(true);
+    setAuthInProgress(true);
     logDebug(`Starting ${isSignUp ? 'signup' : 'signin'} process`);
     
     try {
+      // Clean up existing auth state first
+      cleanupAuthState();
+      
       if (isSignUp) {
         const { error } = await signUp(email, password);
         
@@ -72,6 +86,11 @@ const Auth = () => {
       toast.error(error.message || "Authentication failed");
     } finally {
       setLoading(false);
+      
+      // Allow some time before clearing auth in progress
+      setTimeout(() => {
+        setAuthInProgress(false);
+      }, 1000);
     }
   };
 
@@ -112,6 +131,7 @@ const Auth = () => {
               onChange={e => setEmail(e.target.value)} 
               required 
               className="bg-yellow-50"
+              disabled={loading || isRedirecting || authInProgress}
             />
           </div>
 
@@ -125,12 +145,13 @@ const Auth = () => {
               onChange={e => setPassword(e.target.value)} 
               required 
               className="bg-yellow-50"
+              disabled={loading || isRedirecting || authInProgress}
             />
           </div>
 
           <Button 
             type="submit" 
-            disabled={loading || isRedirecting} 
+            disabled={loading || isRedirecting || authInProgress} 
             className="w-full"
           >
             {loading ? "Processing..." : isSignUp ? "Sign Up" : "Sign In"}
@@ -142,11 +163,19 @@ const Auth = () => {
             type="button" 
             onClick={() => setIsSignUp(!isSignUp)} 
             className="text-primary hover:text-primary-dark text-sm"
-            disabled={loading || isRedirecting}
+            disabled={loading || isRedirecting || authInProgress}
           >
             {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
           </button>
         </div>
+        
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-center text-muted-foreground mt-4">
+            <p>Auth state: {isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
+            <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+            <p>Redirecting: {isRedirecting ? 'Yes' : 'No'}</p>
+          </div>
+        )}
       </Card>
     </motion.div>
   );

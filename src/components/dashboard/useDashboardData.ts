@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { isAuthenticatedSync } from "@/context/AuthContext";
 import type { SavedRegulation } from "./types";
 
 export const useDashboardData = () => {
@@ -28,48 +27,33 @@ export const useDashboardData = () => {
       try {
         logDebug('Starting to fetch saved regulations');
         
-        // First check if we have user from the auth context
-        if (!user || !isAuthenticated) {
-          logDebug('No user in auth context, checking if user is authenticated');
-          
-          // Use the sync method to check auth state without triggering additional fetches
-          const isAuthed = isAuthenticatedSync();
-          
-          if (!isAuthed) {
-            logDebug('User not authenticated via sync check');
-            
-            // Short retry with backoff - wait and check if auth context has updated
-            const waitTime = 600; // Increased wait time
-            logDebug(`Waiting ${waitTime}ms before checking auth again`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-            
-            // If still no authenticated user after waiting, check with Supabase directly
-            const { data: authData, error: authError } = await supabase.auth.getUser();
-            
-            if (authError || !authData.user) {
-              logDebug('Still no authenticated user after direct check');
-              throw new Error("User not authenticated");
-            }
-            
-            logDebug('User authenticated via direct check', authData.user.id);
-            return fetchUserRegulations(authData.user.id);
-          }
+        // Verify we have a valid user ID
+        if (!user?.id) {
+          logDebug('No user ID available, cannot fetch data');
+          throw new Error("User ID required to fetch regulations");
         }
         
-        // Happy path - use the user from auth context
-        logDebug('Using user from auth context', user?.id);
-        return fetchUserRegulations(user!.id);
+        return fetchUserRegulations(user.id);
       } catch (err) {
         logDebug("Error in query function:", err);
         throw err;
       }
     },
-    enabled: isAuthenticated || user !== null || isAuthenticatedSync(),
-    staleTime: 5 * 60 * 1000, // 5 minutes - increase stale time to reduce refetching
-    retry: 3, // Retry failed requests a few times
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
-    refetchOnWindowFocus: false, // Disable refetching on window focus to reduce auth checks
-    refetchOnMount: false, // Only fetch once per mount
+    enabled: Boolean(user?.id && isAuthenticated),
+    staleTime: 5 * 60 * 1000, // 5 minutes cache validity
+    retry: (failureCount, error) => {
+      // Only retry a few times with increasing backoff
+      if (failureCount >= 3) return false;
+      
+      // Add exponential backoff for retries
+      setTimeout(() => {
+        logDebug(`Retry attempt ${failureCount + 1} after error:`, error);
+      }, Math.min(1000 * 2 ** failureCount, 8000));
+      
+      return true;
+    },
+    refetchOnWindowFocus: false, // Disable excessive refetching
+    refetchOnMount: true, // Always fetch fresh data on mount
   });
   
   // Helper function to fetch user regulations
