@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect } from "react";
 import type { SavedRegulation } from "./types";
 
@@ -21,27 +20,52 @@ export const useDashboardData = () => {
     }
   };
 
-  // Safely get auth context
+  // Get user ID without directly using useAuth (which causes errors)
   useEffect(() => {
-    try {
-      const { user, isAuthenticated } = useAuth();
-      setAuthState({ user, isAuthenticated });
-      logDebug("Auth context retrieved", { userId: user?.id, isAuthenticated });
-    } catch (err) {
-      logDebug("Error accessing auth context:", err);
-      setAuthError(err instanceof Error ? err : new Error("Unknown auth error"));
+    // Try to get user from sessionStorage as fallback
+    const fallbackUserId = sessionStorage.getItem('auth:userId');
+    const fallbackAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
+    
+    if (fallbackUserId && fallbackAuth) {
+      logDebug("Using user ID from session storage:", fallbackUserId);
+      setAuthState({ 
+        user: { id: fallbackUserId },
+        isAuthenticated: true
+      });
+    } else {
+      // Check if we can get the auth state from the Supabase client directly
+      const checkSession = async () => {
+        try {
+          logDebug("Checking Supabase session directly");
+          const { data, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            logDebug("Error getting session:", error);
+            setAuthError(error);
+            return;
+          }
+          
+          if (data.session?.user) {
+            logDebug("Got user from Supabase session:", data.session.user.id);
+            setAuthState({
+              user: data.session.user,
+              isAuthenticated: true
+            });
+            
+            // Save to sessionStorage for future use
+            sessionStorage.setItem('auth:userId', data.session.user.id);
+            sessionStorage.setItem('auth:isAuthenticated', 'true');
+          } else {
+            logDebug("No active session found");
+            setAuthError(new Error("No active session found"));
+          }
+        } catch (err) {
+          logDebug("Error checking auth:", err);
+          setAuthError(err instanceof Error ? err : new Error("Unknown auth error"));
+        }
+      };
       
-      // Try to recover user ID from session storage as fallback
-      const fallbackUserId = sessionStorage.getItem('auth:userId');
-      const fallbackAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
-      
-      if (fallbackUserId && fallbackAuth) {
-        logDebug("Using fallback user ID from session storage:", fallbackUserId);
-        setAuthState({ 
-          user: { id: fallbackUserId },
-          isAuthenticated: true
-        });
-      }
+      checkSession();
     }
   }, []);
 

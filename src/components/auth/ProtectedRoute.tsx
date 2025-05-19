@@ -1,22 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth, isAuthenticatedSync } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * ProtectedRoute component with enhanced stability
- * Uses multi-stage verification and increased grace periods
- * to prevent premature redirects and auth loops
+ * Uses direct Supabase session checking instead of relying on context
+ * to prevent errors and auth loops
  */
 const ProtectedRoute = () => {
-  // Safely access auth context
-  const [authContextError, setAuthContextError] = useState<Error | null>(null);
-  const [auth, setAuth] = useState<any>(null);
-  const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState<Error | null>(null);
+  const location = useLocation();
   const [shouldRedirect, setShouldRedirect] = useState(false);
-  const [verificationAttempts, setVerificationAttempts] = useState(0);
-  const [authContextAvailable, setAuthContextAvailable] = useState(false);
 
   // Debug logging function
   const logDebug = (message: string, data?: any) => {
@@ -25,46 +22,7 @@ const ProtectedRoute = () => {
     }
   };
 
-  // Safely get auth context without crashing if it's not ready
   useEffect(() => {
-    try {
-      const authContext = useAuth();
-      setAuth(authContext);
-      setAuthContextAvailable(true);
-      logDebug("Auth context retrieved successfully", authContext);
-    } catch (err) {
-      logDebug("Error retrieving auth context:", err);
-      setAuthContextError(err instanceof Error ? err : new Error("Unknown auth error"));
-      setAuthContextAvailable(false);
-      
-      // Retry getting auth context after a delay
-      const retryTimer = setTimeout(() => {
-        try {
-          const authContext = useAuth();
-          setAuth(authContext);
-          setAuthContextAvailable(true);
-          logDebug("Auth context retrieved successfully on retry", authContext);
-        } catch (retryErr) {
-          logDebug("Failed to retrieve auth context on retry:", retryErr);
-          // If we still can't get auth context, we'll handle it below
-        }
-      }, 1000);
-      
-      return () => clearTimeout(retryTimer);
-    }
-  }, []);
-  
-  useEffect(() => {
-    if (!authContextAvailable) {
-      // Don't proceed with auth checks if the context isn't available
-      return;
-    }
-
-    // Extract auth state from context if available
-    const user = auth?.user;
-    const isLoading = auth?.isLoading || false;
-    const isAuthenticated = auth?.isAuthenticated || false;
-    
     // Track redirects to prevent loops
     const redirectHistory = JSON.parse(sessionStorage.getItem('auth:redirectHistory') || '[]');
     const currentPath = location.pathname;
@@ -78,16 +36,18 @@ const ProtectedRoute = () => {
     // Enhanced loop detection - if we detect a potential loop, force break it
     if (recentRedirects.length > 2) {
       logDebug("Potential redirect loop detected! Breaking cycle.");
-      // Force a specific path to break the cycle - don't get stuck between auth and protected routes
+      
+      // Force a specific path to break the cycle
       if (currentPath === '/auth') {
         logDebug("Breaking loop by allowing access to protected route despite auth status");
-        // Let the protected route render, the component error boundary will handle issues
         setIsCheckingAuth(false);
-        setShouldRedirect(false);
+        setIsAuthenticated(true); // Force authenticated to break the loop
         return;
       } else {
-        logDebug("Breaking loop by redirecting to auth with a marker");
-        // Add a special marker to indicate we're breaking a loop
+        logDebug("Breaking loop by forcing logged out state");
+        // Clear any auth data that might be causing problems
+        sessionStorage.removeItem('auth:userId');
+        sessionStorage.removeItem('auth:isAuthenticated');
         sessionStorage.setItem('auth:breakingLoop', 'true');
         setShouldRedirect(true);
         setIsCheckingAuth(false);
@@ -100,79 +60,65 @@ const ProtectedRoute = () => {
     
     if (fastAuthCheck) {
       logDebug("Fast auth check passed, allowing access");
+      setIsAuthenticated(true);
       setIsCheckingAuth(false);
       return;
     }
     
-    // If initial auth check is still loading, wait longer before making decisions
-    if (isLoading) {
-      logDebug("Auth is still loading, waiting...");
-      return;
-    }
-    
-    // If we have a definite authentication state, update accordingly
-    if (isAuthenticated && user) {
-      logDebug("User is authenticated, allowing access");
-      setIsCheckingAuth(false);
-      return;
-    }
-    
-    // Progressive verification with increasing delays
-    const verificationDelay = Math.min(1000 + (verificationAttempts * 500), 3000);
-    
-    // Multi-stage verification with significantly increased grace period
-    const verificationTimer = setTimeout(() => {
-      logDebug(`Verification attempt ${verificationAttempts + 1}, checking auth status`);
-      
-      // Double-check auth state through multiple channels
-      const syncAuthCheck = isAuthenticatedSync();
-      const sessionAuthCheck = sessionStorage.getItem('auth:isAuthenticated') === 'true';
-      const contextAuthCheck = isAuthenticated && !!user;
-      
-      logDebug("Auth checks:", {
-        syncAuthCheck,
-        sessionAuthCheck,
-        contextAuthCheck,
-        isLoading,
-        authContextAvailable
-      });
-      
-      if (syncAuthCheck || sessionAuthCheck || contextAuthCheck) {
-        // User is authenticated through at least one check
-        logDebug("Secondary auth check passed, allowing access");
+    // Check Supabase session directly
+    const checkSession = async () => {
+      try {
+        logDebug("Checking Supabase session directly");
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          logDebug("Error getting session:", error);
+          setAuthError(error);
+          setShouldRedirect(true);
+          setIsCheckingAuth(false);
+          return;
+        }
+        
+        if (data.session?.user) {
+          logDebug("Got user from Supabase session:", data.session.user.id);
+          setIsAuthenticated(true);
+          
+          // Save to sessionStorage for future use
+          sessionStorage.setItem('auth:userId', data.session.user.id);
+          sessionStorage.setItem('auth:isAuthenticated', 'true');
+          sessionStorage.setItem('auth:lastChecked', Date.now().toString());
+        } else {
+          logDebug("No active session found");
+          
+          // Record this redirect to detect loops
+          const newHistory = [...redirectHistory, {
+            path: currentPath,
+            time: Date.now()
+          }].slice(-10); // Keep last 10 redirects
+          sessionStorage.setItem('auth:redirectHistory', JSON.stringify(newHistory));
+          
+          setShouldRedirect(true);
+        }
+        
         setIsCheckingAuth(false);
-      } else if (verificationAttempts < 2) {
-        // Try again with increased delay
-        logDebug("Auth check failed, trying again");
-        setVerificationAttempts(prev => prev + 1);
-      } else {
-        // After several attempts, if still not authenticated, redirect
-        logDebug("All auth checks failed after multiple attempts, redirecting to /auth");
-        
-        // Record this redirect to detect loops
-        const newHistory = [...redirectHistory, {
-          path: currentPath,
-          time: Date.now()
-        }].slice(-10); // Keep last 10 redirects
-        sessionStorage.setItem('auth:redirectHistory', JSON.stringify(newHistory));
-        
+      } catch (err) {
+        logDebug("Error checking auth:", err);
+        setAuthError(err instanceof Error ? err : new Error("Unknown auth error"));
+        setIsCheckingAuth(false);
         setShouldRedirect(true);
-        setIsCheckingAuth(false);
       }
-    }, verificationDelay);
-    
-    return () => {
-      clearTimeout(verificationTimer);
     };
-  }, [auth, isCheckingAuth, verificationAttempts, location.pathname, authContextAvailable]);
+    
+    checkSession();
+  }, [location.pathname]);
   
-  // Handle auth context error
-  if (authContextError && !authContextAvailable) {
+  // Handle auth error
+  if (authError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="text-red-500 text-xl mb-4">Authentication Error</div>
-        <p className="text-gray-700 mb-4">Unable to access authentication service.</p>
-        <p className="text-sm text-gray-500 mb-4">{authContextError.message}</p>
+        <p className="text-gray-700 mb-4">Unable to verify your authentication status.</p>
+        <p className="text-sm text-gray-500 mb-4">{authError.message}</p>
         <button
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
           onClick={() => window.location.href = "/auth"}
@@ -189,18 +135,8 @@ const ProtectedRoute = () => {
     );
   }
   
-  // Show loading state while checking authentication or waiting for context
-  if (!authContextAvailable) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary mb-4"></div>
-        <p className="text-sm text-muted-foreground">Initializing authentication...</p>
-        <p className="text-xs text-muted-foreground mt-2">Auth context not available yet</p>
-      </div>
-    );
-  }
-  
-  if (auth?.isLoading || isCheckingAuth) {
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary mb-4"></div>

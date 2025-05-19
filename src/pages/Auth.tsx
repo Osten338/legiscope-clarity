@@ -18,10 +18,11 @@ const Auth = () => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [authInProgress, setAuthInProgress] = useState(false);
   const [isBreakingLoop, setIsBreakingLoop] = useState(false);
+  const [authServiceError, setAuthServiceError] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Safely access auth context
+  // Safely access auth context with error handling
   const [authState, setAuthState] = useState<{
     user: any | null;
     isLoading: boolean;
@@ -45,8 +46,10 @@ const Auth = () => {
         signIn: auth.signIn,
         signUp: auth.signUp
       });
+      setAuthServiceError(false); // Reset error state if auth is available
     } catch (err) {
       console.error("Error accessing auth context:", err);
+      setAuthServiceError(true);
     }
   }, []);
   
@@ -85,7 +88,7 @@ const Auth = () => {
   
   useEffect(() => {
     // If user is already signed in and we're done loading, redirect
-    if (authState.isAuthenticated && authState.user && !authState.isLoading && !isRedirecting && !authInProgress) {
+    if (authState.isAuthenticated && authState.user && !authState.isLoading && !isRedirecting && !authInProgress && !authServiceError) {
       logDebug("Auth page: User is signed in, redirecting to", from);
       setIsRedirecting(true);
       
@@ -97,7 +100,7 @@ const Auth = () => {
         navigate(from, { replace: true });
       }, 500);
     }
-  }, [authState.user, authState.isLoading, from, navigate, authState.isAuthenticated, isRedirecting, authInProgress]);
+  }, [authState.user, authState.isLoading, from, navigate, authState.isAuthenticated, isRedirecting, authInProgress, authServiceError]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,6 +147,34 @@ const Auth = () => {
     }
   };
 
+  const handleReloadPage = () => {
+    window.location.reload();
+  };
+
+  // Show auth service error state
+  if (authServiceError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-sage-50 p-4">
+        <Card className="w-full max-w-md p-6 space-y-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-900">Authentication Error</h1>
+            <p className="text-slate-600 mt-2">
+              Unable to access authentication service. Please try again later.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleReloadPage}
+              className="w-full max-w-xs"
+            >
+              Reload Page
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   // Show error state if auth methods aren't available
   if (!authState.signIn || !authState.signUp) {
     return (
@@ -157,7 +188,7 @@ const Auth = () => {
           </div>
           <div className="flex justify-center">
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={handleReloadPage}
               className="w-full max-w-xs"
             >
               Reload Page
@@ -257,6 +288,7 @@ const Auth = () => {
             <p>Loading: {authState.isLoading ? 'Yes' : 'No'}</p>
             <p>Redirecting: {isRedirecting ? 'Yes' : 'No'}</p>
             <p>Breaking loop: {isBreakingLoop ? 'Yes' : 'No'}</p>
+            <p>Auth service error: {authServiceError ? 'Yes' : 'No'}</p>
           </div>
         )}
       </Card>
