@@ -1,11 +1,11 @@
 
-import { InfoCircle } from "lucide-react";
+import { Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function CsvFormatInfo() {
   return (
     <Alert variant="default" className="bg-blue-50 border-blue-100 mt-4">
-      <InfoCircle className="h-4 w-4 text-blue-500" />
+      <Info className="h-4 w-4 text-blue-500" />
       <AlertTitle className="text-blue-700">CSV Format Information</AlertTitle>
       <AlertDescription className="text-blue-600 text-sm">
         <p className="mb-2">Your CSV file should include these columns:</p>
