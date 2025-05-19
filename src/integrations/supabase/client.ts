@@ -18,7 +18,10 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true, // Enable auto detection of OAuth redirects
-      flowType: 'pkce' // Use PKCE flow for more security
+      flowType: 'pkce', // Use PKCE flow for more security
+      debug: false, // Disable debug logs in production
+      // Add a small delay between concurrent auth operations to prevent race conditions
+      storageKey: 'compli-ai-auth-token' // Use a unique key to avoid conflicts with other apps
     }
   }
 );

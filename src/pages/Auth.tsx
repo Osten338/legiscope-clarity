@@ -1,149 +1,64 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
-
-// Utility function to clean up auth state
-const cleanupAuthState = () => {
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
+import { useAuth } from "@/context/AuthContext";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const authCheckCompleted = useRef(false);
-  const authInProgress = useRef(false);
+  const { user, isLoading, signIn, signUp } = useAuth();
   
   // Get the intended destination from location state, defaulting to dashboard
   const from = location.state?.from || "/dashboard";
   
   useEffect(() => {
-    // Only check session once to prevent loops
-    if (authCheckCompleted.current) {
-      return;
+    // If user is already signed in and we're done loading, redirect
+    if (user && !isLoading) {
+      console.log("Auth page: User is signed in, redirecting to", from);
+      navigate(from, { replace: true });
     }
-    
-    // Set the flag to avoid repeated checks
-    authCheckCompleted.current = true;
-    
-    // Check if user is already signed in
-    const checkSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        
-        if (data.session) {
-          console.log("Auth page: Session found, redirecting to", from);
-          navigate(from, { replace: true });
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-      } finally {
-        // Always update this state to stop showing loading
-        setIsCheckingAuth(false);
-      }
-    };
-    
-    checkSession();
-    
-    // Set up auth state listener for navigation after login
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, !!session);
-      
-      if (event === 'SIGNED_IN' && session) {
-        toast.success("Successfully signed in!");
-        
-        // Add a small delay for the redirect to ensure everything is updated
-        setTimeout(() => {
-          navigate(from, { replace: true });
-        }, 500);
-      }
-    });
-    
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [from, navigate]);
+  }, [user, isLoading, from, navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (loading || authInProgress.current) return;
+    if (loading) return;
     
     setLoading(true);
-    authInProgress.current = true;
     
     try {
-      // Clean up existing auth state
-      cleanupAuthState();
-      
-      // Attempt global sign out to ensure clean state
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-        console.log("Global sign out failed, continuing:", err);
-      }
-      
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin + '/auth/callback'
-          }
-        });
+        const { error } = await signUp(email, password);
         
         if (error) throw error;
         
         toast.success("Check your email to confirm your account");
-        setLoading(false);
-        authInProgress.current = false;
       } else {
-        const { error, data } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
+        const { error } = await signIn(email, password);
         
         if (error) throw error;
         
-        if (data.user) {
-          // Toast is shown in the onAuthStateChange handler
-          console.log("Sign-in successful, waiting for redirect");
-        }
+        toast.success("Successfully signed in!");
       }
     } catch (error: any) {
       toast.error(error.message || "Authentication failed");
+    } finally {
       setLoading(false);
-      authInProgress.current = false;
     }
   };
 
   // Show loading while checking authentication
-  if (isCheckingAuth) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
