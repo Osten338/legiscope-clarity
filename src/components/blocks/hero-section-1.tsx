@@ -6,6 +6,7 @@ import { AnimatedGroup } from '@/components/ui/animated-group';
 import { cn } from '@/lib/utils';
 import { Feature } from '@/components/ui/feature-section-with-bento-grid';
 import { AnimatedTestimonialsDemo } from '@/components/ui/animated-testimonials-demo';
+
 const transitionVariants = {
   item: {
     hidden: {
@@ -25,6 +26,7 @@ const transitionVariants = {
     }
   }
 };
+
 export function HeroSection() {
   return <>
             <HeroHeader />
@@ -119,6 +121,7 @@ export function HeroSection() {
             </main>
         </>;
 }
+
 const menuItems = [{
   name: 'Features',
   href: '#link'
@@ -127,14 +130,16 @@ const menuItems = [{
   href: '#link'
 }, {
   name: 'Pricing',
-  href: '/pricing' // Changed from '#link' to '/pricing' to properly navigate to the Pricing page
+  href: '/pricing' 
 }, {
   name: 'About',
   href: '/about'
 }];
+
 const HeroHeader = () => {
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  
   React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -142,6 +147,7 @@ const HeroHeader = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
   return <header>
             <nav data-state={menuState && 'active'} className="fixed z-20 w-full px-2 group">
                 <div className={cn('mx-auto mt-2 max-w-6xl px-6 transition-all duration-300 lg:px-12', isScrolled && 'bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5')}>
@@ -179,17 +185,17 @@ const HeroHeader = () => {
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                                 <Button asChild variant="outline" size="sm" className={cn(isScrolled && 'lg:hidden')}>
-                                    <Link to="#">
+                                    <Link to="/login">
                                         <span>Login</span>
                                     </Link>
                                 </Button>
                                 <Button asChild size="sm" className={cn(isScrolled && 'lg:hidden')}>
-                                    <Link to="#">
+                                    <Link to="/login">
                                         <span>Sign Up</span>
                                     </Link>
                                 </Button>
                                 <Button asChild size="sm" className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}>
-                                    <Link to="#">
+                                    <Link to="/login">
                                         <span>Get Started</span>
                                     </Link>
                                 </Button>
@@ -200,6 +206,7 @@ const HeroHeader = () => {
             </nav>
         </header>;
 };
+
 const Logo = ({
   className
 }: {
