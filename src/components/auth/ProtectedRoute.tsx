@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { cleanupAuthState } from "@/context/AuthContext";
 
 /**
  * ProtectedRoute component with enhanced stability
@@ -28,52 +29,53 @@ const ProtectedRoute = () => {
   // Handle recovery attempts
   const handleRetry = () => {
     setRecoveryAttempts(prev => prev + 1);
+    // If multiple retries, clear auth storage
+    if (recoveryAttempts > 0) {
+      cleanupAuthState();
+    }
     window.location.reload();
   };
 
   // Force break auth loops
   const forceBreakLoop = () => {
     logDebug("Forcing auth loop break");
-    sessionStorage.removeItem('auth:redirectHistory');
-    sessionStorage.removeItem('auth:userId');
-    sessionStorage.removeItem('auth:isAuthenticated');
+    cleanupAuthState();
     sessionStorage.setItem('auth:breakingLoop', 'true');
     window.location.href = '/auth';
   };
 
+  // Detect and break auth loops
   useEffect(() => {
-    // Track redirects to prevent loops
-    const redirectHistory = JSON.parse(sessionStorage.getItem('auth:redirectHistory') || '[]');
-    const currentPath = location.pathname;
+    // Enhanced loop detection
+    const isInPotentialLoop = sessionStorage.getItem('auth:potentialLoop') === 'true';
+    const loopDetectionStart = parseInt(sessionStorage.getItem('auth:loopDetectionStart') || '0', 10);
+    const now = Date.now();
     
-    // Check for potential redirect loops
-    const recentRedirects = redirectHistory.filter(
-      (entry: {path: string, time: number}) => 
-        Date.now() - entry.time < 15000 && entry.path === currentPath
-    );
-    
-    // Enhanced loop detection - if we detect a potential loop, force break it
-    if (recentRedirects.length > 2) {
-      logDebug("Potential redirect loop detected! Breaking cycle.");
+    // If we're loading the same page within 2 seconds multiple times, it's a loop
+    if (isInPotentialLoop && now - loopDetectionStart < 2000) {
+      logDebug("Detected auth loop! Breaking the cycle...");
       setIsRecoveryMode(true);
       
-      // Force a specific path to break the cycle after several attempts
-      if (recoveryAttempts > 2) {
-        forceBreakLoop();
-        return;
-      }
+      // Clear all auth state to break the loop
+      cleanupAuthState();
+      sessionStorage.removeItem('auth:potentialLoop');
+      sessionStorage.removeItem('auth:loopDetectionStart');
       
-      // Try fast path first - check session storage
-      const cachedAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
-      if (cachedAuth) {
-        logDebug("Using cached auth to break loop");
-        setIsAuthenticated(true);
-        setIsCheckingAuth(false);
-        return;
-      }
+      // Set a flag to indicate we're breaking an auth loop
+      sessionStorage.setItem('auth:breakingLoop', 'true');
+    } else {
+      // Start tracking this page load for loop detection
+      sessionStorage.setItem('auth:potentialLoop', 'true');
+      sessionStorage.setItem('auth:loopDetectionStart', now.toString());
+      
+      // Clear the flag after 5 seconds if no loop is detected
+      setTimeout(() => {
+        sessionStorage.removeItem('auth:potentialLoop');
+        sessionStorage.removeItem('auth:loopDetectionStart');
+      }, 5000);
     }
-    
-    // Fast check from session storage first
+
+    // Fast auth check from session storage
     const fastAuthCheck = sessionStorage.getItem('auth:isAuthenticated') === 'true';
     
     if (fastAuthCheck) {
@@ -83,10 +85,10 @@ const ProtectedRoute = () => {
       return;
     }
     
-    // Check Supabase session directly
+    // Use Supabase to check the session
     const checkSession = async () => {
       try {
-        logDebug("Checking Supabase session directly");
+        logDebug("Checking Supabase session");
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -98,23 +100,15 @@ const ProtectedRoute = () => {
         }
         
         if (data.session?.user) {
-          logDebug("Got user from Supabase session:", data.session.user.id);
+          logDebug("Found active Supabase session");
           setIsAuthenticated(true);
           
-          // Save to sessionStorage for future use
-          sessionStorage.setItem('auth:userId', data.session.user.id);
+          // Save to sessionStorage for future fast checks
           sessionStorage.setItem('auth:isAuthenticated', 'true');
+          sessionStorage.setItem('auth:userId', data.session.user.id);
           sessionStorage.setItem('auth:lastChecked', Date.now().toString());
         } else {
           logDebug("No active session found");
-          
-          // Record this redirect to detect loops
-          const newHistory = [...redirectHistory, {
-            path: currentPath,
-            time: Date.now()
-          }].slice(-10); // Keep last 10 redirects
-          sessionStorage.setItem('auth:redirectHistory', JSON.stringify(newHistory));
-          
           setShouldRedirect(true);
         }
         
@@ -127,10 +121,16 @@ const ProtectedRoute = () => {
       }
     };
     
-    checkSession();
-  }, [location.pathname, recoveryAttempts]);
+    // Check session but with a small delay to prevent simultaneous Supabase calls
+    // that might cause deadlocks
+    const timer = setTimeout(() => {
+      checkSession();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
   
-  // Handle auth error
+  // Handle auth error with recovery options
   if (authError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -142,7 +142,10 @@ const ProtectedRoute = () => {
           <div className="space-y-2">
             <Button
               className="w-full"
-              onClick={() => window.location.href = "/auth"}
+              onClick={() => {
+                cleanupAuthState();
+                window.location.href = "/auth";
+              }}
             >
               Go to Login
             </Button>
@@ -155,7 +158,7 @@ const ProtectedRoute = () => {
               Refresh Page {recoveryAttempts > 0 ? `(${recoveryAttempts})` : ''}
             </Button>
             
-            {recoveryAttempts > 2 && (
+            {recoveryAttempts > 1 && (
               <Button
                 variant="destructive"
                 className="w-full"
@@ -192,7 +195,7 @@ const ProtectedRoute = () => {
     );
   }
 
-  // If we've determined we should redirect
+  // If we should redirect to auth page
   if (shouldRedirect) {
     logDebug("Redirecting to /auth from:", location.pathname);
     // Include the current path in state so we can redirect back after login

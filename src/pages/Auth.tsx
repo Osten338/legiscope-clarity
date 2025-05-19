@@ -35,7 +35,7 @@ const Auth = () => {
   // Get the intended destination from location state, defaulting to dashboard
   const from = location.state?.from || "/dashboard";
   
-  // Initialize component with direct Supabase auth check
+  // Initialize auth state directly from Supabase
   useEffect(() => {
     // Clear redirect history on mount to prevent redirect loops
     sessionStorage.removeItem('auth:redirectHistory');
@@ -52,19 +52,24 @@ const Auth = () => {
       }, 1000);
     }
     
+    // Check cached auth state first for immediate response
+    const cachedAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
+    const userId = sessionStorage.getItem('auth:userId');
+    
+    if (cachedAuth && userId) {
+      setUser({ id: userId });
+      setIsAuthenticated(true);
+      logDebug("Using cached auth state, user is authenticated");
+      
+      // Redirect to intended destination after a small delay
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 100);
+    }
+    
+    // Check with Supabase API
     const checkSession = async () => {
       try {
-        // Fast check from sessionStorage first
-        const cachedAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
-        const userId = sessionStorage.getItem('auth:userId');
-        
-        if (cachedAuth && userId) {
-          setUser({ id: userId });
-          setIsAuthenticated(true);
-          logDebug("Using cached auth state, user is authenticated");
-        }
-        
-        // Now check with Supabase directly
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -80,6 +85,7 @@ const Auth = () => {
           // Store for future fast checks
           sessionStorage.setItem('auth:isAuthenticated', 'true');
           sessionStorage.setItem('auth:userId', data.session.user.id);
+          sessionStorage.setItem('auth:lastChecked', Date.now().toString());
           
           // Redirect after a short delay
           setTimeout(() => {
@@ -106,6 +112,7 @@ const Auth = () => {
         // Store for future fast checks
         sessionStorage.setItem('auth:isAuthenticated', 'true');
         sessionStorage.setItem('auth:userId', session.user.id);
+        sessionStorage.setItem('auth:lastChecked', Date.now().toString());
         
         if (event === 'SIGNED_IN') {
           // Redirect after a short delay
@@ -126,6 +133,7 @@ const Auth = () => {
     };
   }, [navigate, from]);
 
+  // Handle authentication (sign in or sign up)
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -142,6 +150,7 @@ const Auth = () => {
       cleanupAuthState();
       
       if (isSignUp) {
+        // Sign up with Supabase
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -155,6 +164,7 @@ const Auth = () => {
         toast.success("Check your email to confirm your account");
         logDebug("Signup successful, check email message shown");
       } else {
+        // Sign in with Supabase
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password
@@ -178,7 +188,16 @@ const Auth = () => {
     }
   };
 
+  // Handle page reload
   const handleReloadPage = () => {
+    window.location.reload();
+  };
+
+  // Force reset all auth state
+  const handleForceReset = () => {
+    cleanupAuthState();
+    sessionStorage.clear();
+    localStorage.clear();
     window.location.reload();
   };
 
@@ -272,7 +291,7 @@ const Auth = () => {
           </button>
         </div>
         
-        <div className="pt-2 flex justify-center">
+        <div className="pt-2 flex justify-center gap-2">
           <Button 
             variant="outline" 
             size="sm"
@@ -280,6 +299,15 @@ const Auth = () => {
             className="text-xs"
           >
             Reload Page
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleForceReset}
+            className="text-xs text-red-600 hover:text-red-700"
+          >
+            Force Reset Auth
           </Button>
         </div>
         
@@ -289,6 +317,7 @@ const Auth = () => {
             <p>Auth state: {isAuthenticated ? 'Authenticated' : 'Not authenticated'}</p>
             <p>Redirecting: {isRedirecting ? 'Yes' : 'No'}</p>
             <p>Breaking loop: {isBreakingLoop ? 'Yes' : 'No'}</p>
+            <p>Auth in progress: {authInProgress ? 'Yes' : 'No'}</p>
           </div>
         )}
       </Card>

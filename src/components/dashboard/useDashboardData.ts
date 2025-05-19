@@ -21,14 +21,14 @@ export const useDashboardData = () => {
     }
   };
 
-  // Get user ID directly from Supabase or session storage
+  // Check auth state without using context
   useEffect(() => {
     const checkSession = async () => {
       try {
         logDebug("Initializing dashboard data...");
         setIsInitializing(true);
         
-        // Try using sessionStorage as an immediate fallback to prevent flicker
+        // First check: Try using sessionStorage for immediate response
         const fallbackUserId = sessionStorage.getItem('auth:userId');
         const fallbackAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
         
@@ -40,33 +40,41 @@ export const useDashboardData = () => {
           });
         }
         
-        // Now check with Supabase directly
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          logDebug("Error getting session:", error);
-          setAuthError(error);
-          return;
-        }
-        
-        if (data.session?.user) {
-          logDebug("Got user from Supabase session:", data.session.user.id);
-          setAuthState({
-            user: data.session.user,
-            isAuthenticated: true
-          });
+        // Second check: Verify with Supabase
+        try {
+          const { data, error } = await supabase.auth.getSession();
           
-          // Update sessionStorage for future fast access
-          sessionStorage.setItem('auth:userId', data.session.user.id);
-          sessionStorage.setItem('auth:isAuthenticated', 'true');
-          sessionStorage.setItem('auth:lastChecked', Date.now().toString());
-        } else {
-          logDebug("No active session found");
-          setAuthError(new Error("No active session found"));
+          if (error) {
+            logDebug("Error getting session:", error);
+            setAuthError(error);
+            return;
+          }
+          
+          if (data.session?.user) {
+            logDebug("Got user from Supabase session:", data.session.user.id);
+            setAuthState({
+              user: data.session.user,
+              isAuthenticated: true
+            });
+            
+            // Update sessionStorage
+            sessionStorage.setItem('auth:userId', data.session.user.id);
+            sessionStorage.setItem('auth:isAuthenticated', 'true');
+            sessionStorage.setItem('auth:lastChecked', Date.now().toString());
+          } else {
+            logDebug("No active session found");
+            if (!fallbackAuth) {
+              setAuthError(new Error("No active session found"));
+            }
+          }
+        } catch (err) {
+          // If Supabase check fails but we have session storage data,
+          // we can still try to show data
+          if (!fallbackAuth) {
+            logDebug("Error checking auth:", err);
+            setAuthError(err instanceof Error ? err : new Error("Unknown auth error"));
+          }
         }
-      } catch (err) {
-        logDebug("Error checking auth:", err);
-        setAuthError(err instanceof Error ? err : new Error("Unknown auth error"));
       } finally {
         setIsInitializing(false);
       }
@@ -106,6 +114,7 @@ export const useDashboardData = () => {
     };
   }, []);
 
+  // Query for saved regulations
   const {
     data: savedRegulations,
     isLoading,

@@ -10,6 +10,7 @@ import { UrgentTasksTable } from "@/components/dashboard/UrgentTasksTable";
 import { ChatWidget } from "@/components/compliance/ChatWidget";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { cleanupAuthState } from "@/context/AuthContext";
 
 const Dashboard = () => {
   const [initState, setInitState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -83,27 +84,7 @@ const DashboardContent = () => {
       clearTimeout(initialTimer);
     };
   }, [dataLoading, isInitializing]);
-
-  // Auth error recovery logic
-  const handleRetry = () => {
-    setRecoveryAttempts(prev => prev + 1);
-    
-    // After several retries, force a redirect
-    if (recoveryAttempts >= 2) {
-      // Clear any auth state that may be causing problems
-      sessionStorage.removeItem('auth:userId');
-      sessionStorage.removeItem('auth:isAuthenticated');
-      sessionStorage.removeItem('auth:lastChecked');
-      sessionStorage.setItem('auth:breakingLoop', 'true');
-      
-      // Navigate to auth
-      navigate('/auth');
-    } else {
-      // Just reload the page
-      window.location.reload();
-    }
-  };
-
+  
   // If there's an auth error, show a helpful error message
   if (authError) {
     return (
@@ -117,7 +98,11 @@ const DashboardContent = () => {
             <div className="space-y-2">
               <Button 
                 className="w-full"
-                onClick={() => navigate('/auth', { replace: true })}
+                onClick={() => {
+                  // Clear all auth state to ensure a fresh start
+                  cleanupAuthState();
+                  navigate('/auth', { replace: true });
+                }}
               >
                 Go to Login
               </Button>
@@ -125,10 +110,34 @@ const DashboardContent = () => {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={handleRetry}
+                onClick={() => {
+                  setRecoveryAttempts(prev => prev + 1);
+                  // Clean stored auth states that might be causing problems
+                  if (recoveryAttempts > 1) {
+                    cleanupAuthState();
+                  }
+                  window.location.reload();
+                }}
               >
                 Retry {recoveryAttempts > 0 ? `(${recoveryAttempts})` : ''}
               </Button>
+              
+              {recoveryAttempts > 1 && (
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => {
+                    // Force clear all auth state
+                    cleanupAuthState();
+                    // Clear any browser data that might be causing issues
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    window.location.href = '/auth';
+                  }}
+                >
+                  Force Reset Authentication
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -146,6 +155,19 @@ const DashboardContent = () => {
           <div className="mt-4 text-xs text-muted-foreground">
             <p>Data loading: {dataLoading ? 'Yes' : 'No'}</p>
             <p>Auth error: {authError ? 'Yes' : 'No'}</p>
+            <p>Is initializing: {isInitializing ? 'Yes' : 'No'}</p>
+            
+            <Button 
+              size="sm"
+              variant="outline"
+              className="mt-2"
+              onClick={() => {
+                setRecoveryAttempts(prev => prev + 1);
+                window.location.reload();
+              }}
+            >
+              Reload Page
+            </Button>
           </div>
         )}
       </div>
