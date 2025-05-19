@@ -39,7 +39,7 @@ const AuthGuard = () => {
     );
   }
 
-  // If not authenticated, redirect to login page with return URL
+  // If not authenticated, redirect to auth page with return URL
   if (!isAuthenticated) {
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }

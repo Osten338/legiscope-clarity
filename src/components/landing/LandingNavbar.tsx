@@ -47,9 +47,9 @@ const LandingNavbar = () => {
           <Link to="#pricing" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Pricing</Link>
           <Link to="/#testimonials" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Testimonials</Link>
           <Link to="/documentation" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Docs</Link>
-          <Link to="/login" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Login</Link>
+          <Link to="/auth" className="text-sm text-white/80 hover:text-brand-blue transition-colors">Login</Link>
           <Button asChild className="bg-brand-blue hover:bg-brand-blue/90 shadow-md px-6 font-medium text-base rounded-full text-white">
-            <Link to="/login">Book a Demo</Link>
+            <Link to="/auth">Book a Demo</Link>
           </Button>
         </nav>
       </div>

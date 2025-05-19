@@ -9,6 +9,7 @@ import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
+import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import Assessment from "@/pages/Assessment"; 
 import ComplianceOverview from "@/pages/ComplianceOverview";
@@ -47,6 +48,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/compliance-overview" element={<ComplianceOverview />} />
