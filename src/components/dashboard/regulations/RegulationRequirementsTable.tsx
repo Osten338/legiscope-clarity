@@ -1,6 +1,5 @@
-
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { RegulationListItem, ChecklistItemType } from "../types";
+import { RegulationListItem, ChecklistItemType, SubtaskType } from "../types";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -31,42 +30,37 @@ export const RegulationRequirementsTable = ({
       
       try {
         if (regulation && regulation.regulations) {
-          // Fetch actual checklist items from the database
-          const { data, error } = await supabase
+          const { data: checklistItems, error } = await supabase
             .from("checklist_items")
             .select("*")
             .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", false)
-            .order("importance", { ascending: false });
+            .eq("is_subtask", false);
             
           if (error) {
             console.error("Error fetching checklist items:", error);
             throw error;
           }
           
-          // Transform the data to match ChecklistItemType
-          const transformedData: ChecklistItemType[] = (data || []).map(item => {
-            // We need to convert the database item to our ChecklistItemType
+          const transformedData: ChecklistItemType[] = (checklistItems || []).map(item => {
             const convertedItem: ChecklistItemType = {
               id: item.id,
-              description: item.description,
-              importance: item.importance,
-              category: item.category,
-              estimated_effort: item.estimated_effort,
-              expert_verified: item.expert_verified,
-              // These properties might not be in all records from the database
-              // so we explicitly check and add them
-              task: 'task' in item ? item.task : null,
-              best_practices: 'best_practices' in item ? item.best_practices : null,
-              department: 'department' in item ? item.department : null,
-              parent_id: 'parent_id' in item ? item.parent_id : null,
-              is_subtask: 'is_subtask' in item ? !!item.is_subtask : false,
-              // Handle subtasks, ensuring they have the correct structure
-              subtasks: Array.isArray(item.subtasks) ? item.subtasks.map((subtask: any) => ({
-                id: subtask.id,
-                description: subtask.description,
-                is_subtask: true
-              })) : []
+              description: item.description || '',
+              importance: item.importance || null,
+              category: item.category || null,
+              estimated_effort: item.estimated_effort || null,
+              expert_verified: item.expert_verified || null,
+              task: item.task || null,
+              best_practices: item.best_practices || null,
+              department: item.department || null,
+              parent_id: item.parent_id || null,
+              is_subtask: item.is_subtask || false,
+              subtasks: Array.isArray(item.subtasks) 
+                ? item.subtasks.map((subtask): SubtaskType => ({
+                    id: subtask.id || '',
+                    description: subtask.description || '',
+                    is_subtask: true
+                  }))
+                : []
             };
             return convertedItem;
           });
@@ -75,64 +69,28 @@ export const RegulationRequirementsTable = ({
         }
       } catch (error) {
         console.error("Failed to fetch requirements:", error);
-        // Fallback to sample data if there's an error or no items
-        if (regulation && regulation.regulations) {
-          // Generate sample requirements based on the regulation
-          const sampleRequirements: ChecklistItemType[] = [
-            {
-              id: "req-1",
-              description: "Implement appropriate technical measures to protect personal data",
-              task: "Data Protection Implementation",
-              best_practices: "Use industry-standard encryption and access controls",
-              department: "IT Security",
-              importance: 5,
-              category: "Security",
-              estimated_effort: "1-2 weeks",
-              expert_verified: true,
-              is_subtask: false,
-              subtasks: [
-                { 
-                  id: "sub-1", 
-                  description: "Implement encryption for data at rest",
-                  is_subtask: true
-                },
-                { 
-                  id: "sub-2", 
-                  description: "Implement encryption for data in transit",
-                  is_subtask: true
-                }
-              ]
-            },
-            {
-              id: "req-2",
-              description: "Document all data processing activities and maintain records",
-              task: "Data Processing Documentation",
-              best_practices: "Create comprehensive templates for all departments to use",
-              department: "Legal & Compliance",
-              importance: 4,
-              category: "Documentation",
-              estimated_effort: "1 week",
-              expert_verified: true,
-              is_subtask: false,
-              subtasks: []
-            },
-            {
-              id: "req-3",
-              description: "Conduct regular risk assessments of data processing activities",
-              task: "Risk Assessment Program",
-              best_practices: "Schedule quarterly assessments with key stakeholders",
-              department: "Risk Management",
-              importance: 4,
-              category: "Risk Management",
-              estimated_effort: "1-2 weeks",
-              expert_verified: false,
-              is_subtask: false,
-              subtasks: []
-            }
-          ];
-          
-          setRequirementItems(sampleRequirements);
-        }
+        // Fallback to sample data if there's an error
+        setRequirementItems([
+          {
+            id: "req-1",
+            description: "Implement appropriate technical measures",
+            task: "Data Protection Implementation",
+            best_practices: "Use industry-standard encryption",
+            department: "IT Security",
+            importance: 5,
+            category: "Security",
+            estimated_effort: "1-2 weeks",
+            expert_verified: true,
+            is_subtask: false,
+            subtasks: [
+              { 
+                id: "sub-1", 
+                description: "Implement encryption for data at rest",
+                is_subtask: true
+              }
+            ]
+          }
+        ]);
       } finally {
         setIsLoading(false);
       }
