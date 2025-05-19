@@ -1,5 +1,4 @@
 
-import { useEffect } from "react";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { useDashboardData } from "@/components/dashboard/useDashboardData";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
@@ -8,13 +7,13 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ComplianceChart } from "@/components/dashboard/ComplianceChart";
 import { UrgentTasksTable } from "@/components/dashboard/UrgentTasksTable";
 import { ChatWidget } from "@/components/compliance/ChatWidget";
+import { useAuth } from "@/context/AuthContext";
 
 const Dashboard = () => {
-  const { savedRegulations, isLoading } = useDashboardData();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { savedRegulations, isLoading: dataLoading } = useDashboardData();
 
-  // Remove the useEffect with refetch to prevent unnecessary API calls
-  // The useDashboardData hook will handle fetching data with appropriate caching
-
+  // Calculate stats only if data is available
   const upcomingDeadlines = savedRegulations?.filter(reg => 
     reg.next_review_date && new Date(reg.next_review_date) > new Date()
   ).length || 0;
@@ -24,6 +23,17 @@ const Dashboard = () => {
   ).length || 0;
 
   const totalRegulations = savedRegulations?.length || 0;
+  
+  // Show loading state if either auth or data is loading
+  if (authLoading || dataLoading) {
+    return (
+      <TopbarLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
+        </div>
+      </TopbarLayout>
+    );
+  }
 
   return (
     <TopbarLayout>

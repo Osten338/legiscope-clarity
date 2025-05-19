@@ -16,18 +16,18 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isLoading, signIn, signUp } = useAuth();
+  const { user, isLoading, isAuthenticated, signIn, signUp } = useAuth();
   
   // Get the intended destination from location state, defaulting to dashboard
   const from = location.state?.from || "/dashboard";
   
   useEffect(() => {
     // If user is already signed in and we're done loading, redirect
-    if (user && !isLoading) {
+    if (isAuthenticated && user && !isLoading) {
       console.log("Auth page: User is signed in, redirecting to", from);
       navigate(from, { replace: true });
     }
-  }, [user, isLoading, from, navigate]);
+  }, [user, isLoading, from, navigate, isAuthenticated]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
