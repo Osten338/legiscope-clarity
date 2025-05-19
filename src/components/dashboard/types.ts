@@ -54,5 +54,9 @@ export interface ChecklistItemType {
   department?: string | null;
   parent_id?: string | null;
   is_subtask: boolean | null;
-  subtasks?: ChecklistItemType[];
+  subtasks?: Array<{
+    id: string;
+    description: string;
+    is_subtask: boolean;
+  }>;
 }

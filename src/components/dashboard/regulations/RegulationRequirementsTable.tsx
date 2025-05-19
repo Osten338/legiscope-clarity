@@ -45,20 +45,31 @@ export const RegulationRequirementsTable = ({
           }
           
           // Transform the data to match ChecklistItemType
-          const transformedData: ChecklistItemType[] = (data || []).map(item => ({
-            id: item.id,
-            description: item.description,
-            importance: item.importance,
-            category: item.category,
-            estimated_effort: item.estimated_effort,
-            expert_verified: item.expert_verified,
-            task: item.task,
-            best_practices: item.best_practices,
-            department: item.department,
-            parent_id: item.parent_id,
-            is_subtask: item.is_subtask === null ? false : item.is_subtask,
-            subtasks: item.subtasks || []
-          }));
+          const transformedData: ChecklistItemType[] = (data || []).map(item => {
+            // We need to convert the database item to our ChecklistItemType
+            const convertedItem: ChecklistItemType = {
+              id: item.id,
+              description: item.description,
+              importance: item.importance,
+              category: item.category,
+              estimated_effort: item.estimated_effort,
+              expert_verified: item.expert_verified,
+              // These properties might not be in all records from the database
+              // so we explicitly check and add them
+              task: 'task' in item ? item.task : null,
+              best_practices: 'best_practices' in item ? item.best_practices : null,
+              department: 'department' in item ? item.department : null,
+              parent_id: 'parent_id' in item ? item.parent_id : null,
+              is_subtask: 'is_subtask' in item ? !!item.is_subtask : false,
+              // Handle subtasks, ensuring they have the correct structure
+              subtasks: Array.isArray(item.subtasks) ? item.subtasks.map((subtask: any) => ({
+                id: subtask.id,
+                description: subtask.description,
+                is_subtask: true
+              })) : []
+            };
+            return convertedItem;
+          });
           
           setRequirementItems(transformedData);
         }
@@ -253,11 +264,11 @@ export const RegulationRequirementsTable = ({
                           <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Subtasks:</h4>
                             <ul className="list-disc pl-5 mt-1 space-y-1">
-                              {item.subtasks.map((subtask) => (
+                              {Array.isArray(item.subtasks) ? item.subtasks.map((subtask) => (
                                 <li key={subtask.id} className="text-sm text-gray-600 dark:text-gray-400">
                                   {subtask.description}
                                 </li>
-                              ))}
+                              )) : null}
                             </ul>
                           </div>
                         )}
