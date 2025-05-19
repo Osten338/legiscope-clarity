@@ -1,4 +1,3 @@
-
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,8 @@ export function DashboardHeader() {
       
       if (error) throw error;
       
-      setAvailableRegulations(data || []);
+      // Cast the data to include the checklist_items property expected by Regulation type
+      setAvailableRegulations((data || []) as Regulation[]);
     } catch (error: any) {
       console.error("Error fetching regulations:", error);
       toast({

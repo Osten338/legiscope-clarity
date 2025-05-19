@@ -1,4 +1,3 @@
-
 export type ChecklistItem = {
   id: string;
   description: string;
@@ -10,7 +9,10 @@ export type Regulation = {
   description: string;
   motivation: string;
   requirements: string;
-  checklist_items: ChecklistItem[];
+  checklist_items?: any[];
+  sanctions?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type SavedRegulation = {
