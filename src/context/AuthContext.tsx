@@ -48,10 +48,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const authStateRef = useRef<boolean>(false);
   const authTimeoutRef = useRef<number | null>(null);
+  const lastCheckTimeRef = useRef<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("AuthProvider: initializing auth state");
+    const now = Date.now();
+    
+    // Avoid frequent re-initializations
+    if (now - lastCheckTimeRef.current < 5000) {
+      console.log("AuthProvider: skipping initialization, last check was recent");
+      return;
+    }
+    
+    lastCheckTimeRef.current = now;
     
     // Clear any existing timeouts
     if (authTimeoutRef.current) {
@@ -65,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Prevent multiple rapid state changes
         if (authStateRef.current) {
+          console.log("AuthProvider: Already processing auth change, skipping");
           return;
         }
         
@@ -75,10 +86,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           window.clearTimeout(authTimeoutRef.current);
         }
         
-        // Use a 300ms timeout to debounce state updates
+        // Use a 1000ms timeout to debounce state updates
         authTimeoutRef.current = window.setTimeout(() => {
-          setSession(currentSession);
-          setUser(currentSession?.user || null);
+          if (currentSession?.user?.id !== user?.id || !currentSession !== !session) {
+            console.log("AuthProvider: User or session changed, updating state");
+            setSession(currentSession);
+            setUser(currentSession?.user || null);
+          }
+          
           setIsLoading(false);
           authStateRef.current = false;
           console.log("AuthProvider: Auth state updated:", !!currentSession);
@@ -91,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Redirect to auth on sign out
             navigate('/auth', { replace: true });
           }
-        }, 300);
+        }, 1000);
       }
     );
 
@@ -103,8 +118,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (!authStateRef.current) {
           // Only update state if we're not already processing an auth change
-          setSession(data.session);
-          setUser(data.session?.user || null);
+          if (data.session?.user?.id !== user?.id || !data.session !== !session) {
+            setSession(data.session);
+            setUser(data.session?.user || null);
+          }
           setIsLoading(false);
         }
       } catch (error) {
@@ -120,10 +137,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
       if (authTimeoutRef.current) {
         window.clearTimeout(authTimeoutRef.current);
+        authTimeoutRef.current = null;
       }
       authStateRef.current = false;
     };
-  }, [navigate]);
+  }, []); // Dependency array intentionally empty to run only on component mount/unmount
 
   // Auth methods
   const signIn = async (email: string, password: string) => {
@@ -167,6 +185,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       cleanupAuthState();
       await supabase.auth.signOut({ scope: 'global' });
+      // Force a page reload after sign out to ensure clean state
+      window.location.href = '/auth';
     } catch (error) {
       console.error("Sign out error:", error);
     }
