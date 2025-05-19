@@ -166,30 +166,48 @@ export type Database = {
       }
       checklist_item_history: {
         Row: {
+          best_practices: string | null
           category: string | null
           checklist_item_id: string
           created_at: string
+          department: string | null
           description: string
           id: string
           importance: number | null
+          is_subtask: boolean | null
+          parent_id: string | null
+          subtasks: Json | null
+          task: string | null
           version_note: string | null
         }
         Insert: {
+          best_practices?: string | null
           category?: string | null
           checklist_item_id: string
           created_at?: string
+          department?: string | null
           description: string
           id?: string
           importance?: number | null
+          is_subtask?: boolean | null
+          parent_id?: string | null
+          subtasks?: Json | null
+          task?: string | null
           version_note?: string | null
         }
         Update: {
+          best_practices?: string | null
           category?: string | null
           checklist_item_id?: string
           created_at?: string
+          department?: string | null
           description?: string
           id?: string
           importance?: number | null
+          is_subtask?: boolean | null
+          parent_id?: string | null
+          subtasks?: Json | null
+          task?: string | null
           version_note?: string | null
         }
         Relationships: [
@@ -248,39 +266,64 @@ export type Database = {
       }
       checklist_items: {
         Row: {
+          best_practices: string | null
           category: string | null
           created_at: string
+          department: string | null
           description: string
           estimated_effort: string | null
           expert_verified: boolean | null
           id: string
           importance: number | null
+          is_subtask: boolean | null
+          parent_id: string | null
           regulation_id: string | null
+          subtasks: Json | null
+          task: string | null
           updated_at: string
         }
         Insert: {
+          best_practices?: string | null
           category?: string | null
           created_at?: string
+          department?: string | null
           description: string
           estimated_effort?: string | null
           expert_verified?: boolean | null
           id?: string
           importance?: number | null
+          is_subtask?: boolean | null
+          parent_id?: string | null
           regulation_id?: string | null
+          subtasks?: Json | null
+          task?: string | null
           updated_at?: string
         }
         Update: {
+          best_practices?: string | null
           category?: string | null
           created_at?: string
+          department?: string | null
           description?: string
           estimated_effort?: string | null
           expert_verified?: boolean | null
           id?: string
           importance?: number | null
+          is_subtask?: boolean | null
+          parent_id?: string | null
           regulation_id?: string | null
+          subtasks?: Json | null
+          task?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "checklist_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "checklist_items_regulation_id_fkey"
             columns: ["regulation_id"]

@@ -8,12 +8,12 @@ import { FileReviewImport } from "./FileReviewImport";
 import { CsvFormatInfo } from "./CsvFormatInfo";
 
 interface CsvImportTabProps {
-  onImport: (items: string[]) => Promise<void>;
+  onImport: (items: any[]) => Promise<void>;
   isImporting: boolean;
 }
 
 export const CsvImportTab = ({ onImport, isImporting }: CsvImportTabProps) => {
-  const [parsedItems, setParsedItems] = useState<string[]>([]);
+  const [parsedItems, setParsedItems] = useState<any[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -25,17 +25,50 @@ export const CsvImportTab = ({ onImport, isImporting }: CsvImportTabProps) => {
     setFileName(file.name);
     
     Papa.parse(file, {
+      header: true, // Treat the first row as headers
       complete: (results) => {
         try {
           console.log("CSV parsing results:", results);
           
-          // Extract descriptions from CSV data
+          // Extract structured data from CSV
           const items = results.data
-            .filter((row: any) => Array.isArray(row) && row.length > 0)
-            .map((row: any) => row[0]?.toString().trim())
-            .filter((item: string) => item && item.length > 0);
+            .filter((row: any) => row && (row.Task || row.Description)) // Ensure we have at least one main field
+            .map((row: any) => {
+              // Try to parse subtasks if they exist
+              let subtasks = [];
+              if (row.Subtasks) {
+                try {
+                  // Check if it's already a JSON array
+                  if (typeof row.Subtasks === 'string' && row.Subtasks.trim()) {
+                    // Try to parse JSON, otherwise split by commas or semicolons
+                    if (row.Subtasks.trim().startsWith('[')) {
+                      subtasks = JSON.parse(row.Subtasks);
+                    } else {
+                      // Split by comma or semicolon and trim each item
+                      subtasks = row.Subtasks.split(/[,;]/).map((s: string) => s.trim()).filter(Boolean);
+                    }
+                  } else if (Array.isArray(row.Subtasks)) {
+                    subtasks = row.Subtasks;
+                  }
+                } catch (e) {
+                  console.warn("Could not parse subtasks:", e);
+                }
+              }
+              
+              return {
+                task: row.Task || "",
+                description: row.Description || "",
+                best_practices: row["Best Practices"] || row.BestPractices || "",
+                department: row.Department || "",
+                subtasks: subtasks,
+                // Optional fields can be included too
+                importance: parseInt(row.Importance) || 3,
+                category: row.Category || "general",
+                estimated_effort: row.EstimatedEffort || row["Estimated Effort"] || ""
+              };
+            });
           
-          console.log("Extracted items:", items);
+          console.log("Extracted structured items:", items);
           setParsedItems(items);
           
           toast({

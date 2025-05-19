@@ -1,19 +1,60 @@
 
-import { FileText } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export const CsvFormatInfo = () => {
   return (
-    <div className="mt-6 p-4 border border-slate-200 rounded-md bg-slate-50">
-      <h4 className="font-medium mb-2 text-sm flex items-center gap-1.5">
-        <FileText className="h-4 w-4 text-slate-600" />
-        CSV Format Instructions
-      </h4>
-      <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
-        <li>The first column should contain the checklist item descriptions</li>
-        <li>Each row will create a separate checklist item</li>
-        <li>Headers will be treated as items (exclude headers row if needed)</li>
-        <li>Empty rows will be skipped</li>
-      </ul>
+    <div className="bg-slate-50 p-6 rounded-md border border-slate-200 space-y-4">
+      <h3 className="font-medium text-base">CSV Format Information</h3>
+      <p className="text-sm text-slate-600">
+        Your CSV file should include the following columns:
+      </p>
+      
+      <div className="space-y-3">
+        <div className="grid grid-cols-4 gap-2 text-sm">
+          <div className="font-medium">Column</div>
+          <div className="font-medium">Required</div>
+          <div className="font-medium col-span-2">Description</div>
+          
+          <div>Task</div>
+          <div>Yes</div>
+          <div className="col-span-2">Main task name</div>
+          
+          <div>Description</div>
+          <div>Yes</div>
+          <div className="col-span-2">Detailed description of the task</div>
+          
+          <div>Best Practices</div>
+          <div>No</div>
+          <div className="col-span-2">Recommended best practices for implementation</div>
+          
+          <div>Department</div>
+          <div>No</div>
+          <div className="col-span-2">Department responsible for this task</div>
+          
+          <div>Subtasks</div>
+          <div>No</div>
+          <div className="col-span-2">Comma-separated list of subtasks</div>
+          
+          <div>Importance</div>
+          <div>No</div>
+          <div className="col-span-2">Number from 1-5 (default: 3)</div>
+          
+          <div>Category</div>
+          <div>No</div>
+          <div className="col-span-2">Category for classification (default: "general")</div>
+        </div>
+      </div>
+      
+      <Separator />
+      
+      <div>
+        <h4 className="font-medium text-sm mb-2">Example Content:</h4>
+        <pre className="bg-slate-100 p-3 rounded text-xs overflow-x-auto whitespace-pre-wrap">
+          Task,Description,Best Practices,Department,Subtasks,Importance,Category
+          "Implement Data Policy","Create data protection document","Follow ISO 27001","Legal","Review annually,Train staff",5,compliance
+          "Setup MFA","Enable multi-factor auth","Use authenticator apps","IT","Document procedure",4,security
+        </pre>
+      </div>
     </div>
   );
 };

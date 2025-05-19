@@ -1,18 +1,25 @@
 
-// Import statements and interfaces
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle, Clock, CalendarDays, Clipboard, ClipboardCheck } from "lucide-react";
+import { CheckCircle, Clock, CalendarDays, Clipboard, ClipboardCheck, ListChecks, Building, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Response {
   status: 'completed' | 'will_do' | 'will_not_do';
   justification?: string;
+}
+
+interface SubtaskType {
+  id: string;
+  description: string;
+  task?: string;
+  is_subtask: boolean;
 }
 
 interface ChecklistItemProps {
@@ -26,6 +33,13 @@ interface ChecklistItemProps {
   regulationDescription: string;
   expertVerified?: boolean;
   response?: Response;
+  task?: string;
+  bestPractices?: string;
+  department?: string;
+  subtasks?: SubtaskType[];
+  isSubtask?: boolean;
+  showParentInfo?: boolean;
+  parentDescription?: string;
 }
 
 export const ChecklistItem = ({
@@ -38,6 +52,13 @@ export const ChecklistItem = ({
   regulationName,
   expertVerified,
   response,
+  task,
+  bestPractices,
+  department,
+  subtasks,
+  isSubtask = false,
+  showParentInfo = false,
+  parentDescription,
 }: ChecklistItemProps) => {
   const [status, setStatus] = useState<'completed' | 'will_do' | 'will_not_do'>(
     response?.status || 'will_do'
@@ -45,6 +66,7 @@ export const ChecklistItem = ({
   const [justification, setJustification] = useState(response?.justification || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showJustification, setShowJustification] = useState(!!response?.justification);
+  const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async () => {
@@ -116,11 +138,21 @@ export const ChecklistItem = ({
     );
   };
 
+  const hasSubtasks = Array.isArray(subtasks) && subtasks.length > 0;
+  const hasAdditionalInfo = !!bestPractices || !!department;
+
   return (
-    <Card className="overflow-hidden">
+    <Card className={`overflow-hidden ${isSubtask ? "ml-6 border-l-4 border-l-slate-200" : ""}`}>
       <CardContent className="p-4 space-y-4">
+        {showParentInfo && parentDescription && (
+          <div className="mb-2 text-xs text-slate-500 flex items-center gap-1">
+            <Clipboard className="h-3 w-3" />
+            <span>Parent task: {parentDescription}</span>
+          </div>
+        )}
+        
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
+          <div className="space-y-2 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               {expertVerified && (
                 <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800 border-green-200">
@@ -128,18 +160,93 @@ export const ChecklistItem = ({
                   <span>Expert-verified</span>
                 </Badge>
               )}
+              
               {category && (
                 <Badge variant="outline">{category}</Badge>
               )}
+              
               {getImportanceBadge()}
+              
+              {isSubtask && (
+                <Badge variant="outline" className="bg-slate-100">Subtask</Badge>
+              )}
+              
+              {hasSubtasks && (
+                <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                  {subtasks?.length} subtask{subtasks!.length !== 1 ? 's' : ''}
+                </Badge>
+              )}
             </div>
-            <p className="text-base">{description}</p>
-            {estimatedEffort && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>Est. effort: {estimatedEffort}</span>
-              </div>
+            
+            {task && (
+              <h4 className="font-medium">{task}</h4>
             )}
+            
+            <p className="text-base">{description}</p>
+            
+            {(hasAdditionalInfo || hasSubtasks) && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs" 
+                onClick={() => setShowDetails(!showDetails)}
+              >
+                {showDetails ? "Hide details" : "Show details"}
+              </Button>
+            )}
+            
+            <Collapsible open={showDetails} onOpenChange={setShowDetails}>
+              <CollapsibleContent className="space-y-3 border-t pt-3 mt-2">
+                {bestPractices && (
+                  <div className="flex gap-2 text-sm">
+                    <BookOpen className="h-4 w-4 text-slate-600 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="font-medium text-sm">Best Practices</p>
+                      <p className="text-slate-600">{bestPractices}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {department && (
+                  <div className="flex gap-2 text-sm">
+                    <Building className="h-4 w-4 text-slate-600 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="font-medium text-sm">Department</p>
+                      <p className="text-slate-600">{department}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {estimatedEffort && (
+                  <div className="flex gap-2 text-sm">
+                    <Clock className="h-4 w-4 text-slate-600 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="font-medium text-sm">Estimated Effort</p>
+                      <p className="text-slate-600">{estimatedEffort}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {hasSubtasks && (
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ListChecks className="h-4 w-4 text-slate-600" />
+                      <h5 className="font-medium text-sm">Subtasks</h5>
+                    </div>
+                    <div className="space-y-3 pl-2">
+                      {subtasks?.map(subtask => (
+                        <div key={subtask.id} className="border-l-2 border-l-slate-200 pl-3 text-sm">
+                          <p className="font-medium">{subtask.task || subtask.description}</p>
+                          {subtask.task && subtask.description && subtask.task !== subtask.description && (
+                            <p className="text-slate-600 text-sm">{subtask.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
           </div>
           
           <div className="flex-shrink-0">

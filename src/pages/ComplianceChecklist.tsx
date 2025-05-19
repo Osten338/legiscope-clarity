@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -15,6 +16,16 @@ interface ChecklistItemType {
   category?: string;
   estimated_effort?: string;
   expert_verified?: boolean;
+  task?: string;
+  best_practices?: string;
+  department?: string;
+  parent_id?: string | null;
+  is_subtask: boolean;
+  response?: {
+    status: 'completed' | 'will_do' | 'will_not_do';
+    justification?: string;
+  };
+  subtasks?: ChecklistItemType[];
 }
 
 interface RegulationType {
@@ -83,7 +94,8 @@ const ComplianceChecklist = () => {
 
         const regulationsWithItems = await Promise.all(
           regulations.map(async (regulation) => {
-            const { data: checklistItems, error: itemsError } = await supabase
+            // First, get all checklist items for this regulation
+            const { data: allChecklistItems, error: itemsError } = await supabase
               .from("checklist_items")
               .select("*")
               .eq("regulation_id", regulation.id);
@@ -106,7 +118,7 @@ const ComplianceChecklist = () => {
               .eq("user_id", user.id)
               .in(
                 "checklist_item_id",
-                checklistItems?.map((item) => item.id) || []
+                allChecklistItems?.map((item) => item.id) || []
               );
 
             if (responsesError) {
@@ -116,13 +128,38 @@ const ComplianceChecklist = () => {
               );
             }
 
+            // Identify main tasks (not subtasks) and subtasks
+            const mainTasks = allChecklistItems?.filter(item => !item.is_subtask) || [];
+            const subtasks = allChecklistItems?.filter(item => item.is_subtask) || [];
+            
             // Map responses to checklist items
-            const itemsWithResponses = checklistItems?.map((item) => {
+            const itemsWithResponses: ChecklistItemType[] = mainTasks.map((item) => {
               const response = responses?.find(
                 (r) => r.checklist_item_id === item.id
               );
+              
+              // Find subtasks for this main task
+              const itemSubtasks = subtasks.filter(
+                subtask => subtask.parent_id === item.id
+              ).map(subtask => {
+                const subtaskResponse = responses?.find(
+                  (r) => r.checklist_item_id === subtask.id
+                );
+                
+                return {
+                  ...subtask,
+                  response: subtaskResponse
+                    ? {
+                        status: subtaskResponse.status,
+                        justification: subtaskResponse.justification,
+                      }
+                    : undefined,
+                };
+              });
+              
               return {
                 ...item,
+                subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
                 response: response
                   ? {
                       status: response.status,
@@ -237,6 +274,10 @@ const ComplianceChecklist = () => {
                             const expertVerified = reg.checklist_items?.filter(item => item.expert_verified)?.length || 0;
                             const expertVerifiedPercentage = totalItems > 0 ? Math.round((expertVerified / totalItems) * 100) : 0;
                             
+                            // Calculate subtasks count
+                            const subtasksCount = reg.checklist_items?.reduce((count, item) => 
+                              count + (Array.isArray(item.subtasks) ? item.subtasks.length : 0), 0) || 0;
+                            
                             return (
                               <div 
                                 key={reg.id} 
@@ -247,7 +288,7 @@ const ComplianceChecklist = () => {
                                 <p className="text-slate-600 mt-2 text-sm line-clamp-3">{reg.description}</p>
                                 <div className="mt-3 flex items-center justify-between">
                                   <span className="text-sage-600 text-sm">
-                                    {reg.checklist_items?.length || 0} checklist items
+                                    {totalItems + subtasksCount} checklist items
                                   </span>
                                   {expertVerified > 0 && (
                                     <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
@@ -282,21 +323,57 @@ const ComplianceChecklist = () => {
                       
                       {regulation.checklist_items && regulation.checklist_items.length > 0 ? (
                         <div className="space-y-6">
-                          {regulation.checklist_items.map((item) => (
-                            <ChecklistItem 
-                              key={item.id} 
-                              id={item.id}
-                              description={item.description} 
-                              importance={item.importance}
-                              category={item.category}
-                              estimatedEffort={item.estimated_effort}
-                              regulationId={regulation.id}
-                              regulationName={regulation.name}
-                              regulationDescription={regulation.description}
-                              expertVerified={item.expert_verified}
-                              response={item.response}
-                            />
-                          ))}
+                          {regulation.checklist_items.map((item) => {
+                            // Render main task
+                            return (
+                              <div key={item.id} className="space-y-4">
+                                <ChecklistItem 
+                                  id={item.id} 
+                                  description={item.description} 
+                                  importance={item.importance}
+                                  category={item.category}
+                                  estimatedEffort={item.estimated_effort}
+                                  regulationId={regulation.id}
+                                  regulationName={regulation.name}
+                                  regulationDescription={regulation.description}
+                                  expertVerified={item.expert_verified}
+                                  response={item.response}
+                                  task={item.task}
+                                  bestPractices={item.best_practices}
+                                  department={item.department}
+                                  subtasks={item.subtasks}
+                                  isSubtask={item.is_subtask}
+                                />
+                                
+                                {/* Render subtasks directly from subtasks array */}
+                                {item.subtasks && item.subtasks.length > 0 && (
+                                  <div className="space-y-3">
+                                    {item.subtasks.map(subtask => (
+                                      <ChecklistItem
+                                        key={subtask.id}
+                                        id={subtask.id}
+                                        description={subtask.description}
+                                        task={subtask.task}
+                                        bestPractices={subtask.best_practices}
+                                        department={subtask.department}
+                                        importance={subtask.importance}
+                                        category={subtask.category}
+                                        estimatedEffort={subtask.estimated_effort}
+                                        regulationId={regulation.id}
+                                        regulationName={regulation.name}
+                                        regulationDescription={regulation.description}
+                                        expertVerified={subtask.expert_verified}
+                                        response={subtask.response}
+                                        isSubtask={true}
+                                        showParentInfo={true}
+                                        parentDescription={item.task || item.description}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <p className="text-slate-500 italic">No checklist items found for this regulation.</p>
