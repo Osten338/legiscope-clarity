@@ -28,12 +28,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Global initialization flag to prevent multiple initializations
 let isAuthInitialized = false;
 
-// Auth state reference that can be checked without triggering re-renders
+// Centralized global auth state reference that can be accessed without triggering re-renders
 const authStateRef = {
   isAuthenticated: false,
   isLoading: true,
   userId: null as string | null,
-  lastVerifiedAt: 0
+  lastVerifiedAt: 0,
+  isAuthLocked: false, // New flag to prevent parallel auth operations
+  isRedirecting: false, // New flag to prevent multiple redirects
+  authStage: 'initializing' as 'initializing' | 'checking' | 'verifying' | 'completed'
 };
 
 // Utility function to clean up auth state
@@ -52,15 +55,35 @@ const cleanupAuthState = () => {
       sessionStorage.removeItem(key);
     }
   });
+  
+  // Clear our custom flags
+  sessionStorage.removeItem('auth:isAuthenticated');
+  sessionStorage.removeItem('auth:userId');
+  sessionStorage.removeItem('auth:lastChecked');
 };
 
 // Function to check if user is authenticated without triggering a re-render
 export const isAuthenticatedSync = (): boolean => {
-  // If we've verified auth in the last 15 seconds, trust the cached value
-  const isCacheValid = Date.now() - authStateRef.lastVerifiedAt < 15000;
+  // If we're currently in a redirecting state, return immediately
+  if (authStateRef.isRedirecting) {
+    return false;
+  }
+  
+  // If we've verified auth in the last 30 seconds, trust the cached value
+  const isCacheValid = Date.now() - authStateRef.lastVerifiedAt < 30000;
   if (isCacheValid) {
     return authStateRef.isAuthenticated;
   }
+  
+  // Check session storage for faster access
+  const sessionAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
+  const authLastChecked = parseInt(sessionStorage.getItem('auth:lastChecked') || '0', 10);
+  const isRecentCheck = Date.now() - authLastChecked < 60000; // Last checked within a minute
+  
+  if (sessionAuth && isRecentCheck) {
+    return true;
+  }
+  
   // Otherwise suggest checking the context value
   return false;
 };
@@ -77,6 +100,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const lastCheckTimeRef = useRef<number>(0);
   const stabilityTimeoutRef = useRef<number | null>(null);
   const navigate = useNavigate();
+  
+  // Debug mode - enable this to see detailed auth logs
+  const isDebugEnabled = process.env.NODE_ENV === 'development';
+  
+  // Enhanced debug logging function
+  const logAuth = (message: string, data?: any) => {
+    if (isDebugEnabled) {
+      console.log(`[AUTH] ${message}`, data ? data : '');
+    }
+  };
 
   // Update the auth state reference whenever state changes
   useEffect(() => {
@@ -85,31 +118,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authStateRef.userId = user?.id || null;
     authStateRef.lastVerifiedAt = Date.now();
     
-    // Add debug logging in development mode
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Auth state updated:', { 
-        isAuthenticated: authStateRef.isAuthenticated,
-        isLoading: authStateRef.isLoading,
-        userId: authStateRef.userId
-      });
+    // Store auth state in sessionStorage for faster access
+    if (authStateRef.isAuthenticated && user?.id) {
+      sessionStorage.setItem('auth:isAuthenticated', 'true');
+      sessionStorage.setItem('auth:userId', user.id);
+      sessionStorage.setItem('auth:lastChecked', Date.now().toString());
     }
+    
+    // Add debug logging in development mode
+    logAuth('Auth state updated:', { 
+      isAuthenticated: authStateRef.isAuthenticated,
+      isLoading: authStateRef.isLoading,
+      userId: authStateRef.userId,
+      stage: authStateRef.authStage
+    });
   }, [user, isLoading]);
 
   useEffect(() => {
     // If already initialized, don't do it again
     if (isAuthInitialized) {
-      console.log("AuthProvider: Already initialized globally, skipping");
+      logAuth("AuthProvider: Already initialized globally, skipping");
       setIsLoading(false);
       return;
     }
     
-    console.log("AuthProvider: initializing auth state");
+    logAuth("AuthProvider: initializing auth state");
     isAuthInitialized = true;
+    authStateRef.authStage = 'checking';
     const now = Date.now();
     
     // Avoid frequent re-initializations
     if (now - lastCheckTimeRef.current < 10000) {
-      console.log("AuthProvider: skipping initialization, last check was very recent");
+      logAuth("AuthProvider: skipping initialization, last check was very recent");
       return;
     }
     
@@ -124,18 +164,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.clearTimeout(stabilityTimeoutRef.current);
     }
 
-    // Set up auth state listener
+    // Set up auth state listener with lock mechanism to prevent overlapping auth operations
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        console.log("AuthProvider: Auth state changed:", event);
+        logAuth("AuthProvider: Auth state changed:", event);
         
         // Prevent multiple rapid state changes
         if (processingAuthChangeRef.current) {
-          console.log("AuthProvider: Already processing auth change, skipping");
+          logAuth("AuthProvider: Already processing auth change, skipping");
           return;
         }
         
         processingAuthChangeRef.current = true;
+        authStateRef.authStage = 'verifying';
         
         // Clear any existing timeout
         if (authTimeoutRef.current) {
@@ -144,28 +185,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Use a longer timeout to debounce state updates
         authTimeoutRef.current = window.setTimeout(() => {
-          if (currentSession?.user?.id !== user?.id || !currentSession !== !session) {
-            console.log("AuthProvider: User or session changed, updating state");
-            
-            const newIsAuthenticated = !!currentSession?.user;
-            setSession(currentSession);
-            setUser(currentSession?.user || null);
-            setIsAuthenticated(newIsAuthenticated);
-            
-            // Store auth state in sessionStorage for faster access
-            if (newIsAuthenticated) {
-              sessionStorage.setItem('auth:isAuthenticated', 'true');
-              sessionStorage.setItem('auth:userId', currentSession.user.id);
-            } else {
-              sessionStorage.removeItem('auth:isAuthenticated');
-              sessionStorage.removeItem('auth:userId');
-            }
+          // Second layer check to prevent race conditions
+          if (authStateRef.isAuthLocked) {
+            logAuth("Auth is locked, deferring state update");
+            processingAuthChangeRef.current = false;
+            return;
           }
           
-          setAuthError(null);
-          setIsLoading(false);
-          processingAuthChangeRef.current = false;
-          console.log("AuthProvider: Auth state updated:", !!currentSession);
+          // Lock auth operations during this critical section
+          authStateRef.isAuthLocked = true;
+          
+          try {
+            if (currentSession?.user?.id !== user?.id || !currentSession !== !session) {
+              logAuth("AuthProvider: User or session changed, updating state");
+              
+              const newIsAuthenticated = !!currentSession?.user;
+              setSession(currentSession);
+              setUser(currentSession?.user || null);
+              setIsAuthenticated(newIsAuthenticated);
+              
+              // Store auth state in sessionStorage for faster access
+              if (newIsAuthenticated) {
+                sessionStorage.setItem('auth:isAuthenticated', 'true');
+                sessionStorage.setItem('auth:userId', currentSession.user.id);
+                sessionStorage.setItem('auth:lastChecked', Date.now().toString());
+              } else {
+                sessionStorage.removeItem('auth:isAuthenticated');
+                sessionStorage.removeItem('auth:userId');
+                sessionStorage.removeItem('auth:lastChecked');
+              }
+            }
+            
+            setAuthError(null);
+            setIsLoading(false);
+            authStateRef.authStage = 'completed';
+            logAuth("AuthProvider: Auth state updated:", !!currentSession);
+          } finally {
+            processingAuthChangeRef.current = false;
+            authStateRef.isAuthLocked = false;
+          }
           
           // Add a stability timeout - defer navigation until auth state is stable
           if (stabilityTimeoutRef.current) {
@@ -174,34 +232,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Handle navigation on sign in/out events with a delay
           stabilityTimeoutRef.current = window.setTimeout(() => {
+            // Prevent navigation if we're already redirecting
+            if (authStateRef.isRedirecting) {
+              logAuth("Already redirecting, skipping navigation");
+              return;
+            }
+            
             if (event === 'SIGNED_IN' && currentSession) {
+              authStateRef.isRedirecting = true;
+              logAuth("Redirecting to dashboard after sign in");
               navigate('/dashboard', { replace: true });
+              setTimeout(() => {
+                authStateRef.isRedirecting = false;
+              }, 1000);
             } else if (event === 'SIGNED_OUT') {
+              authStateRef.isRedirecting = true;
+              logAuth("Redirecting to auth after sign out");
               navigate('/auth', { replace: true });
+              setTimeout(() => {
+                authStateRef.isRedirecting = false;
+              }, 1000);
             }
             stabilityTimeoutRef.current = null;
-          }, 300); // Short delay to ensure state is stable
+          }, 500); // Increased delay for more stability
           
-        }, 500); // Decreased debounce timeout for responsiveness while still preventing flicker
+        }, 800); // Increased debounce timeout for stability while still being responsive
       }
     );
 
     // Check for existing session
     const checkSession = async () => {
       try {
+        // First check for fast path through sessionStorage
+        const sessionAuth = sessionStorage.getItem('auth:isAuthenticated') === 'true';
+        const authLastChecked = parseInt(sessionStorage.getItem('auth:lastChecked') || '0', 10);
+        const isRecentCheck = Date.now() - authLastChecked < 60000; // Last checked within a minute
+        
+        if (sessionAuth && isRecentCheck) {
+          logAuth("Using cached auth state from sessionStorage");
+          // We'll still verify with Supabase, but we can show authenticated state immediately
+          setIsAuthenticated(true);
+          const cachedUserId = sessionStorage.getItem('auth:userId');
+          if (cachedUserId) {
+            setUser({ id: cachedUserId } as User); // Minimal user object
+          }
+        }
+        
+        // Still do a Supabase check to verify the session is valid
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error("Error checking auth session:", error);
+          logAuth("Error checking auth session:", error);
           setAuthError(error);
           setIsLoading(false);
           return;
         }
         
-        console.log("AuthProvider: Current session:", data.session ? "exists" : "none");
+        logAuth("AuthProvider: Current session:", data.session ? "exists" : "none");
         
+        // Only update state if we're not already processing an auth change
         if (!processingAuthChangeRef.current) {
-          // Only update state if we're not already processing an auth change
           if (data.session?.user?.id !== user?.id || !data.session !== !session) {
             const newIsAuthenticated = !!data.session?.user;
             setSession(data.session);
@@ -212,12 +302,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (newIsAuthenticated) {
               sessionStorage.setItem('auth:isAuthenticated', 'true');
               sessionStorage.setItem('auth:userId', data.session.user.id);
+              sessionStorage.setItem('auth:lastChecked', Date.now().toString());
+            } else {
+              sessionStorage.removeItem('auth:isAuthenticated');
+              sessionStorage.removeItem('auth:userId');
             }
           }
+          authStateRef.authStage = 'completed';
           setIsLoading(false);
         }
       } catch (error) {
-        console.error("Error checking auth:", error);
+        logAuth("Error checking auth:", error);
         setAuthError(error instanceof Error ? error : new Error('Unknown auth error'));
         setIsLoading(false);
       }
@@ -237,14 +332,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         stabilityTimeoutRef.current = null;
       }
       processingAuthChangeRef.current = false;
+      authStateRef.authStage = 'initializing';
     };
   }, [navigate, user, session]); // Update dependencies to include user and session
 
   // Auth methods
   const signIn = async (email: string, password: string) => {
     try {
+      logAuth("Beginning sign in process");
       setIsLoading(true);
       setAuthError(null);
+      
+      // Lock auth state during sign in
+      authStateRef.isAuthLocked = true;
       
       // Clean up existing auth state
       cleanupAuthState();
@@ -254,7 +354,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Continue even if this fails
-        console.log("Global sign out failed, continuing:", err);
+        logAuth("Global sign out failed, continuing:", err);
       }
       
       const result = await supabase.auth.signInWithPassword({ email, password });
@@ -262,27 +362,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (result.error) {
         setAuthError(result.error);
         toast.error("Sign in failed: " + result.error.message);
+        logAuth("Sign in failed:", result.error);
       } else {
         toast.success("Signed in successfully!");
+        logAuth("Sign in successful, session established");
         // Auth state will be updated by onAuthStateChange listener
       }
       
       return result;
     } catch (error: any) {
-      console.error("Sign in error:", error);
+      logAuth("Sign in error:", error);
       setAuthError(error);
       toast.error("An unexpected error occurred during sign in");
       return { error, data: null };
     } finally {
       // Don't set isLoading to false here - let the auth state change handler do it
       // This prevents flickering during navigation
+      authStateRef.isAuthLocked = false;
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
+      logAuth("Beginning sign up process");
       setIsLoading(true);
       setAuthError(null);
+      
+      // Lock auth state during sign up
+      authStateRef.isAuthLocked = true;
       
       cleanupAuthState();
       
@@ -295,39 +402,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (result.error) {
+        logAuth("Sign up failed:", result.error);
         setAuthError(result.error);
         toast.error("Sign up failed: " + result.error.message);
+      } else {
+        logAuth("Sign up successful");
       }
       
       return result;
     } catch (error: any) {
-      console.error("Sign up error:", error);
+      logAuth("Sign up error:", error);
       setAuthError(error);
       toast.error("An unexpected error occurred during sign up");
       return { error, data: null };
     } finally {
       setIsLoading(false);
+      authStateRef.isAuthLocked = false;
     }
   };
 
   const signOut = async () => {
     try {
+      logAuth("Beginning sign out process");
       setIsLoading(true);
+      
+      // Lock auth state during sign out
+      authStateRef.isAuthLocked = true;
+      
       cleanupAuthState();
       
       // Clear session storage auth flags
       sessionStorage.removeItem('auth:isAuthenticated');
       sessionStorage.removeItem('auth:userId');
+      sessionStorage.removeItem('auth:lastChecked');
       
       await supabase.auth.signOut({ scope: 'global' });
+      logAuth("Sign out successful");
       
       // Force a page reload after sign out to ensure clean state
       setTimeout(() => {
+        authStateRef.isAuthLocked = false;
         window.location.href = '/auth';
-      }, 100);
+      }, 300);
     } catch (error) {
-      console.error("Sign out error:", error);
+      logAuth("Sign out error:", error);
       // If error during signout, force a clean state anyway
+      authStateRef.isAuthLocked = false;
       window.location.href = '/auth';
     }
   };

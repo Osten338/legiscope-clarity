@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { useDashboardData } from "@/components/dashboard/useDashboardData";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
@@ -10,8 +11,17 @@ import { ChatWidget } from "@/components/compliance/ChatWidget";
 import { useAuth } from "@/context/AuthContext";
 
 const Dashboard = () => {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { savedRegulations, isLoading: dataLoading } = useDashboardData();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
+  // Set a flag after initial render to avoid flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Calculate stats only if data is available
   const upcomingDeadlines = savedRegulations?.filter(reg => 
@@ -24,12 +34,13 @@ const Dashboard = () => {
 
   const totalRegulations = savedRegulations?.length || 0;
   
-  // Show loading state if either auth or data is loading
-  if (authLoading || dataLoading) {
+  // Show loading state if either auth or data is loading - but only after initialization is done
+  if ((authLoading || dataLoading || isInitialLoad) && (!isAuthenticated || !user)) {
     return (
       <TopbarLayout>
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
+        <div className="flex flex-col items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary mb-4"></div>
+          <p className="text-sm text-muted-foreground">Loading dashboard data...</p>
         </div>
       </TopbarLayout>
     );

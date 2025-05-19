@@ -35,7 +35,7 @@ const ProtectedRoute = () => {
       return;
     }
     
-    // If we've completed loading and there's no user, wait a short grace period 
+    // If we've completed loading and there's no user, wait a longer grace period 
     // before redirecting to prevent redirect loops during authentication
     const gracePeriodTimer = setTimeout(() => {
       // Double-check using the sync method before redirecting
@@ -44,7 +44,7 @@ const ProtectedRoute = () => {
         setShouldRedirect(true);
       }
       setIsCheckingAuth(false);
-    }, 600); // Grace period to wait for auth state to stabilize
+    }, 1500); // Increased grace period to wait for auth state to stabilize
     
     return () => {
       clearTimeout(gracePeriodTimer);

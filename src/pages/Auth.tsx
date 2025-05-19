@@ -14,6 +14,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLoading, isAuthenticated, signIn, signUp } = useAuth();
@@ -21,20 +22,33 @@ const Auth = () => {
   // Get the intended destination from location state, defaulting to dashboard
   const from = location.state?.from || "/dashboard";
   
+  // For debugging
+  const logDebug = (message: string, data?: any) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Auth] ${message}`, data ? data : '');
+    }
+  };
+  
   useEffect(() => {
     // If user is already signed in and we're done loading, redirect
-    if (isAuthenticated && user && !isLoading) {
-      console.log("Auth page: User is signed in, redirecting to", from);
-      navigate(from, { replace: true });
+    if (isAuthenticated && user && !isLoading && !isRedirecting) {
+      logDebug("Auth page: User is signed in, redirecting to", from);
+      setIsRedirecting(true);
+      
+      // Use setTimeout to ensure state updates have propagated
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 300);
     }
-  }, [user, isLoading, from, navigate, isAuthenticated]);
+  }, [user, isLoading, from, navigate, isAuthenticated, isRedirecting]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (loading) return;
+    if (loading || isRedirecting) return;
     
     setLoading(true);
+    logDebug(`Starting ${isSignUp ? 'signup' : 'signin'} process`);
     
     try {
       if (isSignUp) {
@@ -43,15 +57,18 @@ const Auth = () => {
         if (error) throw error;
         
         toast.success("Check your email to confirm your account");
+        logDebug("Signup successful, check email message shown");
       } else {
         const { error } = await signIn(email, password);
         
         if (error) throw error;
         
         toast.success("Successfully signed in!");
+        logDebug("Sign in successful");
         // We don't need to navigate here as the AuthContext will handle it
       }
     } catch (error: any) {
+      logDebug("Authentication error:", error);
       toast.error(error.message || "Authentication failed");
     } finally {
       setLoading(false);
@@ -113,7 +130,7 @@ const Auth = () => {
 
           <Button 
             type="submit" 
-            disabled={loading} 
+            disabled={loading || isRedirecting} 
             className="w-full"
           >
             {loading ? "Processing..." : isSignUp ? "Sign Up" : "Sign In"}
@@ -125,6 +142,7 @@ const Auth = () => {
             type="button" 
             onClick={() => setIsSignUp(!isSignUp)} 
             className="text-primary hover:text-primary-dark text-sm"
+            disabled={loading || isRedirecting}
           >
             {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
           </button>
