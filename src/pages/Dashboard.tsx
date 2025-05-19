@@ -10,11 +10,10 @@ import { UrgentTasksTable } from "@/components/dashboard/UrgentTasksTable";
 import { ChatWidget } from "@/components/compliance/ChatWidget";
 
 const Dashboard = () => {
-  const { savedRegulations, isLoading, refetch } = useDashboardData();
+  const { savedRegulations, isLoading } = useDashboardData();
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  // Remove the useEffect with refetch to prevent unnecessary API calls
+  // The useDashboardData hook will handle fetching data with appropriate caching
 
   const upcomingDeadlines = savedRegulations?.filter(reg => 
     reg.next_review_date && new Date(reg.next_review_date) > new Date()

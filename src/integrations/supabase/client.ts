@@ -17,7 +17,7 @@ export const supabase = createClient<Database>(
       storage: localStorage,
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true, // Enable auto detection of OAuth redirects
+      detectSessionInUrl: false, // Disable auto detection of OAuth redirects to prevent loops
       flowType: 'pkce', // Use PKCE flow for more security
       debug: false, // Disable debug logs in production
       // Add a small delay between concurrent auth operations to prevent race conditions

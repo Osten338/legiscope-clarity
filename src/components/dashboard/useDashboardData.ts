@@ -76,7 +76,7 @@ export const useDashboardData = () => {
         throw err;
       }
     },
-    staleTime: 10000,
+    staleTime: 5 * 60 * 1000, // 5 minutes - increase stale time to reduce refetching
   });
 
   return {
@@ -86,4 +86,3 @@ export const useDashboardData = () => {
     refetch
   };
 };
-

@@ -23,6 +23,9 @@ type AuthContextType = {
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Global initialization flag to prevent multiple initializations
+let isAuthInitialized = false;
+
 // Utility function to clean up auth state
 const cleanupAuthState = () => {
   // Remove standard auth tokens
@@ -49,15 +52,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const authStateRef = useRef<boolean>(false);
   const authTimeoutRef = useRef<number | null>(null);
   const lastCheckTimeRef = useRef<number>(0);
+  const processingAuthChangeRef = useRef<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If already initialized, don't do it again
+    if (isAuthInitialized) {
+      console.log("AuthProvider: Already initialized globally, skipping");
+      setIsLoading(false);
+      return;
+    }
+    
     console.log("AuthProvider: initializing auth state");
+    isAuthInitialized = true;
     const now = Date.now();
     
     // Avoid frequent re-initializations
-    if (now - lastCheckTimeRef.current < 5000) {
-      console.log("AuthProvider: skipping initialization, last check was recent");
+    if (now - lastCheckTimeRef.current < 10000) {
+      console.log("AuthProvider: skipping initialization, last check was very recent");
       return;
     }
     
@@ -74,19 +86,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("AuthProvider: Auth state changed:", event);
         
         // Prevent multiple rapid state changes
-        if (authStateRef.current) {
+        if (processingAuthChangeRef.current) {
           console.log("AuthProvider: Already processing auth change, skipping");
           return;
         }
         
-        authStateRef.current = true;
+        processingAuthChangeRef.current = true;
         
         // Clear any existing timeout
         if (authTimeoutRef.current) {
           window.clearTimeout(authTimeoutRef.current);
         }
         
-        // Use a 1000ms timeout to debounce state updates
+        // Use a longer timeout to debounce state updates
         authTimeoutRef.current = window.setTimeout(() => {
           if (currentSession?.user?.id !== user?.id || !currentSession !== !session) {
             console.log("AuthProvider: User or session changed, updating state");
@@ -95,18 +107,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           
           setIsLoading(false);
-          authStateRef.current = false;
+          processingAuthChangeRef.current = false;
           console.log("AuthProvider: Auth state updated:", !!currentSession);
           
           // Handle navigation on sign in/out events
           if (event === 'SIGNED_IN' && currentSession) {
             // Add a small delay for redirect
-            setTimeout(() => navigate('/dashboard', { replace: true }), 100);
+            setTimeout(() => navigate('/dashboard', { replace: true }), 200);
           } else if (event === 'SIGNED_OUT') {
             // Redirect to auth on sign out
             navigate('/auth', { replace: true });
           }
-        }, 1000);
+        }, 2000); // Increased debounce timeout
       }
     );
 
@@ -116,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data } = await supabase.auth.getSession();
         console.log("AuthProvider: Current session:", data.session ? "exists" : "none");
         
-        if (!authStateRef.current) {
+        if (!processingAuthChangeRef.current) {
           // Only update state if we're not already processing an auth change
           if (data.session?.user?.id !== user?.id || !data.session !== !session) {
             setSession(data.session);
@@ -139,9 +151,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.clearTimeout(authTimeoutRef.current);
         authTimeoutRef.current = null;
       }
-      authStateRef.current = false;
+      processingAuthChangeRef.current = false;
     };
-  }, []); // Dependency array intentionally empty to run only on component mount/unmount
+  }, [navigate]); // Add navigate to dependency array
 
   // Auth methods
   const signIn = async (email: string, password: string) => {

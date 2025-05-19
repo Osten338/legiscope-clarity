@@ -22,6 +22,7 @@ const ProtectedRoute = () => {
   // If not authenticated, redirect to auth page with return URL
   if (!user) {
     console.log("ProtectedRoute: Not authenticated, redirecting to /auth", location.pathname);
+    // Include the current path in state so we can redirect back after login
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 

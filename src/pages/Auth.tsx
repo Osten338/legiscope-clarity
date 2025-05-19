@@ -49,6 +49,7 @@ const Auth = () => {
         if (error) throw error;
         
         toast.success("Successfully signed in!");
+        // We don't need to navigate here as the AuthContext will handle it
       }
     } catch (error: any) {
       toast.error(error.message || "Authentication failed");
@@ -57,8 +58,8 @@ const Auth = () => {
     }
   };
 
-  // Show loading while checking authentication
-  if (isLoading) {
+  // Don't show loading indicator during initial load to avoid flicker
+  if (isLoading && !loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
