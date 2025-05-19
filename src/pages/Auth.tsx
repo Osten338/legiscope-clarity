@@ -38,7 +38,7 @@ const Auth = () => {
   const authCheckCompleted = useRef(false);
   const authInProgress = useRef(false);
   
-  // Get the intended destination from location state, defaulting to assessment
+  // Get the intended destination from location state, defaulting to dashboard
   const from = location.state?.from || "/dashboard";
   
   useEffect(() => {
@@ -56,8 +56,8 @@ const Auth = () => {
         const { data } = await supabase.auth.getSession();
         
         if (data.session) {
-          console.log("Auth page: Session found, no need to login");
-          // AuthGuard will handle the redirect, we just need to finish checking
+          console.log("Auth page: Session found, redirecting to", from);
+          navigate(from, { replace: true });
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -69,7 +69,23 @@ const Auth = () => {
     
     checkSession();
     
-    // We don't need an auth listener here since AuthGuard will handle that
+    // Set up auth state listener for navigation after login
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, !!session);
+      
+      if (event === 'SIGNED_IN' && session) {
+        toast.success("Successfully signed in!");
+        
+        // Add a small delay for the redirect to ensure everything is updated
+        setTimeout(() => {
+          navigate(from, { replace: true });
+        }, 500);
+      }
+    });
+    
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, [from, navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -115,8 +131,8 @@ const Auth = () => {
         if (error) throw error;
         
         if (data.user) {
-          toast.success("Successfully signed in!");
-          // Let AuthGuard handle the redirect based on the session state
+          // Toast is shown in the onAuthStateChange handler
+          console.log("Sign-in successful, waiting for redirect");
         }
       }
     } catch (error: any) {
@@ -162,6 +178,7 @@ const Auth = () => {
               value={email} 
               onChange={e => setEmail(e.target.value)} 
               required 
+              className="bg-yellow-50"
             />
           </div>
 
@@ -174,13 +191,14 @@ const Auth = () => {
               value={password} 
               onChange={e => setPassword(e.target.value)} 
               required 
+              className="bg-yellow-50"
             />
           </div>
 
           <Button 
             type="submit" 
             disabled={loading} 
-            className="w-full bg-sage-600 hover:bg-sage-700 text-slate-900 bg-zinc-400 hover:bg-zinc-300"
+            className="w-full"
           >
             {loading ? "Processing..." : isSignUp ? "Sign Up" : "Sign In"}
           </Button>
@@ -190,7 +208,7 @@ const Auth = () => {
           <button 
             type="button" 
             onClick={() => setIsSignUp(!isSignUp)} 
-            className="text-sage-600 hover:text-sage-700 text-sm"
+            className="text-primary hover:text-primary-dark text-sm"
           >
             {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
           </button>

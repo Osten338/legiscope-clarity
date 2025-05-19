@@ -26,10 +26,12 @@ const AuthGuard = () => {
       window.clearTimeout(redirectTimeoutRef.current);
     }
     
+    console.log("AuthGuard mounted/updated, checking auth state");
+    
     // Set up auth state listener first - with debounce mechanism
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        console.log("Auth state changed:", event);
+        console.log("AuthGuard: Auth state changed:", event);
         
         // Prevent multiple rapid state changes
         if (processingAuthChange.current) {
@@ -48,7 +50,7 @@ const AuthGuard = () => {
           setIsAuthenticated(!!currentSession);
           setSession(currentSession);
           processingAuthChange.current = false;
-          console.log("Auth state updated:", !!currentSession);
+          console.log("AuthGuard: Auth state updated:", !!currentSession);
         }, 300);
       }
     );
@@ -57,7 +59,7 @@ const AuthGuard = () => {
     const checkAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
-        console.log("Current session:", data.session ? "exists" : "none");
+        console.log("AuthGuard: Current session:", data.session ? "exists" : "none");
         
         if (!processingAuthChange.current) {
           // Only update state if we're not already processing an auth change
@@ -98,21 +100,18 @@ const AuthGuard = () => {
 
   // If not authenticated, redirect to auth page with return URL
   if (!isAuthenticated && !location.pathname.includes('/auth')) {
-    console.log("Not authenticated, redirecting to /auth");
-    
-    // Use a small delay for the redirect to prevent potential race conditions
-    // We don't need to store this timeout as the component will unmount
+    console.log("AuthGuard: Not authenticated, redirecting to /auth", location.pathname);
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 
   // If authenticated but on auth page, redirect to intended destination
   if (isAuthenticated && location.pathname === '/auth') {
-    console.log("Already authenticated, checking redirect destination");
+    console.log("AuthGuard: Already authenticated, checking redirect destination");
     
     // Prevent immediate redirect to avoid potential loops
-    // Use the state from location if available, otherwise redirect to assessment
+    // Use the state from location if available, otherwise redirect to dashboard
     const redirectTo = location.state?.from || "/dashboard";
-    console.log("Redirecting to:", redirectTo);
+    console.log("AuthGuard: Redirecting to:", redirectTo);
     
     return <Navigate to={redirectTo} replace />;
   }
