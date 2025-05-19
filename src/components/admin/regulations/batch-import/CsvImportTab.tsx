@@ -26,6 +26,7 @@ export const CsvImportTab = ({ onImport, isImporting }: CsvImportTabProps) => {
     
     Papa.parse(file, {
       header: true, // Treat the first row as headers
+      delimiter: undefined, // Auto-detect delimiter (will work with both commas and semicolons)
       complete: (results) => {
         try {
           console.log("CSV parsing results:", results);
@@ -133,3 +134,4 @@ export const CsvImportTab = ({ onImport, isImporting }: CsvImportTabProps) => {
     </div>
   );
 };
+
