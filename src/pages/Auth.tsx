@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,28 +32,66 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const authCheckCompleted = useRef(false);
   
   // Get the intended destination from location state, defaulting to assessment
   const from = location.state?.from || "/assessment";
   
   useEffect(() => {
+    // Only check session once to prevent loops
+    if (authCheckCompleted.current) {
+      return;
+    }
+    
     // Check if user is already signed in
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (data.session) {
-        // Already authenticated, redirect to intended destination
-        navigate(from);
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        // Mark that we've completed the check
+        authCheckCompleted.current = true;
+        
+        if (data.session) {
+          // Short delay to prevent race conditions with AuthGuard
+          setTimeout(() => {
+            navigate(from, { replace: true });
+          }, 100);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+      } finally {
+        // Always update this state to stop showing loading
+        setIsCheckingAuth(false);
       }
     };
     
     checkSession();
+    
+    // Set up one-time auth listener for this component
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          // Add slight delay to prevent race conditions
+          setTimeout(() => {
+            navigate(from, { replace: true });
+          }, 100);
+        }
+      }
+    );
+    
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
   }, [from, navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (loading) return;
+    
     setLoading(true);
     
     try {
@@ -65,6 +103,7 @@ const Auth = () => {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Continue even if this fails
+        console.log("Global sign out failed, continuing:", err);
       }
       
       if (isSignUp) {
@@ -76,6 +115,7 @@ const Auth = () => {
         if (error) throw error;
         
         toast.success("Check your email to confirm your account");
+        setLoading(false);
       } else {
         const { error, data } = await supabase.auth.signInWithPassword({
           email,
@@ -86,18 +126,23 @@ const Auth = () => {
         
         if (data.user) {
           toast.success("Successfully signed in!");
-          // Use setTimeout to ensure the auth state is fully updated
-          setTimeout(() => {
-            navigate(from);
-          }, 100);
+          // No need to navigate here, the auth state listener will handle it
         }
       }
     } catch (error: any) {
       toast.error(error.message);
-    } finally {
       setLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 

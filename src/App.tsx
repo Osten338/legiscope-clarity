@@ -1,7 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import AuthGuard from "@/components/auth/AuthGuard";
 
@@ -9,7 +9,6 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Dashboard from "@/pages/Dashboard";
-import Login from "@/pages/Login";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import Assessment from "@/pages/Assessment"; 
@@ -28,7 +27,14 @@ import RegulationsAdmin from "@/pages/Admin/RegulationsAdmin";
 import ChecklistEditor from "@/pages/Admin/ChecklistEditor";
 
 // Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30000,
+    },
+  },
+});
 
 function App() {
   // Apply saved theme on app load
@@ -49,7 +55,6 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/login" element={<Login />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/documentation" element={<Documentation />} />
           
