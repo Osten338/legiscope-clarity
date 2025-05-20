@@ -29,7 +29,6 @@ interface RawChecklistItem {
   department?: string | null;
   parent_id?: string | null;
   is_subtask?: boolean | null;
-  subtasks?: any[];
 }
 
 export const useComplianceChecklist = () => {
@@ -89,16 +88,17 @@ export const useComplianceChecklist = () => {
 
         const regulationsWithItems = await Promise.all(
           regulations.map(async (regulation) => {
-            // First, get all checklist items for this regulation
-            const { data: allChecklistItems, error: itemsError } = await supabase
+            // First, get all main checklist items (not subtasks) for this regulation
+            const { data: mainItems, error: mainItemsError } = await supabase
               .from("checklist_items")
               .select("*")
-              .eq("regulation_id", regulation.id);
+              .eq("regulation_id", regulation.id)
+              .eq("is_subtask", false);
 
-            if (itemsError) {
+            if (mainItemsError) {
               console.error(
-                `Error fetching checklist items for regulation ${regulation.id}:`,
-                itemsError
+                `Error fetching main checklist items for regulation ${regulation.id}:`,
+                mainItemsError
               );
               return {
                 ...regulation,
@@ -106,15 +106,42 @@ export const useComplianceChecklist = () => {
               };
             }
 
+            // Get all subtasks for this regulation
+            const { data: subtasks, error: subtasksError } = await supabase
+              .from("checklist_items")
+              .select("*")
+              .eq("regulation_id", regulation.id)
+              .eq("is_subtask", true);
+
+            if (subtasksError) {
+              console.error(
+                `Error fetching subtasks for regulation ${regulation.id}:`,
+                subtasksError
+              );
+            }
+
+            // Group subtasks by parent_id
+            const subtasksByParent: Record<string, RawChecklistItem[]> = {};
+            (subtasks || []).forEach(subtask => {
+              if (subtask.parent_id) {
+                if (!subtasksByParent[subtask.parent_id]) {
+                  subtasksByParent[subtask.parent_id] = [];
+                }
+                subtasksByParent[subtask.parent_id].push(subtask);
+              }
+            });
+
             // Get user responses for these checklist items
+            const allItemIds = [
+              ...(mainItems || []).map(item => item.id),
+              ...(subtasks || []).map(subtask => subtask.id)
+            ];
+
             const { data: responses, error: responsesError } = await supabase
               .from("checklist_item_responses")
               .select("*")
               .eq("user_id", user.id)
-              .in(
-                "checklist_item_id",
-                allChecklistItems?.map((item) => item.id) || []
-              );
+              .in("checklist_item_id", allItemIds);
 
             if (responsesError) {
               console.error(
@@ -123,41 +150,22 @@ export const useComplianceChecklist = () => {
               );
             }
 
-            // Add is_subtask and parent_id fields with type assertion
-            const typedItems = (allChecklistItems as RawChecklistItem[] || []).map(item => ({
-              ...item,
-              is_subtask: !!item.is_subtask,
-              parent_id: item.parent_id || null
-            }));
-
-            // Identify main tasks (not subtasks) and subtasks
-            const mainTasks = typedItems.filter(item => {
-              // Ensure is_subtask exists and is a boolean, default to false if undefined
-              return item.is_subtask === false || item.is_subtask === undefined || item.is_subtask === null;
-            });
-            
-            const subtasks = typedItems.filter(item => {
-              // Ensure is_subtask is explicitly true
-              return item.is_subtask === true;
-            });
-            
             // Map responses to checklist items
-            const itemsWithResponses: ChecklistItemType[] = mainTasks.map((item) => {
+            const itemsWithResponses: ChecklistItemType[] = (mainItems || []).map((item) => {
               const response = responses?.find(
                 (r) => r.checklist_item_id === item.id
               );
               
               // Find subtasks for this main task
-              const itemSubtasks = subtasks.filter(
-                subtask => subtask.parent_id === item.id
-              ).map(subtask => {
+              const itemSubtasks: SubtaskType[] = (subtasksByParent[item.id] || []).map(subtask => {
                 const subtaskResponse = responses?.find(
                   (r) => r.checklist_item_id === subtask.id
                 );
                 
                 return {
-                  ...subtask,
-                  is_subtask: true, // Ensure is_subtask is explicitly set
+                  id: subtask.id,
+                  description: subtask.description,
+                  is_subtask: true,
                   response: subtaskResponse
                     ? {
                         status: subtaskResponse.status,
@@ -169,8 +177,7 @@ export const useComplianceChecklist = () => {
               
               return {
                 ...item,
-                is_subtask: false, // Ensure is_subtask is explicitly set
-                parent_id: item.parent_id || null, // Ensure parent_id exists, even if null
+                is_subtask: false,
                 subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
                 response: response
                   ? {

@@ -65,6 +65,7 @@ export interface ChecklistItemType extends BaseChecklistItem {
   best_practices?: string | null;
   department?: string | null;
   parent_id?: string | null;
-  is_subtask: boolean | null;
+  is_subtask: boolean;
   subtasks?: SubtaskType[];
 }
+

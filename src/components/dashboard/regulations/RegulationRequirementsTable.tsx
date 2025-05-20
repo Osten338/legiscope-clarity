@@ -31,21 +31,57 @@ export const RegulationRequirementsTable = ({
       
       try {
         if (regulation && regulation.regulations) {
-          const { data: checklistItems, error } = await supabase
+          console.log("Fetching checklist items for regulation:", regulation.regulations.id);
+          
+          // First fetch parent checklist items (not subtasks)
+          const { data: mainItems, error: mainError } = await supabase
             .from("checklist_items")
             .select("*")
             .eq("regulation_id", regulation.regulations.id)
             .eq("is_subtask", false);
             
-          if (error) {
-            console.error("Error fetching checklist items:", error);
-            throw error;
+          if (mainError) {
+            console.error("Error fetching main checklist items:", mainError);
+            throw mainError;
           }
           
-          // Transform Supabase data to match our ChecklistItemType
-          const transformedData: ChecklistItemType[] = (checklistItems || []).map((item: any) => {
-            // Safely handle subtasks by ensuring it's an array
-            const subtasksArray = Array.isArray(item.subtasks) ? item.subtasks : [];
+          console.log("Main items fetched:", mainItems);
+          
+          // Fetch subtasks in a separate query
+          const { data: subtaskItems, error: subtaskError } = await supabase
+            .from("checklist_items")
+            .select("*")
+            .eq("regulation_id", regulation.regulations.id)
+            .eq("is_subtask", true);
+            
+          if (subtaskError) {
+            console.error("Error fetching subtasks:", subtaskError);
+            throw subtaskError;
+          }
+          
+          console.log("Subtask items fetched:", subtaskItems);
+          
+          // Group subtasks by parent_id
+          const subtasksByParent: Record<string, any[]> = {};
+          (subtaskItems || []).forEach(subtask => {
+            if (subtask.parent_id) {
+              if (!subtasksByParent[subtask.parent_id]) {
+                subtasksByParent[subtask.parent_id] = [];
+              }
+              subtasksByParent[subtask.parent_id].push(subtask);
+            }
+          });
+          
+          // Map main items with their subtasks
+          const transformedData: ChecklistItemType[] = (mainItems || []).map(item => {
+            const itemSubtasks = subtasksByParent[item.id] || [];
+            
+            // Transform subtasks into SubtaskType
+            const mappedSubtasks: SubtaskType[] = itemSubtasks.map(subtask => ({
+              id: subtask.id,
+              description: subtask.description,
+              is_subtask: true
+            }));
             
             return {
               id: item.id || '',
@@ -58,16 +94,12 @@ export const RegulationRequirementsTable = ({
               best_practices: item.best_practices || null,
               department: item.department || null,
               parent_id: item.parent_id || null,
-              is_subtask: item.is_subtask || false,
-              // Map subtasks array to SubtaskType objects
-              subtasks: subtasksArray.map((subtask: any): SubtaskType => ({
-                id: subtask.id || '',
-                description: subtask.description || '',
-                is_subtask: true
-              }))
+              is_subtask: false,
+              subtasks: mappedSubtasks.length > 0 ? mappedSubtasks : undefined
             };
           });
           
+          console.log("Transformed data with subtasks:", transformedData);
           setRequirementItems(transformedData);
         }
       } catch (error) {
@@ -89,6 +121,11 @@ export const RegulationRequirementsTable = ({
               { 
                 id: "sub-1", 
                 description: "Implement encryption for data at rest",
+                is_subtask: true
+              },
+              {
+                id: "sub-2",
+                description: "Implement encryption for data in transit",
                 is_subtask: true
               }
             ]
@@ -166,7 +203,7 @@ export const RegulationRequirementsTable = ({
           {requirementItems.map((item, index) => (
             <>
               <TableRow 
-                key={item.id}
+                key={`row-${item.id}`}
                 className={cn(
                   "transition-colors cursor-pointer",
                   index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"
@@ -204,7 +241,7 @@ export const RegulationRequirementsTable = ({
               </TableRow>
               
               {expandedRows[item.id] && (
-                <TableRow className={index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"}>
+                <TableRow key={`expanded-${item.id}`} className={index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"}>
                   <TableCell colSpan={6} className="p-0">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
                       <div className="space-y-3">
@@ -224,13 +261,15 @@ export const RegulationRequirementsTable = ({
                         
                         {item.subtasks && item.subtasks.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Subtasks:</h4>
-                            <ul className="list-disc pl-5 mt-1 space-y-1">
-                              {Array.isArray(item.subtasks) ? item.subtasks.map((subtask) => (
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                              Subtasks <Badge className="bg-blue-100 text-blue-600 border-0">{item.subtasks.length}</Badge>
+                            </h4>
+                            <ul className="list-disc pl-5 mt-2 space-y-2">
+                              {item.subtasks.map((subtask) => (
                                 <li key={subtask.id} className="text-sm text-gray-600 dark:text-gray-400">
                                   {subtask.description}
                                 </li>
-                              )) : null}
+                              ))}
                             </ul>
                           </div>
                         )}
