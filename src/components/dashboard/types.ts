@@ -42,14 +42,14 @@ export type RegulationListItem = {
   };
 };
 
-// Define SubtaskType independently to avoid circular references
+// Define a plain subtask type without circular references
 export interface SubtaskType {
   id: string;
   description: string;
   is_subtask: boolean;
 }
 
-// Main checklist item type
+// Main checklist item type that references the plain subtask type
 export interface ChecklistItemType {
   id: string;
   description: string;
@@ -62,5 +62,6 @@ export interface ChecklistItemType {
   department?: string | null;
   parent_id?: string | null;
   is_subtask: boolean | null;
+  // This now references the plain subtask type, breaking the circular reference
   subtasks?: SubtaskType[];
 }

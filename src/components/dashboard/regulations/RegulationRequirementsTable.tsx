@@ -1,4 +1,3 @@
-
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { RegulationListItem, ChecklistItemType, SubtaskType } from "../types";
 import { useEffect, useState } from "react";
@@ -47,7 +46,7 @@ export const RegulationRequirementsTable = ({
             // Type assertion to access properties we know exist in the database
             const dbItem = item as any;
             
-            const convertedItem: ChecklistItemType = {
+            return {
               id: dbItem.id || '',
               description: dbItem.description || '',
               importance: dbItem.importance || null,
@@ -67,7 +66,6 @@ export const RegulationRequirementsTable = ({
                   }))
                 : []
             };
-            return convertedItem;
           });
           
           setRequirementItems(transformedData);
