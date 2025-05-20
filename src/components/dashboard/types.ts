@@ -1,5 +1,4 @@
 
-
 export type ChecklistItem = {
   id: string;
   description: string;
@@ -43,19 +42,37 @@ export type RegulationListItem = {
   };
 };
 
-// Define a base type for common properties
+// Define type for raw checklist items from database
+export interface RawChecklistItem {
+  id: string;
+  description: string;
+  importance?: number | null;
+  category?: string | null;
+  estimated_effort?: string | null;
+  expert_verified?: boolean | null;
+  task?: string | null;
+  best_practices?: string | null;
+  department?: string | null;
+  parent_id?: string | null;
+  is_subtask?: boolean;
+  regulation_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Define a base interface for checklist items
 export interface BaseChecklistItem {
   id: string;
   description: string;
   is_subtask: boolean;
 }
 
-// SubtaskType extends BaseChecklistItem but doesn't reference ChecklistItemType
+// Subtask type - simpler version that doesn't reference the parent
 export interface SubtaskType extends BaseChecklistItem {
   is_subtask: true;
 }
 
-// ChecklistItemType extends BaseChecklistItem and can contain subtasks
+// Main checklist item type with all properties
 export interface ChecklistItemType extends BaseChecklistItem {
   importance?: number | null;
   category?: string | null;
@@ -68,4 +85,3 @@ export interface ChecklistItemType extends BaseChecklistItem {
   is_subtask: boolean;
   subtasks?: SubtaskType[];
 }
-

@@ -1,8 +1,9 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ChecklistItemType, SubtaskType, BaseChecklistItem } from "@/components/dashboard/types";
+import { ChecklistItemType, SubtaskType, RawChecklistItem } from "@/components/dashboard/types";
 
 export interface RegulationType {
   id: string;
@@ -11,24 +12,6 @@ export interface RegulationType {
   motivation: string;
   requirements: string;
   checklist_items: ChecklistItemType[];
-}
-
-// Define an interface that matches what comes from the database
-interface RawChecklistItem {
-  id: string;
-  regulation_id: string | null;
-  created_at: string;
-  updated_at: string;
-  importance: number | null;
-  description: string;
-  category: string | null;
-  estimated_effort: string | null;
-  expert_verified: boolean | null;
-  task?: string | null;
-  best_practices?: string | null;
-  department?: string | null;
-  parent_id?: string | null;
-  is_subtask?: boolean | null;
 }
 
 export const useComplianceChecklist = () => {

@@ -1,6 +1,6 @@
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { RegulationListItem, ChecklistItemType, SubtaskType, BaseChecklistItem } from "../types";
+import { RegulationListItem, ChecklistItemType, SubtaskType, RawChecklistItem } from "../types";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +62,7 @@ export const RegulationRequirementsTable = ({
           console.log("Subtask items fetched:", subtaskItems);
           
           // Group subtasks by parent_id
-          const subtasksByParent: Record<string, any[]> = {};
+          const subtasksByParent: Record<string, RawChecklistItem[]> = {};
           (subtaskItems || []).forEach(subtask => {
             if (subtask.parent_id) {
               if (!subtasksByParent[subtask.parent_id]) {
@@ -78,8 +78,8 @@ export const RegulationRequirementsTable = ({
             
             // Transform subtasks into SubtaskType
             const mappedSubtasks: SubtaskType[] = itemSubtasks.map(subtask => ({
-              id: subtask.id,
-              description: subtask.description,
+              id: subtask.id || '',
+              description: subtask.description || '',
               is_subtask: true
             }));
             
