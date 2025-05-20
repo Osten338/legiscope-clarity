@@ -1,4 +1,5 @@
 
+
 export type ChecklistItem = {
   id: string;
   description: string;
@@ -42,17 +43,20 @@ export type RegulationListItem = {
   };
 };
 
-// Define subtask type first, with no reference to ChecklistItemType
-export interface SubtaskType {
+// Define a base type for common properties
+export interface BaseChecklistItem {
   id: string;
   description: string;
   is_subtask: boolean;
 }
 
-// Then define the main ChecklistItemType that can include subtasks
-export interface ChecklistItemType {
-  id: string;
-  description: string;
+// SubtaskType extends BaseChecklistItem but doesn't reference ChecklistItemType
+export interface SubtaskType extends BaseChecklistItem {
+  is_subtask: true;
+}
+
+// ChecklistItemType extends BaseChecklistItem and can contain subtasks
+export interface ChecklistItemType extends BaseChecklistItem {
   importance?: number | null;
   category?: string | null;
   estimated_effort?: string | null;

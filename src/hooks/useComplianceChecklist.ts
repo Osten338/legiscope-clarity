@@ -1,27 +1,8 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-
-export interface ChecklistItemType {
-  id: string;
-  description: string;
-  importance?: number;
-  category?: string;
-  estimated_effort?: string;
-  expert_verified?: boolean;
-  task?: string;
-  best_practices?: string;
-  department?: string;
-  parent_id?: string | null;
-  is_subtask: boolean;
-  response?: {
-    status: 'completed' | 'will_do' | 'will_not_do';
-    justification?: string;
-  };
-  subtasks?: ChecklistItemType[];
-}
+import { ChecklistItemType, SubtaskType, BaseChecklistItem } from "@/components/dashboard/types";
 
 export interface RegulationType {
   id: string;
@@ -183,7 +164,7 @@ export const useComplianceChecklist = () => {
                         justification: subtaskResponse.justification,
                       }
                     : undefined,
-                } as ChecklistItemType;
+                } as SubtaskType;
               });
               
               return {
