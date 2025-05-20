@@ -70,6 +70,10 @@ export interface BaseChecklistItem {
 // Subtask type - simpler version that doesn't reference the parent
 export interface SubtaskType extends BaseChecklistItem {
   is_subtask: true;
+  response?: {
+    status: string;
+    justification?: string;
+  };
 }
 
 // Main checklist item type with all properties
@@ -84,4 +88,8 @@ export interface ChecklistItemType extends BaseChecklistItem {
   parent_id?: string | null;
   is_subtask: boolean;
   subtasks?: SubtaskType[];
+  response?: {
+    status: string;
+    justification?: string;
+  };
 }
