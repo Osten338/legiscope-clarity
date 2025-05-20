@@ -105,7 +105,7 @@ export const useComplianceChecklist = () => {
 
             // Group subtasks by parent_id
             const subtasksByParent: Record<string, RawChecklistItem[]> = {};
-            (subtasks || []).forEach(subtask => {
+            (subtasks || []).forEach((subtask: RawChecklistItem) => {
               if (subtask.parent_id) {
                 if (!subtasksByParent[subtask.parent_id]) {
                   subtasksByParent[subtask.parent_id] = [];
@@ -134,7 +134,7 @@ export const useComplianceChecklist = () => {
             }
 
             // Map responses to checklist items
-            const itemsWithResponses: ChecklistItemType[] = (mainItems || []).map((item) => {
+            const itemsWithResponses: ChecklistItemType[] = (mainItems || []).map((item: RawChecklistItem) => {
               const response = responses?.find(
                 (r) => r.checklist_item_id === item.id
               );
@@ -159,7 +159,16 @@ export const useComplianceChecklist = () => {
               });
               
               return {
-                ...item,
+                id: item.id,
+                description: item.description,
+                importance: item.importance,
+                category: item.category,
+                estimated_effort: item.estimated_effort,
+                expert_verified: item.expert_verified,
+                task: item.task,
+                best_practices: item.best_practices,
+                department: item.department,
+                parent_id: item.parent_id,
                 is_subtask: false,
                 subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
                 response: response

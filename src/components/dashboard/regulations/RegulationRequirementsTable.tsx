@@ -63,7 +63,7 @@ export const RegulationRequirementsTable = ({
           
           // Group subtasks by parent_id
           const subtasksByParent: Record<string, RawChecklistItem[]> = {};
-          (subtaskItems || []).forEach(subtask => {
+          (subtaskItems || []).forEach((subtask: RawChecklistItem) => {
             if (subtask.parent_id) {
               if (!subtasksByParent[subtask.parent_id]) {
                 subtasksByParent[subtask.parent_id] = [];
@@ -73,7 +73,7 @@ export const RegulationRequirementsTable = ({
           });
           
           // Map main items with their subtasks
-          const transformedData: ChecklistItemType[] = (mainItems || []).map(item => {
+          const transformedData: ChecklistItemType[] = (mainItems || []).map((item: RawChecklistItem) => {
             const itemSubtasks = subtasksByParent[item.id] || [];
             
             // Transform subtasks into SubtaskType
