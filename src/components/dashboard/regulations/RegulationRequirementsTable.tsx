@@ -1,3 +1,4 @@
+
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { RegulationListItem, ChecklistItemType, SubtaskType } from "../types";
 import { useEffect, useState } from "react";
@@ -41,21 +42,25 @@ export const RegulationRequirementsTable = ({
             throw error;
           }
           
+          // Transform Supabase data to match our ChecklistItemType
           const transformedData: ChecklistItemType[] = (checklistItems || []).map(item => {
+            // Type assertion to access properties we know exist in the database
+            const dbItem = item as any;
+            
             const convertedItem: ChecklistItemType = {
-              id: item.id,
-              description: item.description || '',
-              importance: item.importance || null,
-              category: item.category || null,
-              estimated_effort: item.estimated_effort || null,
-              expert_verified: item.expert_verified || null,
-              task: item.task || null,
-              best_practices: item.best_practices || null,
-              department: item.department || null,
-              parent_id: item.parent_id || null,
-              is_subtask: item.is_subtask || false,
-              subtasks: Array.isArray(item.subtasks) 
-                ? item.subtasks.map((subtask): SubtaskType => ({
+              id: dbItem.id || '',
+              description: dbItem.description || '',
+              importance: dbItem.importance || null,
+              category: dbItem.category || null,
+              estimated_effort: dbItem.estimated_effort || null,
+              expert_verified: dbItem.expert_verified || null,
+              task: dbItem.task || null,
+              best_practices: dbItem.best_practices || null,
+              department: dbItem.department || null,
+              parent_id: dbItem.parent_id || null,
+              is_subtask: dbItem.is_subtask || false,
+              subtasks: Array.isArray(dbItem.subtasks) 
+                ? dbItem.subtasks.map((subtask: any): SubtaskType => ({
                     id: subtask.id || '',
                     description: subtask.description || '',
                     is_subtask: true

@@ -1,3 +1,4 @@
+
 export type ChecklistItem = {
   id: string;
   description: string;
@@ -9,7 +10,7 @@ export type Regulation = {
   description: string;
   motivation: string;
   requirements: string;
-  checklist_items?: any[];
+  checklist_items?: ChecklistItem[];
   sanctions?: string;
   created_at?: string;
   updated_at?: string;
@@ -41,12 +42,14 @@ export type RegulationListItem = {
   };
 };
 
+// Define SubtaskType independently to avoid circular references
 export interface SubtaskType {
   id: string;
   description: string;
   is_subtask: boolean;
 }
 
+// Main checklist item type
 export interface ChecklistItemType {
   id: string;
   description: string;
