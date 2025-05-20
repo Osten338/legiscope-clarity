@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ChecklistItemType, SubtaskType, RawChecklistItem } from "@/components/dashboard/types";
+import { ChecklistItemType, SubtaskType, RawChecklistItem, ResponseStatus } from "@/components/dashboard/types";
 
 export interface RegulationType {
   id: string;
@@ -151,7 +151,7 @@ export const useComplianceChecklist = () => {
                   is_subtask: true,
                   response: subtaskResponse
                     ? {
-                        status: subtaskResponse.status,
+                        status: subtaskResponse.status as ResponseStatus,
                         justification: subtaskResponse.justification,
                       }
                     : undefined,
@@ -173,7 +173,7 @@ export const useComplianceChecklist = () => {
                 subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
                 response: response
                   ? {
-                      status: response.status,
+                      status: response.status as ResponseStatus,
                       justification: response.justification,
                     }
                   : undefined,
@@ -183,12 +183,12 @@ export const useComplianceChecklist = () => {
             return {
               ...regulation,
               checklist_items: itemsWithResponses || [],
-            };
+            } as RegulationType;
           })
         );
 
         console.log("Fetched regulations with items:", regulationsWithItems);
-        return regulationsWithItems;
+        return regulationsWithItems as RegulationType[];
       } catch (error) {
         console.error("Error in query function:", error);
         throw error;

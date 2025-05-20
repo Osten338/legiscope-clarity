@@ -3,25 +3,7 @@ import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ChecklistOverviewTab } from "./ChecklistOverviewTab";
 import { RegulationTabContent } from "./RegulationTabContent";
-
-interface ChecklistItemType {
-  id: string;
-  description: string;
-  importance?: number;
-  category?: string;
-  estimated_effort?: string;
-  expert_verified?: boolean;
-  task?: string;
-  best_practices?: string;
-  department?: string;
-  parent_id?: string | null;
-  is_subtask: boolean;
-  response?: {
-    status: 'completed' | 'will_do' | 'will_not_do';
-    justification?: string;
-  };
-  subtasks?: ChecklistItemType[];
-}
+import { ChecklistItemType, ResponseStatus } from "@/components/dashboard/types";
 
 interface RegulationType {
   id: string;
