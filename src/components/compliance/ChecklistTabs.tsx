@@ -3,16 +3,8 @@ import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ChecklistOverviewTab } from "./ChecklistOverviewTab";
 import { RegulationTabContent } from "./RegulationTabContent";
-import { ChecklistItemType, ResponseStatus } from "@/components/dashboard/types";
-
-interface RegulationType {
-  id: string;
-  name: string;
-  description: string;
-  motivation: string;
-  requirements: string;
-  checklist_items: ChecklistItemType[];
-}
+import { ChecklistItemType } from "@/components/dashboard/types";
+import { RegulationType } from "@/hooks/useComplianceChecklist";
 
 interface ChecklistTabsProps {
   regulations: RegulationType[];

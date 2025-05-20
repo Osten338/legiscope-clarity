@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChecklistItemType, SubtaskType, RawChecklistItem, ResponseStatus } from "@/components/dashboard/types";
 
+// Define RegulationType separately to avoid circular references
 export interface RegulationType {
   id: string;
   name: string;
@@ -69,6 +70,7 @@ export const useComplianceChecklist = () => {
           throw regulationsError;
         }
 
+        // Use Promise.all with map to process regulations in parallel
         const regulationsWithItems = await Promise.all(
           regulations.map(async (regulation) => {
             // First, get all main checklist items (not subtasks) for this regulation
@@ -180,15 +182,22 @@ export const useComplianceChecklist = () => {
               } as ChecklistItemType;
             });
 
-            return {
-              ...regulation,
+            // Construct the regulation with its checklist items
+            const result: RegulationType = {
+              id: regulation.id,
+              name: regulation.name,
+              description: regulation.description,
+              motivation: regulation.motivation,
+              requirements: regulation.requirements,
               checklist_items: itemsWithResponses || [],
-            } as RegulationType;
+            };
+
+            return result;
           })
         );
 
         console.log("Fetched regulations with items:", regulationsWithItems);
-        return regulationsWithItems as RegulationType[];
+        return regulationsWithItems;
       } catch (error) {
         console.error("Error in query function:", error);
         throw error;
