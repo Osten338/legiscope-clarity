@@ -55,37 +55,45 @@ export const RegulationRequirementsTable = ({
         if (regulation && regulation.regulations) {
           console.log("Fetching checklist items for regulation:", regulation.regulations.id);
           
-          // Use any type to completely bypass Supabase type inference
-          const { data: mainItems, error: mainError } = await supabase
-            .from("checklist_items")
-            .select("*")
-            .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", false) as { data: any[] | null; error: any };
+          // Completely bypass Supabase type inference by using fetch directly
+          const supabaseUrl = "https://vmyzceyvkkcgdbgmbbqf.supabase.co";
+          const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZteXpjZXl2a2tjZ2RiZ21iYnFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwMTYwMzQsImV4cCI6MjA1NDU5MjAzNH0.h804WotC8aLH-3EPBRcE3kWPpwkvfZRkI9o2oQdzkBE";
           
-          if (mainError) {
-            console.error("Error fetching main checklist items:", mainError);
-            throw mainError;
+          // Fetch main items
+          const mainResponse = await fetch(`${supabaseUrl}/rest/v1/checklist_items?regulation_id=eq.${regulation.regulations.id}&is_subtask=eq.false&select=*`, {
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!mainResponse.ok) {
+            throw new Error(`Failed to fetch main items: ${mainResponse.statusText}`);
           }
           
+          const mainItems = await mainResponse.json();
           console.log("Main items fetched:", mainItems);
           
-          // Fetch subtasks separately
-          const { data: subtaskItems, error: subtaskError } = await supabase
-            .from("checklist_items")
-            .select("*")
-            .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", true) as { data: any[] | null; error: any };
+          // Fetch subtasks
+          const subtaskResponse = await fetch(`${supabaseUrl}/rest/v1/checklist_items?regulation_id=eq.${regulation.regulations.id}&is_subtask=eq.true&select=*`, {
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json'
+            }
+          });
           
-          if (subtaskError) {
-            console.error("Error fetching subtasks:", subtaskError);
-            throw subtaskError;
+          if (!subtaskResponse.ok) {
+            throw new Error(`Failed to fetch subtasks: ${subtaskResponse.statusText}`);
           }
           
+          const subtaskItems = await subtaskResponse.json();
           console.log("Subtask items fetched:", subtaskItems);
           
           // Group subtasks by parent_id
           const subtasksByParent: Record<string, any[]> = {};
-          (subtaskItems || []).forEach((subtask: any) => {
+          subtaskItems.forEach((subtask: any) => {
             if (subtask.parent_id) {
               if (!subtasksByParent[subtask.parent_id]) {
                 subtasksByParent[subtask.parent_id] = [];
@@ -95,7 +103,7 @@ export const RegulationRequirementsTable = ({
           });
           
           // Map main items with their subtasks
-          const transformedData: SimpleChecklistItem[] = (mainItems || []).map((item: any) => {
+          const transformedData: SimpleChecklistItem[] = mainItems.map((item: any) => {
             const itemSubtasks = subtasksByParent[item.id] || [];
             
             // Transform subtasks into SimpleSubtask
