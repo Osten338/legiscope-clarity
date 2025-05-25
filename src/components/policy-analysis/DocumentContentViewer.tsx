@@ -33,7 +33,7 @@ interface DocumentContentViewerProps {
 }
 
 export const DocumentContentViewer = ({
-  document,
+  document: documentProp,
   highlights,
   selectedRegulation,
   onHighlightSelect
@@ -41,7 +41,7 @@ export const DocumentContentViewer = ({
   const [fontSize, setFontSize] = useState(14);
   const [selectedHighlight, setSelectedHighlight] = useState<PolicyHighlight | null>(null);
 
-  const documentContent = document.description || "Document content not available";
+  const documentContent = documentProp.description || "Document content not available";
 
   // Create highlighted content with position-based highlighting
   const highlightedContent = useMemo(() => {
@@ -112,9 +112,9 @@ export const DocumentContentViewer = ({
   const downloadDocument = () => {
     const blob = new Blob([documentContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = window.document.createElement('a');
     a.href = url;
-    a.download = `${document.file_name}.txt`;
+    a.download = `${documentProp.file_name}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -124,7 +124,7 @@ export const DocumentContentViewer = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <span>{document.file_name}</span>
+            <span>{documentProp.file_name}</span>
             {selectedRegulation && (
               <Badge variant="outline" className="text-xs">
                 vs {selectedRegulation.name}

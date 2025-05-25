@@ -31,7 +31,7 @@ interface PolicyDocumentViewerProps {
 }
 
 export const PolicyDocumentViewer = ({
-  document,
+  document: documentProp,
   highlights,
   selectedRegulation
 }: PolicyDocumentViewerProps) => {
@@ -44,7 +44,7 @@ export const PolicyDocumentViewer = ({
   const handleNavigateToHighlight = (highlight: PolicyHighlight) => {
     setSelectedHighlight(highlight);
     // Scroll to highlight position (you could enhance this with smooth scrolling)
-    const element = document.querySelector(`[data-highlight-id="${highlight.id}"]`);
+    const element = window.document.querySelector(`[data-highlight-id="${highlight.id}"]`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -55,7 +55,7 @@ export const PolicyDocumentViewer = ({
       {/* Document Content with Highlights */}
       <div className="flex-1">
         <DocumentContentViewer
-          document={document}
+          document={documentProp}
           highlights={highlights}
           selectedRegulation={selectedRegulation}
           onHighlightSelect={handleHighlightSelect}
