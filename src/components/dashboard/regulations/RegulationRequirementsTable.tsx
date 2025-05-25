@@ -55,37 +55,37 @@ export const RegulationRequirementsTable = ({
         if (regulation && regulation.regulations) {
           console.log("Fetching checklist items for regulation:", regulation.regulations.id);
           
-          // Fetch all checklist items with minimal selection to avoid type issues
-          const mainItemsResponse = await supabase
+          // Use any type to completely bypass Supabase type inference
+          const { data: mainItems, error: mainError } = await supabase
             .from("checklist_items")
             .select("*")
             .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", false);
+            .eq("is_subtask", false) as { data: any[] | null; error: any };
           
-          if (mainItemsResponse.error) {
-            console.error("Error fetching main checklist items:", mainItemsResponse.error);
-            throw mainItemsResponse.error;
+          if (mainError) {
+            console.error("Error fetching main checklist items:", mainError);
+            throw mainError;
           }
           
-          console.log("Main items fetched:", mainItemsResponse.data);
+          console.log("Main items fetched:", mainItems);
           
           // Fetch subtasks separately
-          const subtaskResponse = await supabase
+          const { data: subtaskItems, error: subtaskError } = await supabase
             .from("checklist_items")
             .select("*")
             .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", true);
+            .eq("is_subtask", true) as { data: any[] | null; error: any };
           
-          if (subtaskResponse.error) {
-            console.error("Error fetching subtasks:", subtaskResponse.error);
-            throw subtaskResponse.error;
+          if (subtaskError) {
+            console.error("Error fetching subtasks:", subtaskError);
+            throw subtaskError;
           }
           
-          console.log("Subtask items fetched:", subtaskResponse.data);
+          console.log("Subtask items fetched:", subtaskItems);
           
           // Group subtasks by parent_id
           const subtasksByParent: Record<string, any[]> = {};
-          (subtaskResponse.data || []).forEach((subtask) => {
+          (subtaskItems || []).forEach((subtask: any) => {
             if (subtask.parent_id) {
               if (!subtasksByParent[subtask.parent_id]) {
                 subtasksByParent[subtask.parent_id] = [];
@@ -95,11 +95,11 @@ export const RegulationRequirementsTable = ({
           });
           
           // Map main items with their subtasks
-          const transformedData: SimpleChecklistItem[] = (mainItemsResponse.data || []).map((item) => {
+          const transformedData: SimpleChecklistItem[] = (mainItems || []).map((item: any) => {
             const itemSubtasks = subtasksByParent[item.id] || [];
             
             // Transform subtasks into SimpleSubtask
-            const mappedSubtasks: SimpleSubtask[] = itemSubtasks.map(subtask => ({
+            const mappedSubtasks: SimpleSubtask[] = itemSubtasks.map((subtask: any) => ({
               id: subtask.id || '',
               description: subtask.description || '',
               is_subtask: true as const
