@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -26,7 +25,6 @@ interface RawChecklistItem {
   category: string | null;
   estimated_effort: string | null;
   expert_verified: boolean | null;
-  parent_id: string | null;
   is_subtask: boolean | null;
 }
 
@@ -111,7 +109,6 @@ export const useComplianceChecklist = () => {
         category,
         estimated_effort,
         expert_verified,
-        parent_id,
         is_subtask
       `)
       .eq("regulation_id", regulationId);
@@ -147,27 +144,10 @@ export const useComplianceChecklist = () => {
     allItems: RawChecklistItem[], 
     responses: RawResponse[]
   ): ChecklistItemType[] => {
+    // Since we're not fetching subtasks separately, we'll treat all items as main items for now
     const mainItems = allItems.filter(item => !item.is_subtask);
-    const subtaskItems = allItems.filter(item => item.is_subtask);
     
     return mainItems.map(item => {
-      // Find subtasks for this item
-      const itemSubtasks: SimpleSubtask[] = subtaskItems
-        .filter(subtask => subtask.parent_id === item.id)
-        .map(subtask => {
-          const subtaskResponse = responses.find(r => r.checklist_item_id === subtask.id);
-          
-          return {
-            id: subtask.id,
-            description: subtask.description,
-            is_subtask: true as const,
-            response: subtaskResponse ? {
-              status: subtaskResponse.status as ResponseStatus,
-              justification: subtaskResponse.justification || undefined,
-            } : undefined,
-          };
-        });
-
       // Find response for main item
       const response = responses.find(r => r.checklist_item_id === item.id);
       
@@ -181,9 +161,9 @@ export const useComplianceChecklist = () => {
         task: null, // Set to null since this column doesn't exist in database
         best_practices: null, // Set to null since this column doesn't exist in database
         department: null, // Set to null since this column doesn't exist in database
-        parent_id: item.parent_id,
+        parent_id: null, // Set to null for now
         is_subtask: false,
-        subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
+        subtasks: undefined, // No subtasks for now since we're not handling parent-child relationships
         response: response ? {
           status: response.status as ResponseStatus,
           justification: response.justification || undefined,
