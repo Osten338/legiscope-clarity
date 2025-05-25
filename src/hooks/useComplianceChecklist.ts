@@ -15,6 +15,30 @@ export interface RegulationType {
   checklist_items: ChecklistItemType[];
 }
 
+// Define raw database types to avoid type inference issues
+interface RawChecklistItem {
+  id: string;
+  regulation_id: string;
+  created_at: string;
+  updated_at: string;
+  importance: number | null;
+  description: string;
+  category: string | null;
+  estimated_effort: string | null;
+  expert_verified: boolean | null;
+  task: string | null;
+  best_practices: string | null;
+  department: string | null;
+  parent_id: string | null;
+  is_subtask: boolean | null;
+}
+
+interface RawResponse {
+  checklist_item_id: string;
+  status: string;
+  justification: string | null;
+}
+
 export const useComplianceChecklist = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [userId, setUserId] = useState<string | null>(null);
@@ -35,6 +59,129 @@ export const useComplianceChecklist = () => {
     getUserId();
   }, []);
 
+  // Helper function to fetch saved regulations
+  const fetchSavedRegulations = async (userId: string): Promise<string[]> => {
+    const { data: savedRegs, error } = await supabase
+      .from("saved_regulations")
+      .select("regulation_id")
+      .eq("user_id", userId);
+      
+    if (error) throw error;
+    
+    if (!savedRegs || savedRegs.length === 0) {
+      console.log("No saved regulations found for user:", userId);
+      return [];
+    }
+    
+    return savedRegs.map(r => r.regulation_id);
+  };
+
+  // Helper function to fetch regulations basic info
+  const fetchRegulations = async (regulationIds: string[]) => {
+    const { data: regulationsData, error } = await supabase
+      .from("regulations")
+      .select("id, name, description, motivation, requirements")
+      .in("id", regulationIds);
+
+    if (error) {
+      console.error("Error fetching regulations:", error);
+      toast("Failed to load regulations");
+      throw error;
+    }
+
+    return regulationsData || [];
+  };
+
+  // Helper function to fetch checklist items
+  const fetchChecklistItems = async (regulationId: string): Promise<RawChecklistItem[]> => {
+    const { data, error } = await supabase
+      .from("checklist_items")
+      .select(`
+        id,
+        regulation_id,
+        created_at,
+        updated_at,
+        importance,
+        description,
+        category,
+        estimated_effort,
+        expert_verified,
+        task,
+        best_practices,
+        department,
+        parent_id,
+        is_subtask
+      `)
+      .eq("regulation_id", regulationId);
+
+    if (error) throw error;
+    return (data || []) as RawChecklistItem[];
+  };
+
+  // Helper function to fetch responses
+  const fetchResponses = async (userId: string, itemIds: string[]): Promise<RawResponse[]> => {
+    if (itemIds.length === 0) return [];
+    
+    const { data, error } = await supabase
+      .from("checklist_item_responses")
+      .select("checklist_item_id, status, justification")
+      .eq("user_id", userId)
+      .in("checklist_item_id", itemIds);
+
+    if (error) throw error;
+    return (data || []) as RawResponse[];
+  };
+
+  // Helper function to process items into the expected format
+  const processChecklistItems = (
+    allItems: RawChecklistItem[], 
+    responses: RawResponse[]
+  ): ChecklistItemType[] => {
+    const mainItems = allItems.filter(item => !item.is_subtask);
+    const subtaskItems = allItems.filter(item => item.is_subtask);
+    
+    return mainItems.map(item => {
+      // Find subtasks for this item
+      const itemSubtasks: SimpleSubtask[] = subtaskItems
+        .filter(subtask => subtask.parent_id === item.id)
+        .map(subtask => {
+          const subtaskResponse = responses.find(r => r.checklist_item_id === subtask.id);
+          
+          return {
+            id: subtask.id,
+            description: subtask.description,
+            is_subtask: true as const,
+            response: subtaskResponse ? {
+              status: subtaskResponse.status as ResponseStatus,
+              justification: subtaskResponse.justification || undefined,
+            } : undefined,
+          };
+        });
+
+      // Find response for main item
+      const response = responses.find(r => r.checklist_item_id === item.id);
+      
+      return {
+        id: item.id,
+        description: item.description,
+        importance: item.importance,
+        category: item.category,
+        estimated_effort: item.estimated_effort,
+        expert_verified: item.expert_verified,
+        task: item.task,
+        best_practices: item.best_practices,
+        department: item.department,
+        parent_id: item.parent_id,
+        is_subtask: false,
+        subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
+        response: response ? {
+          status: response.status as ResponseStatus,
+          justification: response.justification || undefined,
+        } : undefined,
+      };
+    });
+  };
+
   const { data: regulations, isLoading, error, refetch } = useQuery({
     queryKey: ["regulations", userId],
     queryFn: async (): Promise<RegulationType[]> => {
@@ -45,118 +192,30 @@ export const useComplianceChecklist = () => {
           throw new Error("User not authenticated");
         }
         
-        // Get saved regulations
-        const { data: savedRegs, error: savedError } = await supabase
-          .from("saved_regulations")
-          .select("regulation_id")
-          .eq("user_id", user.id);
-          
-        if (savedError) {
-          throw savedError;
-        }
+        // Step 1: Get saved regulations
+        const regulationIds = await fetchSavedRegulations(user.id);
+        if (regulationIds.length === 0) return [];
         
-        if (!savedRegs || savedRegs.length === 0) {
-          console.log("No saved regulations found for user:", user.id);
-          return [];
-        }
-        
-        const regulationIds = savedRegs.map(r => r.regulation_id);
-        
-        // Get regulations basic info
-        const { data: regulationsData, error: regulationsError } = await supabase
-          .from("regulations")
-          .select("id, name, description, motivation, requirements")
-          .in("id", regulationIds);
+        // Step 2: Get regulations basic info
+        const regulationsData = await fetchRegulations(regulationIds);
+        if (!regulationsData || regulationsData.length === 0) return [];
 
-        if (regulationsError) {
-          console.error("Error fetching regulations:", regulationsError);
-          toast("Failed to load regulations");
-          throw regulationsError;
-        }
-
-        if (!regulationsData) {
-          return [];
-        }
-
-        // Process each regulation with simplified data handling
+        // Step 3: Process each regulation
         const result: RegulationType[] = [];
         
         for (const regulation of regulationsData) {
           try {
-            // Get main checklist items
-            const { data: items } = await supabase
-              .from("checklist_items")
-              .select("*")
-              .eq("regulation_id", regulation.id)
-              .eq("is_subtask", false);
-
-            // Get subtasks
-            const { data: subtasks } = await supabase
-              .from("checklist_items")
-              .select("*")
-              .eq("regulation_id", regulation.id)
-              .eq("is_subtask", true);
-
-            // Get responses for all items
-            const allItemIds = [
-              ...(items || []).map(item => item.id),
-              ...(subtasks || []).map(subtask => subtask.id)
-            ];
-
-            let responses: any[] = [];
-            if (allItemIds.length > 0) {
-              const { data: responsesData } = await supabase
-                .from("checklist_item_responses")
-                .select("checklist_item_id, status, justification")
-                .eq("user_id", user.id)
-                .in("checklist_item_id", allItemIds);
-
-              responses = responsesData || [];
-            }
-
-            // Build processed items with simpler operations
-            const processedItems: ChecklistItemType[] = [];
+            // Get all checklist items for this regulation
+            const allItems = await fetchChecklistItems(regulation.id);
             
-            for (const item of items || []) {
-              const response = responses.find(r => r.checklist_item_id === item.id);
-              
-              // Find subtasks for this item
-              const itemSubtasks: SimpleSubtask[] = [];
-              for (const subtask of subtasks || []) {
-                if (subtask.parent_id === item.id) {
-                  const subtaskResponse = responses.find(r => r.checklist_item_id === subtask.id);
-                  
-                  itemSubtasks.push({
-                    id: subtask.id,
-                    description: subtask.description,
-                    is_subtask: true as const,
-                    response: subtaskResponse ? {
-                      status: subtaskResponse.status as ResponseStatus,
-                      justification: subtaskResponse.justification,
-                    } : undefined,
-                  });
-                }
-              }
-              
-              processedItems.push({
-                id: item.id,
-                description: item.description,
-                importance: item.importance,
-                category: item.category,
-                estimated_effort: item.estimated_effort,
-                expert_verified: item.expert_verified,
-                task: item.task,
-                best_practices: item.best_practices,
-                department: item.department,
-                parent_id: item.parent_id,
-                is_subtask: false,
-                subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
-                response: response ? {
-                  status: response.status as ResponseStatus,
-                  justification: response.justification,
-                } : undefined,
-              });
-            }
+            // Get all item IDs for responses
+            const allItemIds = allItems.map(item => item.id);
+            
+            // Get responses
+            const responses = await fetchResponses(user.id, allItemIds);
+            
+            // Process items
+            const processedItems = processChecklistItems(allItems, responses);
 
             result.push({
               id: regulation.id,
