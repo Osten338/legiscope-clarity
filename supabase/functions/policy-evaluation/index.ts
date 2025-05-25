@@ -28,7 +28,10 @@ serve(async (req) => {
   try {
     const { document_id, regulation_id, documentContent }: PolicyEvaluationRequest = await req.json()
 
+    console.log('Policy evaluation request:', { document_id, regulation_id, hasContent: !!documentContent })
+
     if (!document_id || !regulation_id) {
+      console.error('Missing required parameters:', { document_id, regulation_id })
       return new Response(
         JSON.stringify({ error: 'Document ID and Regulation ID are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -56,11 +59,14 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(jwt)
     
     if (userError || !user) {
+      console.error('Auth error:', userError)
       return new Response(
         JSON.stringify({ error: 'Invalid authorization' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('User authenticated:', user.id)
 
     // Fetch document and regulation details
     const [documentResult, regulationResult] = await Promise.all([
@@ -77,15 +83,27 @@ serve(async (req) => {
         .single()
     ])
 
-    if (documentResult.error || regulationResult.error) {
+    if (documentResult.error) {
+      console.error('Document fetch error:', documentResult.error)
       return new Response(
-        JSON.stringify({ error: 'Document or regulation not found' }),
+        JSON.stringify({ error: 'Document not found or access denied' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (regulationResult.error) {
+      console.error('Regulation fetch error:', regulationResult.error)
+      return new Response(
+        JSON.stringify({ error: 'Regulation not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     const document = documentResult.data
     const regulation = regulationResult.data
+
+    console.log('Found document:', document.file_name)
+    console.log('Found regulation:', regulation.name)
 
     // Create policy evaluation record
     const { data: evaluation, error: evalError } = await supabase
@@ -114,7 +132,7 @@ serve(async (req) => {
 
     // Validate content
     if (!textContent || textContent.trim().length === 0) {
-      // Update evaluation as failed due to missing content
+      console.error('No document content available')
       await supabase
         .from('policy_evaluations')
         .update({ 
@@ -133,8 +151,9 @@ serve(async (req) => {
       )
     }
 
-    // Validate content quality (check for binary/corrupted content)
+    // Validate content quality
     if (!isContentValid(textContent)) {
+      console.error('Content validation failed')
       await supabase
         .from('policy_evaluations')
         .update({ 
@@ -178,7 +197,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Policy evaluation error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error: ' + error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
@@ -212,9 +231,13 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
     const articleMapper = new ArticleReferenceMapper()
     const assessor = new ComplianceAssessor()
 
-    // Chunk the document into analyzable sections with precise positioning
+    // Chunk the document into analyzable sections
     const chunks = chunkDocumentWithPrecisePositions(documentContent)
     console.log('Created', chunks.length, 'chunks for analysis')
+    
+    if (chunks.length === 0) {
+      throw new Error('No valid text chunks could be created from document content')
+    }
     
     let compliantSections = 0
     let nonCompliantSections = 0
@@ -267,7 +290,7 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
             break
         }
 
-        // Create enhanced highlight record with precise positioning
+        // Create enhanced highlight record
         const highlight = {
           evaluation_id: evaluationId,
           section_text: chunk.text,
@@ -312,10 +335,10 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
 
     console.log('Total highlights created:', highlights.length)
 
-    // Insert all highlights in batches to avoid timeout
+    // Insert all highlights in batches
     if (highlights.length > 0) {
       console.log(`Inserting ${highlights.length} highlights into database`)
-      const batchSize = 20
+      const batchSize = 10 // Smaller batch size for better reliability
       let insertedCount = 0
       
       for (let i = 0; i < highlights.length; i += batchSize) {
@@ -361,12 +384,7 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
     const recommendations = assessor.generateDetailedRecommendations(highlights)
 
     console.log('Calculated compliance score:', complianceScore)
-    console.log('Section counts:', {
-      compliant: compliantSections,
-      non_compliant: nonCompliantSections,
-      needs_review: needsReviewSections,
-      not_applicable: notApplicableSections
-    })
+    console.log('Section counts:', metrics.section_scores)
 
     // Update evaluation with enhanced results
     const { error: updateError } = await supabase
@@ -383,7 +401,7 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
         metadata: {
           risk_factors: riskFactors,
           priority_actions: priorityActions,
-          evaluation_engine_version: '3.2',
+          evaluation_engine_version: '3.3',
           highlights_created: highlights.length,
           processing_completed_at: new Date().toISOString()
         }
@@ -399,7 +417,6 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
 
   } catch (error) {
     console.error('Background processing error:', error)
-    // Update evaluation status to failed
     await supabase
       .from('policy_evaluations')
       .update({ 

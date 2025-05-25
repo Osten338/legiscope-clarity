@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -111,31 +112,50 @@ export function PolicyEvaluationDialog({
 
     setIsEvaluating(true);
     try {
+      console.log('Starting evaluation for document:', document.id, 'with regulation:', selectedRegulation);
+      
+      // Call the edge function with correct parameter names
       const { data, error } = await supabase.functions.invoke('policy-evaluation', {
         body: {
-          documentId: document.id,
-          regulationId: selectedRegulation
+          document_id: document.id,
+          regulation_id: selectedRegulation,
+          documentContent: document.description // Include document content
         }
       });
 
-      if (error) throw error;
+      console.log('Edge function response:', { data, error });
 
-      toast({
-        title: "Evaluation Started",
-        description: "Policy evaluation is running in the background. You'll see results shortly.",
-      });
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
 
-      queryClient.invalidateQueries({ queryKey: ['policy-evaluations'] });
-      setSelectedRegulation("");
-      
-      // Call the completion callback if provided
-      if (onEvaluationComplete) {
-        onEvaluationComplete();
+      if (data?.success) {
+        toast({
+          title: "Evaluation Started",
+          description: "Policy evaluation is running in the background. You'll see results shortly.",
+        });
+
+        // Invalidate relevant queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['policy-evaluations'] });
+        queryClient.invalidateQueries({ queryKey: ['policy-evaluation'] });
+        
+        // Call the completion callback if provided
+        if (onEvaluationComplete) {
+          onEvaluationComplete();
+        }
+        
+        // Close dialog
+        onOpenChange(false);
+        setSelectedRegulation("");
+      } else {
+        throw new Error(data?.error || 'Failed to start evaluation');
       }
     } catch (error: any) {
+      console.error('Evaluation failed:', error);
       toast({
         title: "Evaluation Failed",
-        description: error.message,
+        description: error.message || "Failed to start policy evaluation. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -179,7 +199,10 @@ export function PolicyEvaluationDialog({
             <h4 className="font-medium text-gray-900 mb-2">Document</h4>
             <p className="text-sm text-gray-600">{document.file_name}</p>
             {document.description && (
-              <p className="text-xs text-gray-500 mt-1">{document.description}</p>
+              <p className="text-xs text-gray-500 mt-1 line-clamp-3">{document.description.substring(0, 200)}...</p>
+            )}
+            {!document.description && (
+              <p className="text-xs text-yellow-600 mt-1">⚠️ No document content available - analysis may be limited</p>
             )}
           </div>
 
@@ -203,7 +226,10 @@ export function PolicyEvaluationDialog({
                 disabled={isEvaluating || !selectedRegulation}
               >
                 {isEvaluating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Analyzing...
+                  </>
                 ) : (
                   "Evaluate"
                 )}
