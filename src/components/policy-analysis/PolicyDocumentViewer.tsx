@@ -54,9 +54,9 @@ export const PolicyDocumentViewer = ({
   };
 
   return (
-    <div className="flex h-full gap-6 bg-gray-50">
-      {/* Document Content with Highlights */}
-      <div className="flex-1 min-w-0">
+    <div className="flex h-full gap-6 bg-gray-50 overflow-hidden">
+      {/* Document Content with Highlights - Constrained width to prevent overflow */}
+      <div className="flex-1 min-w-0 max-w-full overflow-hidden">
         <DocumentContentViewer
           document={documentProp}
           highlights={highlights}
@@ -66,8 +66,8 @@ export const PolicyDocumentViewer = ({
         />
       </div>
 
-      {/* Analysis Details Panel */}
-      <div className="w-96 flex-shrink-0">
+      {/* Analysis Details Panel - Fixed width */}
+      <div className="w-96 flex-shrink-0 max-w-96">
         <AnalysisDetailsPanel
           selectedHighlight={selectedHighlight}
           allHighlights={highlights}

@@ -112,15 +112,15 @@ export const DocumentContentViewer = ({
   const getHighlightStyle = (status: string) => {
     switch (status) {
       case 'compliant':
-        return 'bg-green-100 border-l-2 border-green-400 hover:bg-green-200 text-green-900';
+        return 'bg-green-50 border-l-4 border-green-400 text-green-900 shadow-sm';
       case 'non_compliant':
-        return 'bg-red-100 border-l-2 border-red-400 hover:bg-red-200 text-red-900';
+        return 'bg-red-50 border-l-4 border-red-400 text-red-900 shadow-sm';
       case 'needs_review':
-        return 'bg-yellow-100 border-l-2 border-yellow-400 hover:bg-yellow-200 text-yellow-900';
+        return 'bg-yellow-50 border-l-4 border-yellow-400 text-yellow-900 shadow-sm';
       case 'not_applicable':
-        return 'bg-gray-100 border-l-2 border-gray-400 hover:bg-gray-200 text-gray-900';
+        return 'bg-gray-50 border-l-4 border-gray-400 text-gray-900 shadow-sm';
       default:
-        return 'bg-gray-100';
+        return 'bg-gray-50 border-l-4 border-gray-400';
     }
   };
 
@@ -221,48 +221,60 @@ export const DocumentContentViewer = ({
   };
 
   return (
-    <div className="h-full bg-white border border-gray-200 rounded-lg shadow-sm">
-      {/* Document Header */}
-      <div className="border-b border-gray-200 p-4">
+    <div className="h-full bg-white shadow-lg rounded-lg border border-gray-200 overflow-hidden flex flex-col">
+      {/* Document Header - Professional Design */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <h3 className="text-lg font-semibold text-gray-900">{documentProp.file_name}</h3>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-blue-500 rounded-full shadow-sm"></div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900 truncate max-w-md">
+                  {documentProp.file_name}
+                </h1>
+                {selectedRegulation && (
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-sm text-gray-500">Analyzing against:</span>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                      {selectedRegulation.name}
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </div>
-            {selectedRegulation && (
-              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                vs {selectedRegulation.name}
-              </Badge>
-            )}
           </div>
           
-          {/* Document Controls */}
-          <div className="flex items-center gap-2">
+          {/* Document Controls - Improved Design */}
+          <div className="flex items-center space-x-1 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setFontSize(Math.max(10, fontSize - 2))}
-              className="h-8 w-8 p-0"
+              onClick={() => setFontSize(Math.max(10, fontSize - 1))}
+              className="h-8 w-8 p-0 hover:bg-gray-100"
+              title="Decrease font size"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
-            <span className="text-sm text-gray-600 min-w-[50px] text-center">{fontSize}px</span>
+            <div className="px-3 py-1 text-sm font-medium text-gray-600 min-w-[50px] text-center">
+              {fontSize}px
+            </div>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setFontSize(Math.min(24, fontSize + 2))}
-              className="h-8 w-8 p-0"
+              onClick={() => setFontSize(Math.min(20, fontSize + 1))}
+              className="h-8 w-8 p-0 hover:bg-gray-100"
+              title="Increase font size"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
-            <div className="w-px h-6 bg-gray-200 mx-2"></div>
+            <div className="w-px h-6 bg-gray-200 mx-1"></div>
             <Button
               variant="ghost"
               size="sm"
               onClick={downloadDocument}
               disabled={!isContentValid}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hover:bg-gray-100"
+              title="Download document"
             >
               <Download className="h-4 w-4" />
             </Button>
@@ -272,7 +284,8 @@ export const DocumentContentViewer = ({
                 size="sm"
                 onClick={handleReprocess}
                 disabled={isReprocessing}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+                title="Reprocess document"
               >
                 <RefreshCw className={`h-4 w-4 ${isReprocessing ? 'animate-spin' : ''}`} />
               </Button>
@@ -281,64 +294,90 @@ export const DocumentContentViewer = ({
         </div>
       </div>
       
-      {/* Document Content */}
-      <div className="flex-1 p-6">
+      {/* Document Content - Professional Document Reader Layout */}
+      <div className="flex-1 overflow-hidden bg-gray-50">
         {!documentContent ? (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              No document content available. The document may not have been processed yet or there was an error during upload.
-              <div className="mt-2">
-                <Button onClick={handleReprocess} disabled={isReprocessing} size="sm">
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
-                  {isReprocessing ? 'Processing...' : 'Process Document'}
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
+          <div className="h-full flex items-center justify-center p-8">
+            <Alert variant="destructive" className="max-w-md">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                No document content available. The document may not have been processed yet or there was an error during upload.
+                <div className="mt-3">
+                  <Button onClick={handleReprocess} disabled={isReprocessing} size="sm" className="w-full">
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
+                    {isReprocessing ? 'Processing...' : 'Process Document'}
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
         ) : showContentError ? (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              The document content appears to be corrupted or in an unsupported format. This usually happens when binary data from Word documents wasn't properly extracted as text.
-              <div className="mt-2">
-                <Button onClick={handleReprocess} disabled={isReprocessing} size="sm">
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
-                  {isReprocessing ? 'Reprocessing...' : 'Reprocess Document'}
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
+          <div className="h-full flex items-center justify-center p-8">
+            <Alert variant="destructive" className="max-w-md">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                The document content appears to be corrupted or in an unsupported format. This usually happens when binary data from Word documents wasn't properly extracted as text.
+                <div className="mt-3">
+                  <Button onClick={handleReprocess} disabled={isReprocessing} size="sm" className="w-full">
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
+                    {isReprocessing ? 'Reprocessing...' : 'Reprocess Document'}
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
         ) : (
-          <ScrollArea className="h-[calc(100vh-280px)]">
-            <div 
-              className="prose prose-gray max-w-none leading-relaxed text-gray-800"
-              style={{ fontSize: `${fontSize}px`, lineHeight: '1.6' }}
-            >
-              {highlightedContent.map((segment, index) => {
-                if (segment.type === 'normal') {
-                  return (
-                    <span key={index} className="whitespace-pre-wrap break-words">
-                      {segment.text}
-                    </span>
-                  );
-                } else if (segment.highlight) {
-                  return (
-                    <mark
-                      key={index}
-                      className={`inline-block px-2 py-1 mx-0.5 my-0.5 rounded cursor-pointer transition-all duration-200 break-words ${getHighlightStyle(segment.highlight.compliance_status)} ${
-                        selectedHighlight?.id === segment.highlight.id ? 'ring-2 ring-blue-400 shadow-sm' : ''
-                      }`}
-                      onClick={() => handleHighlightClick(segment.highlight!)}
-                      title={`${segment.highlight.compliance_status.replace('_', ' ').toUpperCase()} - Click for details`}
-                      data-highlight-id={segment.highlight.id}
-                    >
-                      {segment.text}
-                    </mark>
-                  );
-                }
-                return null;
-              })}
+          <ScrollArea className="h-full">
+            <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-lg m-6 overflow-hidden">
+              {/* Document Paper Background */}
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <div 
+                  className="px-8 py-12 leading-relaxed text-gray-800 break-words overflow-wrap-anywhere"
+                  style={{ 
+                    fontSize: `${fontSize}px`, 
+                    lineHeight: fontSize < 14 ? '1.5' : '1.7',
+                    maxWidth: '100%',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    hyphens: 'auto'
+                  }}
+                >
+                  {highlightedContent.map((segment, index) => {
+                    if (segment.type === 'normal') {
+                      return (
+                        <span 
+                          key={index} 
+                          className="whitespace-pre-wrap"
+                          style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                        >
+                          {segment.text}
+                        </span>
+                      );
+                    } else if (segment.highlight) {
+                      return (
+                        <mark
+                          key={index}
+                          className={`inline-block px-3 py-1.5 mx-0.5 my-0.5 rounded-md cursor-pointer transition-all duration-200 hover:shadow-md ${getHighlightStyle(segment.highlight.compliance_status)} ${
+                            selectedHighlight?.id === segment.highlight.id ? 'ring-2 ring-blue-400 shadow-md scale-105' : ''
+                          }`}
+                          onClick={() => handleHighlightClick(segment.highlight!)}
+                          title={`${segment.highlight.compliance_status.replace('_', ' ').toUpperCase()} - Click for details`}
+                          data-highlight-id={segment.highlight.id}
+                          style={{ 
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                            display: 'inline-block',
+                            maxWidth: '100%'
+                          }}
+                        >
+                          {segment.text}
+                        </mark>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              </div>
             </div>
           </ScrollArea>
         )}
