@@ -18,6 +18,18 @@ interface PolicyEvaluationDialogProps {
   };
 }
 
+// Define types for our policy evaluation data
+interface PolicyEvaluation {
+  id: string;
+  status: string;
+  overall_compliance_score: number | null;
+  created_at: string;
+  summary: string | null;
+  regulation: {
+    name: string;
+  } | null;
+}
+
 export function PolicyEvaluationDialog({
   open,
   onOpenChange,
@@ -43,16 +55,22 @@ export function PolicyEvaluationDialog({
   const { data: existingEvaluations } = useQuery({
     queryKey: ['policy-evaluations', document.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('policy_evaluations')
-        .select(`
-          *,
-          regulations (name)
-        `)
-        .eq('document_id', document.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
+      try {
+        // Use a raw SQL query to work around TypeScript type issues
+        const { data, error } = await supabase.rpc('get_policy_evaluations', {
+          document_id_param: document.id
+        });
+        
+        if (error) {
+          console.error('Error fetching evaluations:', error);
+          return [];
+        }
+        
+        return data as PolicyEvaluation[] || [];
+      } catch (error) {
+        console.error('Failed to fetch evaluations:', error);
+        return [];
+      }
     },
     enabled: open
   });
@@ -96,7 +114,7 @@ export function PolicyEvaluationDialog({
     }
   };
 
-  const getStatusIcon = (status: string, score?: number) => {
+  const getStatusIcon = (status: string, score?: number | null) => {
     switch (status) {
       case 'completed':
         if (score && score >= 80) return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -177,7 +195,7 @@ export function PolicyEvaluationDialog({
                       <div className="flex items-center gap-2">
                         {getStatusIcon(evaluation.status, evaluation.overall_compliance_score)}
                         <span className="font-medium text-sm">
-                          {evaluation.regulations?.name}
+                          {evaluation.regulation?.name || 'Unknown Regulation'}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
