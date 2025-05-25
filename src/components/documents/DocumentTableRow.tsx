@@ -1,8 +1,9 @@
 
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, Bot, Shield } from "lucide-react";
+import { Download, Trash2, Bot, Shield, FileSearch } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { PolicyEvaluationDialog } from "./PolicyEvaluationDialog";
 import {
   AlertDialog,
@@ -30,6 +31,11 @@ export const DocumentTableRow = ({
   onDelete,
 }: DocumentTableRowProps) => {
   const [policyEvaluationOpen, setPolicyEvaluationOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handlePolicyAnalysis = () => {
+    navigate(`/policy-analysis/${document.id}`);
+  };
 
   return (
     <>
@@ -44,6 +50,13 @@ export const DocumentTableRow = ({
         </TableCell>
         <TableCell>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePolicyAnalysis}
+            >
+              <FileSearch className="h-4 w-4" />
+            </Button>
             <Button
               variant="outline"
               size="sm"

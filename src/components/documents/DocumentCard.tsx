@@ -1,10 +1,12 @@
-import { FileText, Download, Trash2, Bot, Shield } from "lucide-react";
+
+import { FileText, Download, Trash2, Bot, Shield, FileSearch } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ReviewDocumentDialog } from "./ReviewDocumentDialog";
 import { PolicyEvaluationDialog } from "./PolicyEvaluationDialog";
 import {
@@ -26,8 +28,13 @@ interface DocumentCardProps {
 export const DocumentCard = ({ document }: DocumentCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [policyEvaluationOpen, setPolicyEvaluationOpen] = useState(false);
+
+  const handlePolicyAnalysis = () => {
+    navigate(`/policy-analysis/${document.id}`);
+  };
 
   const handleDownload = async () => {
     try {
@@ -118,6 +125,15 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
         </div>
 
         <div className="mt-4 pt-4 border-t border-slate-200 flex flex-wrap gap-2 justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 bg-white hover:bg-green-50"
+            onClick={handlePolicyAnalysis}
+          >
+            <FileSearch className="h-4 w-4" />
+            Policy Analysis
+          </Button>
           <Button
             variant="outline"
             size="sm"

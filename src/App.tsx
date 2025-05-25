@@ -26,6 +26,7 @@ import Pricing from "@/pages/Pricing";
 import ComplianceChecklist from "@/pages/ComplianceChecklist";
 import RegulationsAdmin from "@/pages/Admin/RegulationsAdmin";
 import ChecklistEditor from "@/pages/Admin/ChecklistEditor";
+import PolicyAnalysis from "@/pages/PolicyAnalysis";
 
 // Create a client with increased staleTime to reduce unnecessary refetches
 const queryClient = new QueryClient({
@@ -70,6 +71,7 @@ function App() {
               <Route path="/compliance-checklist" element={<ComplianceChecklist />} />
               <Route path="/alerts" element={<Alerts />} />
               <Route path="/documents" element={<Documents />} />
+              <Route path="/policy-analysis/:documentId" element={<PolicyAnalysis />} />
               <Route path="/legislation" element={<Legislation />} />
               <Route path="/compliance-calendar" element={<ComplianceCalendar />} />
               <Route path="/settings" element={<Settings />} />
