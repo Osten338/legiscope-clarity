@@ -56,17 +56,31 @@ export function PolicyEvaluationDialog({
     queryKey: ['policy-evaluations', document.id],
     queryFn: async () => {
       try {
-        // Use a raw SQL query to work around TypeScript type issues
-        const { data, error } = await supabase.rpc('get_policy_evaluations', {
-          document_id_param: document.id
-        });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+
+        const { data, error } = await supabase
+          .from('policy_evaluations')
+          .select(`
+            id,
+            status,
+            overall_compliance_score,
+            created_at,
+            summary,
+            regulation:regulations(name)
+          `)
+          .eq('document_id', document.id)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
         
         if (error) {
           console.error('Error fetching evaluations:', error);
           return [];
         }
         
-        return data as PolicyEvaluation[] || [];
+        return (data || []) as PolicyEvaluation[];
       } catch (error) {
         console.error('Failed to fetch evaluations:', error);
         return [];

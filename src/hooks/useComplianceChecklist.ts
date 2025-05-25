@@ -70,6 +70,10 @@ export const useComplianceChecklist = () => {
           throw regulationsError;
         }
 
+        if (!regulations) {
+          return [];
+        }
+
         // Process regulations sequentially to avoid complex type mappings
         const result: RegulationType[] = [];
         
@@ -114,23 +118,28 @@ export const useComplianceChecklist = () => {
             ...(subtasks || []).map(subtask => subtask.id)
           ];
 
-          const { data: responses, error: responsesError } = await supabase
-            .from("checklist_item_responses")
-            .select("*")
-            .eq("user_id", user.id)
-            .in("checklist_item_id", allItemIds);
+          let responses: any[] = [];
+          if (allItemIds.length > 0) {
+            const { data: responsesData, error: responsesError } = await supabase
+              .from("checklist_item_responses")
+              .select("*")
+              .eq("user_id", user.id)
+              .in("checklist_item_id", allItemIds);
 
-          if (responsesError) {
-            console.error(`Error fetching responses for regulation ${regulation.id}:`, responsesError);
+            if (responsesError) {
+              console.error(`Error fetching responses for regulation ${regulation.id}:`, responsesError);
+            } else {
+              responses = responsesData || [];
+            }
           }
 
           // Transform main items with their subtasks
           const itemsWithResponses: ChecklistItemType[] = (mainItems || []).map((item: RawChecklistItem) => {
-            const response = responses?.find((r) => r.checklist_item_id === item.id);
+            const response = responses.find((r) => r.checklist_item_id === item.id);
             
             // Find subtasks for this main task
             const itemSubtasks: SimpleSubtask[] = (subtasksByParent[item.id] || []).map(subtask => {
-              const subtaskResponse = responses?.find((r) => r.checklist_item_id === subtask.id);
+              const subtaskResponse = responses.find((r) => r.checklist_item_id === subtask.id);
               
               return {
                 id: subtask.id,
