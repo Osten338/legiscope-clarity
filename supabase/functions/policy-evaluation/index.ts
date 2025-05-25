@@ -8,8 +8,8 @@ import { ComplianceAssessor } from "./complianceAssessor.ts"
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
 
 interface PolicyEvaluationRequest {
-  documentId: string
-  regulationId: string
+  document_id: string
+  regulation_id: string
   documentContent?: string
 }
 
@@ -26,9 +26,9 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, regulationId, documentContent }: PolicyEvaluationRequest = await req.json()
+    const { document_id, regulation_id, documentContent }: PolicyEvaluationRequest = await req.json()
 
-    if (!documentId || !regulationId) {
+    if (!document_id || !regulation_id) {
       return new Response(
         JSON.stringify({ error: 'Document ID and Regulation ID are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -67,13 +67,13 @@ serve(async (req) => {
       supabase
         .from('compliance_documents')
         .select('*')
-        .eq('id', documentId)
+        .eq('id', document_id)
         .eq('user_id', user.id)
         .single(),
       supabase
         .from('regulations')
         .select('*')
-        .eq('id', regulationId)
+        .eq('id', regulation_id)
         .single()
     ])
 
@@ -92,8 +92,8 @@ serve(async (req) => {
       .from('policy_evaluations')
       .insert({
         user_id: user.id,
-        document_id: documentId,
-        regulation_id: regulationId,
+        document_id: document_id,
+        regulation_id: regulation_id,
         status: 'processing'
       })
       .select()
@@ -124,6 +124,12 @@ serve(async (req) => {
       }
     }
 
+    // Store the document content for display
+    await supabase
+      .from('compliance_documents')
+      .update({ description: textContent })
+      .eq('id', document_id)
+
     // Process document in background
     processDocumentInBackground(supabase, evaluation.id, textContent, regulation)
 
@@ -152,8 +158,8 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
     const articleMapper = new ArticleReferenceMapper()
     const assessor = new ComplianceAssessor()
 
-    // Chunk the document into analyzable sections
-    const chunks = chunkDocument(documentContent)
+    // Chunk the document into analyzable sections with precise positioning
+    const chunks = chunkDocumentWithPrecisePositions(documentContent)
     
     let compliantSections = 0
     let nonCompliantSections = 0
@@ -202,7 +208,7 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
             break
         }
 
-        // Create enhanced highlight record
+        // Create enhanced highlight record with precise positioning
         highlights.push({
           evaluation_id: evaluationId,
           section_text: chunk.text,
@@ -241,11 +247,20 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
       }
     }
 
-    // Insert all highlights
+    // Insert all highlights in batches to avoid timeout
     if (highlights.length > 0) {
-      await supabase
-        .from('policy_highlights')
-        .insert(highlights)
+      console.log(`Inserting ${highlights.length} highlights`)
+      const batchSize = 50
+      for (let i = 0; i < highlights.length; i += batchSize) {
+        const batch = highlights.slice(i, i + batchSize)
+        const { error: insertError } = await supabase
+          .from('policy_highlights')
+          .insert(batch)
+        
+        if (insertError) {
+          console.error('Error inserting highlight batch:', insertError)
+        }
+      }
     }
 
     // Calculate enhanced compliance metrics
@@ -284,10 +299,12 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
         metadata: {
           risk_factors: riskFactors,
           priority_actions: priorityActions,
-          evaluation_engine_version: '3.0'
+          evaluation_engine_version: '3.1'
         }
       })
       .eq('id', evaluationId)
+
+    console.log(`Policy evaluation completed for ${evaluationId}`)
 
   } catch (error) {
     console.error('Background processing error:', error)
@@ -299,30 +316,33 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
   }
 }
 
-function chunkDocument(content: string): EvaluationChunk[] {
+function chunkDocumentWithPrecisePositions(content: string): EvaluationChunk[] {
   const chunks: EvaluationChunk[] = []
   
-  // Enhanced chunking with better section detection
-  const sections = content.split(/\n\s*\n/).filter(section => section.trim().length > 50)
+  // Enhanced chunking with precise character position tracking
+  const paragraphs = content.split(/\n\s*\n/).filter(section => section.trim().length > 30)
   let currentPosition = 0
   
-  for (const section of sections) {
-    const startPosition = content.indexOf(section, currentPosition)
-    const endPosition = startPosition + section.length
+  for (const paragraph of paragraphs) {
+    // Find the exact start position in the original content
+    const startPosition = content.indexOf(paragraph.trim(), currentPosition)
+    const endPosition = startPosition + paragraph.trim().length
     
     // Determine section type based on content patterns
     let sectionType: EvaluationChunk['sectionType'] = 'paragraph'
     
-    if (/^\d+\.\s|\bChapter\s+\d+|\bSection\s+\d+/i.test(section)) {
+    if (/^\d+\.\s|\bChapter\s+\d+|\bSection\s+\d+/i.test(paragraph)) {
       sectionType = 'section'
-    } else if (/^[A-Z][^.]*:|\b(ARTICLE|Article)\s+\d+/i.test(section)) {
+    } else if (/^[A-Z][^.]*:|\b(ARTICLE|Article)\s+\d+/i.test(paragraph)) {
       sectionType = 'clause'
+    } else if (/\bchapter\b/i.test(paragraph)) {
+      sectionType = 'chapter'
     }
     
     chunks.push({
-      text: section.trim(),
-      startPosition,
-      endPosition,
+      text: paragraph.trim(),
+      startPosition: Math.max(0, startPosition),
+      endPosition: Math.min(content.length, endPosition),
       sectionType
     })
     

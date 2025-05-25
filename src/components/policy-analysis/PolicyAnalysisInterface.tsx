@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +7,7 @@ import { ComplianceSummaryCard } from "./ComplianceSummaryCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, FileText, AlertCircle, Play } from "lucide-react";
+import { Loader2, FileText, AlertCircle, Play, RefreshCw } from "lucide-react";
 
 interface PolicyAnalysisInterfaceProps {
   documentId: string;
@@ -19,7 +18,7 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch document details
+  // Fetch document details with content
   const { data: document, isLoading: documentLoading } = useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
@@ -30,6 +29,29 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
         .single();
       
       if (error) throw error;
+
+      // If document doesn't have content in description, try to fetch from storage
+      if (!data.description && data.file_path) {
+        try {
+          const { data: fileData, error: downloadError } = await supabase.storage
+            .from('compliance_documents')
+            .download(data.file_path);
+
+          if (!downloadError && fileData) {
+            const content = await fileData.text();
+            // Update the document with extracted content
+            await supabase
+              .from('compliance_documents')
+              .update({ description: content })
+              .eq('id', documentId);
+            
+            data.description = content;
+          }
+        } catch (error) {
+          console.error('Failed to extract document content:', error);
+        }
+      }
+      
       return data;
     }
   });
@@ -65,7 +87,7 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
   });
 
   // Fetch highlights for selected evaluation
-  const { data: highlights, isLoading: highlightsLoading } = useQuery({
+  const { data: highlights, isLoading: highlightsLoading, refetch: refetchHighlights } = useQuery({
     queryKey: ["policy-highlights", selectedEvaluationId],
     queryFn: async () => {
       if (!selectedEvaluationId) return [];
@@ -88,7 +110,8 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
       const { data, error } = await supabase.functions.invoke("policy-evaluation", {
         body: {
           document_id: documentId,
-          regulation_id: regulationId
+          regulation_id: regulationId,
+          documentContent: document?.description // Pass document content if available
         }
       });
 
@@ -97,11 +120,13 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
     },
     onSuccess: () => {
       toast({
-        title: "Analysis Complete",
-        description: "Policy analysis has been completed successfully.",
+        title: "Analysis Started",
+        description: "Policy analysis is running in the background. Results will appear shortly.",
       });
-      // Refresh evaluations list
-      refetchEvaluations();
+      // Refresh evaluations list after a short delay
+      setTimeout(() => {
+        refetchEvaluations();
+      }, 2000);
     },
     onError: (error: any) => {
       console.error("Policy analysis error:", error);
@@ -124,17 +149,29 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
     }
 
     // Use the first available regulation for analysis
-    // In a more advanced implementation, you might want to let users select which regulation to analyze against
     const defaultRegulation = regulations[0];
     runAnalysisMutation.mutate(defaultRegulation.id);
   };
 
-  // Auto-select first evaluation if available
+  // Auto-select first evaluation if available and poll for updates
   useEffect(() => {
     if (evaluations && evaluations.length > 0 && !selectedEvaluationId) {
       setSelectedEvaluationId(evaluations[0].id);
     }
   }, [evaluations, selectedEvaluationId]);
+
+  // Poll for evaluation updates if status is processing
+  useEffect(() => {
+    const selectedEvaluation = evaluations?.find(e => e.id === selectedEvaluationId);
+    if (selectedEvaluation?.status === 'processing') {
+      const interval = setInterval(() => {
+        refetchEvaluations();
+        refetchHighlights();
+      }, 3000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [selectedEvaluationId, evaluations, refetchEvaluations, refetchHighlights]);
 
   const selectedEvaluation = evaluations?.find(e => e.id === selectedEvaluationId);
 
@@ -217,6 +254,9 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
                     <SelectItem key={evaluation.id} value={evaluation.id}>
                       {evaluation.regulation?.name || 'Unknown Regulation'} - {' '}
                       {new Date(evaluation.created_at).toLocaleDateString()}
+                      {evaluation.status === 'processing' && (
+                        <span className="ml-2 text-blue-600">(Processing...)</span>
+                      )}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -234,6 +274,17 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
                 <Play className="h-4 w-4" />
               )}
               New Analysis
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                refetchEvaluations();
+                refetchHighlights();
+              }}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
           </div>
         </CardContent>
@@ -261,6 +312,15 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
           <CardContent className="flex items-center justify-center h-32">
             <Loader2 className="h-6 w-6 animate-spin text-sage-600" />
             <span className="ml-2">Loading analysis details...</span>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedEvaluation?.status === 'processing' && (
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            <span className="ml-2">Analysis in progress... This may take a few minutes.</span>
           </CardContent>
         </Card>
       )}
