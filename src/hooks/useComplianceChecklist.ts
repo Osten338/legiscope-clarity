@@ -26,8 +26,6 @@ interface RawChecklistItem {
   category: string | null;
   estimated_effort: string | null;
   expert_verified: boolean | null;
-  best_practices: string | null;
-  department: string | null;
   parent_id: string | null;
   is_subtask: boolean | null;
 }
@@ -113,8 +111,6 @@ export const useComplianceChecklist = () => {
         category,
         estimated_effort,
         expert_verified,
-        best_practices,
-        department,
         parent_id,
         is_subtask
       `)
@@ -183,8 +179,8 @@ export const useComplianceChecklist = () => {
         estimated_effort: item.estimated_effort,
         expert_verified: item.expert_verified,
         task: null, // Set to null since this column doesn't exist in database
-        best_practices: item.best_practices,
-        department: item.department,
+        best_practices: null, // Set to null since this column doesn't exist in database
+        department: null, // Set to null since this column doesn't exist in database
         parent_id: item.parent_id,
         is_subtask: false,
         subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
