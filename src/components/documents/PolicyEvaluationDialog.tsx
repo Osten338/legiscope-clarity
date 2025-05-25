@@ -61,32 +61,11 @@ export function PolicyEvaluationDialog({
           throw new Error('User not authenticated');
         }
 
-        // Use raw SQL to bypass TypeScript type issues
-        const query = `
-          SELECT 
-            pe.id,
-            pe.status,
-            pe.overall_compliance_score,
-            pe.created_at,
-            pe.summary,
-            r.name as regulation_name
-          FROM policy_evaluations pe
-          LEFT JOIN regulations r ON pe.regulation_id = r.id
-          WHERE pe.document_id = $1 AND pe.user_id = $2
-          ORDER BY pe.created_at DESC
-        `;
-
-        const { data, error } = await supabase.rpc('match_documents', {
-          query_embedding: null,
-          match_threshold: 0,
-          match_count: 0
-        });
-
-        // Since we can't use the table directly, let's use the edge function approach
-        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/get-policy-evaluations`, {
+        // Use the edge function to fetch evaluations
+        const response = await fetch(`https://vmyzceyvkkcgdbgmbbqf.supabase.co/functions/v1/get-policy-evaluations`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${supabase.supabaseKey}`,
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZteXpjZXl2a2tjZ2RiZ21iYnFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwMTYwMzQsImV4cCI6MjA1NDU5MjAzNH0.h804WotC8aLH-3EPBRcE3kWPpwkvfZRkI9o2oQdzkBE`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -101,13 +80,13 @@ export function PolicyEvaluationDialog({
         const evaluations = await response.json();
         
         // Transform the data to match our interface
-        return (evaluations || []).map((eval: any) => ({
-          id: eval.id,
-          status: eval.status,
-          overall_compliance_score: eval.overall_compliance_score,
-          created_at: eval.created_at,
-          summary: eval.summary,
-          regulation: eval.regulation ? { name: eval.regulation.name } : null
+        return (evaluations || []).map((evaluation: any) => ({
+          id: evaluation.id,
+          status: evaluation.status,
+          overall_compliance_score: evaluation.overall_compliance_score,
+          created_at: evaluation.created_at,
+          summary: evaluation.summary,
+          regulation: evaluation.regulation ? { name: evaluation.regulation.name } : null
         })) as PolicyEvaluation[];
       } catch (error) {
         console.error('Failed to fetch evaluations:', error);

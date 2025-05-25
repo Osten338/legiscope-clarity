@@ -46,13 +46,11 @@ export const useComplianceChecklist = () => {
         }
         
         // Fetch saved regulations first
-        const savedRegsQuery = supabase
+        const { data: savedRegs, error: savedError } = await supabase
           .from("saved_regulations")
           .select("regulation_id")
           .eq("user_id", user.id);
           
-        const { data: savedRegs, error: savedError } = await savedRegsQuery;
-        
         if (savedError) {
           throw savedError;
         }
@@ -63,12 +61,10 @@ export const useComplianceChecklist = () => {
         }
         
         // Fetch regulations data
-        const regulationsQuery = supabase
+        const { data: regulations, error: regulationsError } = await supabase
           .from("regulations")
           .select("*")
           .in("id", savedRegs.map(r => r.regulation_id));
-
-        const { data: regulations, error: regulationsError } = await regulationsQuery;
 
         if (regulationsError) {
           console.error("Error fetching regulations:", regulationsError);
@@ -85,13 +81,11 @@ export const useComplianceChecklist = () => {
         
         for (const regulation of regulations) {
           // Get main checklist items (not subtasks)
-          const mainItemsQuery = supabase
+          const { data: mainItems, error: mainItemsError } = await supabase
             .from("checklist_items")
             .select("*")
             .eq("regulation_id", regulation.id)
             .eq("is_subtask", false);
-
-          const { data: mainItems, error: mainItemsError } = await mainItemsQuery;
 
           if (mainItemsError) {
             console.error(`Error fetching main checklist items for regulation ${regulation.id}:`, mainItemsError);
@@ -99,13 +93,11 @@ export const useComplianceChecklist = () => {
           }
 
           // Get all subtasks for this regulation
-          const subtasksQuery = supabase
+          const { data: subtasks, error: subtasksError } = await supabase
             .from("checklist_items")
             .select("*")
             .eq("regulation_id", regulation.id)
             .eq("is_subtask", true);
-
-          const { data: subtasks, error: subtasksError } = await subtasksQuery;
 
           if (subtasksError) {
             console.error(`Error fetching subtasks for regulation ${regulation.id}:`, subtasksError);
@@ -130,13 +122,11 @@ export const useComplianceChecklist = () => {
 
           let responses: any[] = [];
           if (allItemIds.length > 0) {
-            const responsesQuery = supabase
+            const { data: responsesData, error: responsesError } = await supabase
               .from("checklist_item_responses")
               .select("*")
               .eq("user_id", user.id)
               .in("checklist_item_id", allItemIds);
-
-            const { data: responsesData, error: responsesError } = await responsesQuery;
 
             if (responsesError) {
               console.error(`Error fetching responses for regulation ${regulation.id}:`, responsesError);
