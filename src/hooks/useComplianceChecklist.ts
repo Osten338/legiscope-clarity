@@ -15,7 +15,7 @@ export interface RegulationType {
   checklist_items: ChecklistItemType[];
 }
 
-// Define raw database types to avoid type inference issues
+// Define raw database types to match the actual database schema
 interface RawChecklistItem {
   id: string;
   regulation_id: string;
@@ -37,6 +37,14 @@ interface RawResponse {
   checklist_item_id: string;
   status: string;
   justification: string | null;
+}
+
+interface RegulationData {
+  id: string;
+  name: string;
+  description: string;
+  motivation: string;
+  requirements: string;
 }
 
 export const useComplianceChecklist = () => {
@@ -77,7 +85,7 @@ export const useComplianceChecklist = () => {
   };
 
   // Helper function to fetch regulations basic info
-  const fetchRegulations = async (regulationIds: string[]) => {
+  const fetchRegulations = async (regulationIds: string[]): Promise<RegulationData[]> => {
     const { data: regulationsData, error } = await supabase
       .from("regulations")
       .select("id, name, description, motivation, requirements")
@@ -89,10 +97,10 @@ export const useComplianceChecklist = () => {
       throw error;
     }
 
-    return regulationsData || [];
+    return (regulationsData || []) as RegulationData[];
   };
 
-  // Helper function to fetch checklist items
+  // Helper function to fetch checklist items with explicit column selection
   const fetchChecklistItems = async (regulationId: string): Promise<RawChecklistItem[]> => {
     const { data, error } = await supabase
       .from("checklist_items")
@@ -114,7 +122,11 @@ export const useComplianceChecklist = () => {
       `)
       .eq("regulation_id", regulationId);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching checklist items:", error);
+      throw error;
+    }
+    
     return (data || []) as RawChecklistItem[];
   };
 
@@ -128,7 +140,11 @@ export const useComplianceChecklist = () => {
       .eq("user_id", userId)
       .in("checklist_item_id", itemIds);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching responses:", error);
+      throw error;
+    }
+    
     return (data || []) as RawResponse[];
   };
 
