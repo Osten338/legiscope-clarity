@@ -1,6 +1,6 @@
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { RegulationListItem, ChecklistItemType, SubtaskType, RawChecklistItem } from "../types";
+import { RegulationListItem, ChecklistItemType, RawChecklistItem, SimpleSubtask } from "../types";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -76,11 +76,11 @@ export const RegulationRequirementsTable = ({
           const transformedData: ChecklistItemType[] = (mainItems || []).map((item: RawChecklistItem) => {
             const itemSubtasks = subtasksByParent[item.id] || [];
             
-            // Transform subtasks into SubtaskType
-            const mappedSubtasks: SubtaskType[] = itemSubtasks.map(subtask => ({
+            // Transform subtasks into SimpleSubtask
+            const mappedSubtasks: SimpleSubtask[] = itemSubtasks.map(subtask => ({
               id: subtask.id || '',
               description: subtask.description || '',
-              is_subtask: true
+              is_subtask: true as const
             }));
             
             return {
@@ -121,12 +121,12 @@ export const RegulationRequirementsTable = ({
               { 
                 id: "sub-1", 
                 description: "Implement encryption for data at rest",
-                is_subtask: true
+                is_subtask: true as const
               },
               {
                 id: "sub-2",
                 description: "Implement encryption for data in transit",
-                is_subtask: true
+                is_subtask: true as const
               }
             ]
           }

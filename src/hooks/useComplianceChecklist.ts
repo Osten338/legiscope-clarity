@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ChecklistItemType, SubtaskType, RawChecklistItem, ResponseStatus } from "@/components/dashboard/types";
+import { ChecklistItemType, RawChecklistItem, ResponseStatus, SimpleSubtask } from "@/components/dashboard/types";
 
 // Define RegulationType separately to avoid circular references
 export interface RegulationType {
@@ -37,7 +37,7 @@ export const useComplianceChecklist = () => {
 
   const { data: regulations, isLoading, error, refetch } = useQuery({
     queryKey: ["regulations", userId],
-    queryFn: async () => {
+    queryFn: async (): Promise<RegulationType[]> => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -71,10 +71,10 @@ export const useComplianceChecklist = () => {
         }
 
         // Process regulations sequentially to avoid complex type mappings
-        const regulationsWithItems: RegulationType[] = [];
+        const result: RegulationType[] = [];
         
         for (const regulation of regulations) {
-          // First, get all main checklist items (not subtasks) for this regulation
+          // Get main checklist items (not subtasks)
           const { data: mainItems, error: mainItemsError } = await supabase
             .from("checklist_items")
             .select("*")
@@ -129,13 +129,13 @@ export const useComplianceChecklist = () => {
             const response = responses?.find((r) => r.checklist_item_id === item.id);
             
             // Find subtasks for this main task
-            const itemSubtasks: SubtaskType[] = (subtasksByParent[item.id] || []).map(subtask => {
+            const itemSubtasks: SimpleSubtask[] = (subtasksByParent[item.id] || []).map(subtask => {
               const subtaskResponse = responses?.find((r) => r.checklist_item_id === subtask.id);
               
               return {
                 id: subtask.id,
                 description: subtask.description,
-                is_subtask: true,
+                is_subtask: true as const,
                 response: subtaskResponse ? {
                   status: subtaskResponse.status as ResponseStatus,
                   justification: subtaskResponse.justification,
@@ -173,11 +173,11 @@ export const useComplianceChecklist = () => {
             checklist_items: itemsWithResponses,
           };
 
-          regulationsWithItems.push(regulationWithItems);
+          result.push(regulationWithItems);
         }
 
-        console.log("Fetched regulations with items:", regulationsWithItems);
-        return regulationsWithItems;
+        console.log("Fetched regulations with items:", result);
+        return result;
       } catch (error) {
         console.error("Error in query function:", error);
         throw error;

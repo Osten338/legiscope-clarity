@@ -60,13 +60,6 @@ export interface RawChecklistItem {
   updated_at?: string;
 }
 
-// Define a base interface for checklist items
-export interface BaseChecklistItem {
-  id: string;
-  description: string;
-  is_subtask: boolean;
-}
-
 // Define the allowed status values for responses
 export type ResponseStatus = 'completed' | 'will_do' | 'will_not_do';
 
@@ -76,14 +69,18 @@ export interface ItemResponse {
   justification?: string;
 }
 
-// Subtask type - simpler version that doesn't reference the parent
-export interface SubtaskType extends BaseChecklistItem {
+// Simple subtask type
+export interface SimpleSubtask {
+  id: string;
+  description: string;
   is_subtask: true;
   response?: ItemResponse;
 }
 
-// Main checklist item type with all properties
-export interface ChecklistItemType extends BaseChecklistItem {
+// Main checklist item type - simplified to avoid circular dependencies
+export interface ChecklistItemType {
+  id: string;
+  description: string;
   importance?: number | null;
   category?: string | null;
   estimated_effort?: string | null;
@@ -93,6 +90,6 @@ export interface ChecklistItemType extends BaseChecklistItem {
   department?: string | null;
   parent_id?: string | null;
   is_subtask: boolean;
-  subtasks?: SubtaskType[];
+  subtasks?: SimpleSubtask[];
   response?: ItemResponse;
 }
