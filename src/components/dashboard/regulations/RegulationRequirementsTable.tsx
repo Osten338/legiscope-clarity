@@ -33,6 +33,25 @@ interface SimpleSubtask {
   is_subtask: true;
 }
 
+// Define a basic database row type to avoid complex inference
+interface DbChecklistItem {
+  id: string;
+  description: string;
+  importance?: number | null;
+  category?: string | null;
+  estimated_effort?: string | null;
+  expert_verified?: boolean | null;
+  task?: string | null;
+  best_practices?: string | null;
+  department?: string | null;
+  parent_id?: string | null;
+  is_subtask?: boolean;
+  regulation_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  subtasks?: any;
+}
+
 export const RegulationRequirementsTable = ({
   regulation,
 }: RegulationRequirementsTableProps) => {
@@ -58,9 +77,9 @@ export const RegulationRequirementsTable = ({
           // First fetch parent checklist items (not subtasks)
           const { data: mainItems, error: mainError } = await supabase
             .from("checklist_items")
-            .select("*")
+            .select("id, description, importance, category, estimated_effort, expert_verified, task, best_practices, department, parent_id, is_subtask, regulation_id")
             .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", false);
+            .eq("is_subtask", false) as { data: DbChecklistItem[] | null; error: any };
             
           if (mainError) {
             console.error("Error fetching main checklist items:", mainError);
@@ -72,9 +91,9 @@ export const RegulationRequirementsTable = ({
           // Fetch subtasks in a separate query
           const { data: subtaskItems, error: subtaskError } = await supabase
             .from("checklist_items")
-            .select("*")
+            .select("id, description, parent_id, is_subtask")
             .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", true);
+            .eq("is_subtask", true) as { data: DbChecklistItem[] | null; error: any };
             
           if (subtaskError) {
             console.error("Error fetching subtasks:", subtaskError);
@@ -84,8 +103,8 @@ export const RegulationRequirementsTable = ({
           console.log("Subtask items fetched:", subtaskItems);
           
           // Group subtasks by parent_id
-          const subtasksByParent: Record<string, any[]> = {};
-          (subtaskItems || []).forEach((subtask: any) => {
+          const subtasksByParent: Record<string, DbChecklistItem[]> = {};
+          (subtaskItems || []).forEach((subtask) => {
             if (subtask.parent_id) {
               if (!subtasksByParent[subtask.parent_id]) {
                 subtasksByParent[subtask.parent_id] = [];
@@ -95,7 +114,7 @@ export const RegulationRequirementsTable = ({
           });
           
           // Map main items with their subtasks
-          const transformedData: SimpleChecklistItem[] = (mainItems || []).map((item: any) => {
+          const transformedData: SimpleChecklistItem[] = (mainItems || []).map((item) => {
             const itemSubtasks = subtasksByParent[item.id] || [];
             
             // Transform subtasks into SimpleSubtask
