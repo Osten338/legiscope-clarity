@@ -33,25 +33,6 @@ interface SimpleSubtask {
   is_subtask: true;
 }
 
-// Define a basic database row type to avoid complex inference
-interface DbChecklistItem {
-  id: string;
-  description: string;
-  importance?: number | null;
-  category?: string | null;
-  estimated_effort?: string | null;
-  expert_verified?: boolean | null;
-  task?: string | null;
-  best_practices?: string | null;
-  department?: string | null;
-  parent_id?: string | null;
-  is_subtask?: boolean;
-  regulation_id?: string;
-  created_at?: string;
-  updated_at?: string;
-  subtasks?: any;
-}
-
 export const RegulationRequirementsTable = ({
   regulation,
 }: RegulationRequirementsTableProps) => {
@@ -74,43 +55,37 @@ export const RegulationRequirementsTable = ({
         if (regulation && regulation.regulations) {
           console.log("Fetching checklist items for regulation:", regulation.regulations.id);
           
-          // First fetch parent checklist items (not subtasks) - using explicit typing
-          const mainItemsQuery = await supabase
+          // Fetch all checklist items with minimal selection to avoid type issues
+          const mainItemsResponse = await supabase
             .from("checklist_items")
-            .select("id, description, importance, category, estimated_effort, expert_verified, task, best_practices, department, parent_id, is_subtask, regulation_id")
+            .select("*")
             .eq("regulation_id", regulation.regulations.id)
             .eq("is_subtask", false);
           
-          const mainItems: DbChecklistItem[] | null = mainItemsQuery.data;
-          const mainError = mainItemsQuery.error;
-            
-          if (mainError) {
-            console.error("Error fetching main checklist items:", mainError);
-            throw mainError;
+          if (mainItemsResponse.error) {
+            console.error("Error fetching main checklist items:", mainItemsResponse.error);
+            throw mainItemsResponse.error;
           }
           
-          console.log("Main items fetched:", mainItems);
+          console.log("Main items fetched:", mainItemsResponse.data);
           
-          // Fetch subtasks in a separate query - using explicit typing
-          const subtaskQuery = await supabase
+          // Fetch subtasks separately
+          const subtaskResponse = await supabase
             .from("checklist_items")
-            .select("id, description, parent_id, is_subtask")
+            .select("*")
             .eq("regulation_id", regulation.regulations.id)
             .eq("is_subtask", true);
           
-          const subtaskItems: DbChecklistItem[] | null = subtaskQuery.data;
-          const subtaskError = subtaskQuery.error;
-            
-          if (subtaskError) {
-            console.error("Error fetching subtasks:", subtaskError);
-            throw subtaskError;
+          if (subtaskResponse.error) {
+            console.error("Error fetching subtasks:", subtaskResponse.error);
+            throw subtaskResponse.error;
           }
           
-          console.log("Subtask items fetched:", subtaskItems);
+          console.log("Subtask items fetched:", subtaskResponse.data);
           
           // Group subtasks by parent_id
-          const subtasksByParent: Record<string, DbChecklistItem[]> = {};
-          (subtaskItems || []).forEach((subtask) => {
+          const subtasksByParent: Record<string, any[]> = {};
+          (subtaskResponse.data || []).forEach((subtask) => {
             if (subtask.parent_id) {
               if (!subtasksByParent[subtask.parent_id]) {
                 subtasksByParent[subtask.parent_id] = [];
@@ -120,7 +95,7 @@ export const RegulationRequirementsTable = ({
           });
           
           // Map main items with their subtasks
-          const transformedData: SimpleChecklistItem[] = (mainItems || []).map((item) => {
+          const transformedData: SimpleChecklistItem[] = (mainItemsResponse.data || []).map((item) => {
             const itemSubtasks = subtasksByParent[item.id] || [];
             
             // Transform subtasks into SimpleSubtask
