@@ -261,7 +261,7 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
           <CardContent className="flex items-center justify-center h-32">
             <Loader2 className="h-6 w-6 animate-spin text-sage-600" />
             <span className="ml-2">Loading analysis details...</span>
-          </div>
+          </CardContent>
         </Card>
       )}
     </div>
