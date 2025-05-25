@@ -1,3 +1,4 @@
+
 import { Database as OriginalDatabase } from './types';
 import type { Json } from './types';
 
@@ -695,6 +696,148 @@ export interface Database {
             columns: ["checklist_item_id"];
             isOneToOne: false;
             referencedRelation: "checklist_items";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      policy_evaluations: {
+        Row: {
+          id: string;
+          user_id: string;
+          document_id: string;
+          regulation_id: string;
+          created_at: string;
+          updated_at: string;
+          overall_compliance_score: number | null;
+          total_sections_analyzed: number | null;
+          compliant_sections: number | null;
+          non_compliant_sections: number | null;
+          needs_review_sections: number | null;
+          metadata: Json | null;
+          status: string;
+          summary: string | null;
+          recommendations: string | null;
+          regulation?: {
+            id: string;
+            name: string;
+            description: string;
+            requirements: string;
+            motivation: string;
+            sanctions: string;
+          };
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          document_id: string;
+          regulation_id: string;
+          created_at?: string;
+          updated_at?: string;
+          overall_compliance_score?: number | null;
+          total_sections_analyzed?: number | null;
+          compliant_sections?: number | null;
+          non_compliant_sections?: number | null;
+          needs_review_sections?: number | null;
+          metadata?: Json | null;
+          status?: string;
+          summary?: string | null;
+          recommendations?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          document_id?: string;
+          regulation_id?: string;
+          created_at?: string;
+          updated_at?: string;
+          overall_compliance_score?: number | null;
+          total_sections_analyzed?: number | null;
+          compliant_sections?: number | null;
+          non_compliant_sections?: number | null;
+          needs_review_sections?: number | null;
+          metadata?: Json | null;
+          status?: string;
+          summary?: string | null;
+          recommendations?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "policy_evaluations_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "compliance_documents";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "policy_evaluations_regulation_id_fkey";
+            columns: ["regulation_id"];
+            isOneToOne: false;
+            referencedRelation: "regulations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      policy_highlights: {
+        Row: {
+          id: string;
+          evaluation_id: string;
+          section_text: string;
+          compliance_status: 'compliant' | 'non_compliant' | 'needs_review' | 'not_applicable';
+          confidence_score: number;
+          priority_level: number;
+          gap_analysis: string | null;
+          suggested_fixes: string | null;
+          article_references: string[];
+          section_start_position: number | null;
+          section_end_position: number | null;
+          ai_reasoning: string | null;
+          regulation_excerpt: string | null;
+          section_type: string | null;
+          metadata: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          evaluation_id: string;
+          section_text: string;
+          compliance_status: 'compliant' | 'non_compliant' | 'needs_review' | 'not_applicable';
+          confidence_score?: number;
+          priority_level?: number;
+          gap_analysis?: string | null;
+          suggested_fixes?: string | null;
+          article_references?: string[];
+          section_start_position?: number | null;
+          section_end_position?: number | null;
+          ai_reasoning?: string | null;
+          regulation_excerpt?: string | null;
+          section_type?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          evaluation_id?: string;
+          section_text?: string;
+          compliance_status?: 'compliant' | 'non_compliant' | 'needs_review' | 'not_applicable';
+          confidence_score?: number;
+          priority_level?: number;
+          gap_analysis?: string | null;
+          suggested_fixes?: string | null;
+          article_references?: string[];
+          section_start_position?: number | null;
+          section_end_position?: number | null;
+          ai_reasoning?: string | null;
+          regulation_excerpt?: string | null;
+          section_type?: string | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "policy_highlights_evaluation_id_fkey";
+            columns: ["evaluation_id"];
+            isOneToOne: false;
+            referencedRelation: "policy_evaluations";
             referencedColumns: ["id"];
           }
         ];
