@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Download, AlertTriangle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DocumentExtractor } from "@/utils/documentExtractor";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PolicyHighlight {
   id: string;
@@ -26,23 +28,28 @@ interface DocumentContentViewerProps {
     id: string;
     file_name: string;
     description?: string;
+    file_path?: string;
   };
   highlights: PolicyHighlight[];
   selectedRegulation?: {
     name: string;
   };
   onHighlightSelect: (highlight: PolicyHighlight) => void;
+  onDocumentUpdated?: () => void;
 }
 
 export const DocumentContentViewer = ({
   document: documentProp,
   highlights,
   selectedRegulation,
-  onHighlightSelect
+  onHighlightSelect,
+  onDocumentUpdated
 }: DocumentContentViewerProps) => {
   const [fontSize, setFontSize] = useState(14);
   const [selectedHighlight, setSelectedHighlight] = useState<PolicyHighlight | null>(null);
   const [showContentError, setShowContentError] = useState(false);
+  const [isReprocessing, setIsReprocessing] = useState(false);
+  const { toast } = useToast();
 
   const documentContent = documentProp.description || "";
   
@@ -132,10 +139,85 @@ export const DocumentContentViewer = ({
     URL.revokeObjectURL(url);
   };
 
-  const handleReprocess = () => {
-    // This would trigger a reprocessing of the document
-    // For now, we'll just refresh the page
-    window.location.reload();
+  const handleReprocess = async () => {
+    if (!documentProp.file_path) {
+      toast({
+        title: "Error",
+        description: "Cannot reprocess document - file path not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsReprocessing(true);
+    try {
+      // Download the original file from storage
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from('compliance_documents')
+        .download(documentProp.file_path);
+
+      if (downloadError) {
+        throw new Error(`Failed to download file: ${downloadError.message}`);
+      }
+
+      // Create a File object from the downloaded data
+      const file = new File([fileData], documentProp.file_name, {
+        type: fileData.type || 'application/octet-stream'
+      });
+
+      console.log('Reprocessing file:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
+      // Extract text using the DocumentExtractor
+      const extracted = await DocumentExtractor.extractText(file);
+
+      if (!extracted.success || !extracted.text) {
+        throw new Error(extracted.error || 'Failed to extract text from file');
+      }
+
+      // Validate the extracted content
+      if (!DocumentExtractor.validateExtractedContent(extracted.text)) {
+        throw new Error('Extracted content appears to be corrupted or in an unsupported format');
+      }
+
+      console.log('Successfully extracted text:', extracted.text.substring(0, 200) + '...');
+
+      // Update the document in the database
+      const { error: updateError } = await supabase
+        .from('compliance_documents')
+        .update({ description: extracted.text })
+        .eq('id', documentProp.id);
+
+      if (updateError) {
+        throw new Error(`Failed to update document: ${updateError.message}`);
+      }
+
+      toast({
+        title: "Success",
+        description: "Document has been reprocessed with clean text content",
+      });
+
+      // Trigger refresh if callback provided
+      if (onDocumentUpdated) {
+        onDocumentUpdated();
+      } else {
+        // Fallback to page reload
+        window.location.reload();
+      }
+
+    } catch (error: any) {
+      console.error('Reprocessing error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reprocess document",
+        variant: "destructive",
+      });
+    } finally {
+      setIsReprocessing(false);
+    }
   };
 
   return (
@@ -174,13 +256,15 @@ export const DocumentContentViewer = ({
             >
               <Download className="h-4 w-4" />
             </Button>
-            {showContentError && (
+            {(showContentError || !isContentValid) && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleReprocess}
+                disabled={isReprocessing}
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className={`h-4 w-4 ${isReprocessing ? 'animate-spin' : ''}`} />
+                {isReprocessing ? 'Processing...' : 'Reprocess'}
               </Button>
             )}
           </div>
@@ -193,13 +277,25 @@ export const DocumentContentViewer = ({
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               No document content available. The document may not have been processed yet or there was an error during upload.
+              <div className="mt-2">
+                <Button onClick={handleReprocess} disabled={isReprocessing} size="sm">
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
+                  {isReprocessing ? 'Processing...' : 'Process Document'}
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
         ) : showContentError ? (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              The document content appears to be corrupted or in an unsupported format. Please try re-uploading the document or use a different file format.
+              The document content appears to be corrupted or in an unsupported format. This usually happens when binary data from Word documents wasn't properly extracted as text.
+              <div className="mt-2">
+                <Button onClick={handleReprocess} disabled={isReprocessing} size="sm">
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isReprocessing ? 'animate-spin' : ''}`} />
+                  {isReprocessing ? 'Reprocessing...' : 'Reprocess Document'}
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
         ) : (

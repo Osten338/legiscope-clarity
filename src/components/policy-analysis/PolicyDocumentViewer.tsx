@@ -23,17 +23,20 @@ interface PolicyDocumentViewerProps {
     id: string;
     file_name: string;
     description?: string;
+    file_path?: string;
   };
   highlights: PolicyHighlight[];
   selectedRegulation?: {
     name: string;
   };
+  onDocumentUpdated?: () => void;
 }
 
 export const PolicyDocumentViewer = ({
   document: documentProp,
   highlights,
-  selectedRegulation
+  selectedRegulation,
+  onDocumentUpdated
 }: PolicyDocumentViewerProps) => {
   const [selectedHighlight, setSelectedHighlight] = useState<PolicyHighlight | null>(null);
 
@@ -59,6 +62,7 @@ export const PolicyDocumentViewer = ({
           highlights={highlights}
           selectedRegulation={selectedRegulation}
           onHighlightSelect={handleHighlightSelect}
+          onDocumentUpdated={onDocumentUpdated}
         />
       </div>
 
