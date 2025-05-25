@@ -26,7 +26,6 @@ interface RawChecklistItem {
   category: string | null;
   estimated_effort: string | null;
   expert_verified: boolean | null;
-  task: string | null;
   best_practices: string | null;
   department: string | null;
   parent_id: string | null;
@@ -114,7 +113,6 @@ export const useComplianceChecklist = () => {
         category,
         estimated_effort,
         expert_verified,
-        task,
         best_practices,
         department,
         parent_id,
@@ -184,7 +182,7 @@ export const useComplianceChecklist = () => {
         category: item.category,
         estimated_effort: item.estimated_effort,
         expert_verified: item.expert_verified,
-        task: item.task,
+        task: null, // Set to null since this column doesn't exist in database
         best_practices: item.best_practices,
         department: item.department,
         parent_id: item.parent_id,
