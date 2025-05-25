@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +26,6 @@ interface RawChecklistItem {
   category: string | null;
   estimated_effort: string | null;
   expert_verified: boolean | null;
-  is_subtask: boolean | null;
 }
 
 interface RawResponse {
@@ -95,7 +95,7 @@ export const useComplianceChecklist = () => {
     return (regulationsData || []) as RegulationData[];
   };
 
-  // Helper function to fetch checklist items with explicit column selection
+  // Helper function to fetch checklist items with only essential columns
   const fetchChecklistItems = async (regulationId: string): Promise<RawChecklistItem[]> => {
     const { data, error } = await supabase
       .from("checklist_items")
@@ -108,8 +108,7 @@ export const useComplianceChecklist = () => {
         description,
         category,
         estimated_effort,
-        expert_verified,
-        is_subtask
+        expert_verified
       `)
       .eq("regulation_id", regulationId);
 
@@ -144,11 +143,9 @@ export const useComplianceChecklist = () => {
     allItems: RawChecklistItem[], 
     responses: RawResponse[]
   ): ChecklistItemType[] => {
-    // Since we're not fetching subtasks separately, we'll treat all items as main items for now
-    const mainItems = allItems.filter(item => !item.is_subtask);
-    
-    return mainItems.map(item => {
-      // Find response for main item
+    // Process all items as main items since we're not handling subtasks for now
+    return allItems.map(item => {
+      // Find response for item
       const response = responses.find(r => r.checklist_item_id === item.id);
       
       return {
@@ -162,7 +159,7 @@ export const useComplianceChecklist = () => {
         best_practices: null, // Set to null since this column doesn't exist in database
         department: null, // Set to null since this column doesn't exist in database
         parent_id: null, // Set to null for now
-        is_subtask: false,
+        is_subtask: false, // Default to false for all items
         subtasks: undefined, // No subtasks for now since we're not handling parent-child relationships
         response: response ? {
           status: response.status as ResponseStatus,
