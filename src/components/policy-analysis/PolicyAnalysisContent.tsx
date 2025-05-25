@@ -36,8 +36,13 @@ interface PolicyEvaluation {
   id: string;
   status: string;
   overall_compliance_score: number | null;
+  total_sections_analyzed: number;
+  compliant_sections: number;
+  non_compliant_sections: number;
+  needs_review_sections: number;
   created_at: string;
   summary: string | null;
+  recommendations?: string;
 }
 
 interface EvaluationData {
