@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -112,25 +111,55 @@ export function PolicyEvaluationDialog({
 
     setIsEvaluating(true);
     try {
-      console.log('Starting evaluation for document:', document.id, 'with regulation:', selectedRegulation);
+      console.log('=== STARTING EVALUATION ===');
+      console.log('Document:', {
+        id: document.id,
+        filename: document.file_name,
+        hasDescription: !!document.description,
+        descriptionLength: document.description?.length
+      });
+      console.log('Regulation ID:', selectedRegulation);
       
-      // Call the edge function with correct parameter names
+      // Get current user for logging
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user?.id);
+
+      // Call the edge function with detailed logging
+      console.log('Calling policy-evaluation edge function...');
+      
       const { data, error } = await supabase.functions.invoke('policy-evaluation', {
         body: {
           document_id: document.id,
           regulation_id: selectedRegulation,
-          documentContent: document.description // Include document content
+          documentContent: document.description
         }
       });
 
-      console.log('Edge function response:', { data, error });
+      console.log('Edge function response:', {
+        data,
+        error,
+        hasError: !!error,
+        success: data?.success
+      });
 
       if (error) {
-        console.error('Edge function error:', error);
-        throw error;
+        console.error('Edge function error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Edge function error: ${error.message}`);
       }
 
-      if (data?.success) {
+      if (!data) {
+        console.error('No data returned from edge function');
+        throw new Error('No response data from evaluation service');
+      }
+
+      if (data.success) {
+        console.log('Evaluation started successfully:', data.evaluationId);
+        
         toast({
           title: "Evaluation Started",
           description: "Policy evaluation is running in the background. You'll see results shortly.",
@@ -149,10 +178,16 @@ export function PolicyEvaluationDialog({
         onOpenChange(false);
         setSelectedRegulation("");
       } else {
-        throw new Error(data?.error || 'Failed to start evaluation');
+        const errorMessage = data.error || 'Failed to start evaluation';
+        console.error('Evaluation failed:', errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
-      console.error('Evaluation failed:', error);
+      console.error('=== EVALUATION ERROR ===');
+      console.error('Error type:', error.constructor.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
       toast({
         title: "Evaluation Failed",
         description: error.message || "Failed to start policy evaluation. Please try again.",
