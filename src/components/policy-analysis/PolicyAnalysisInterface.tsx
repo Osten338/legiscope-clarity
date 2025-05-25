@@ -1,14 +1,13 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { PolicyDocumentViewer } from "./PolicyDocumentViewer";
-import { ComplianceSummaryCard } from "./ComplianceSummaryCard";
 import { PolicyEvaluationDialog } from "../documents/PolicyEvaluationDialog";
+import { PolicyAnalysisHeader } from "./PolicyAnalysisHeader";
+import { PolicyAnalysisContent } from "./PolicyAnalysisContent";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle, FileText, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 interface PolicyAnalysisInterfaceProps {
   documentId: string;
@@ -129,82 +128,23 @@ export const PolicyAnalysisInterface = ({ documentId }: PolicyAnalysisInterfaceP
 
   return (
     <div className="space-y-6">
-      {/* Analysis Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <h2 className="text-xl font-semibold">{document.file_name}</h2>
-          </div>
-          
-          {regulations && regulations.length > 0 && (
-            <select
-              value={selectedRegulation || ""}
-              onChange={(e) => setSelectedRegulation(e.target.value || undefined)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select a regulation...</option>
-              {regulations.map((reg) => (
-                <option key={reg.id} value={reg.id}>
-                  {reg.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+      <PolicyAnalysisHeader
+        document={document}
+        regulations={regulations}
+        selectedRegulation={selectedRegulation}
+        onRegulationChange={setSelectedRegulation}
+        onStartAnalysis={handleStartAnalysis}
+      />
 
-        {selectedRegulation && (
-          <Button onClick={handleStartAnalysis}>
-            Start New Analysis
-          </Button>
-        )}
-      </div>
-
-      {/* Compliance Summary */}
-      {evaluationData?.evaluation && (
-        <ComplianceSummaryCard 
-          evaluation={evaluationData.evaluation}
-          regulation={regulations?.find(r => r.id === selectedRegulation)}
-        />
-      )}
-
-      {/* Document Viewer */}
-      <div className="h-[800px]">
-        {selectedRegulation && evaluationData ? (
-          <PolicyDocumentViewer
-            document={document}
-            highlights={evaluationData.highlights}
-            selectedRegulation={regulations?.find(r => r.id === selectedRegulation)}
-            onDocumentUpdated={handleDocumentUpdated}
-          />
-        ) : selectedRegulation ? (
-          <Card className="h-full flex items-center justify-center">
-            <CardContent>
-              {evaluationLoading ? (
-                <div className="text-center">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                  <p>Loading analysis...</p>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">No analysis found for this regulation.</p>
-                  <Button onClick={handleStartAnalysis}>
-                    Start Analysis
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="h-full flex items-center justify-center">
-            <CardContent className="text-center">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Select a regulation to begin policy analysis</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      <PolicyAnalysisContent
+        document={document}
+        selectedRegulation={selectedRegulation}
+        evaluationData={evaluationData}
+        evaluationLoading={evaluationLoading}
+        regulations={regulations}
+        onStartAnalysis={handleStartAnalysis}
+        onDocumentUpdated={handleDocumentUpdated}
+      />
 
       {/* Policy Evaluation Dialog */}
       {showEvaluationDialog && selectedRegulation && (
