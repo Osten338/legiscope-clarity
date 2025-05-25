@@ -1,6 +1,6 @@
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { RegulationListItem, ChecklistItemType, RawChecklistItem, SimpleSubtask } from "../types";
+import { RegulationListItem } from "../types";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +11,32 @@ interface RegulationRequirementsTableProps {
   regulation: RegulationListItem;
 }
 
+// Simple interfaces to avoid type complexity
+interface SimpleChecklistItem {
+  id: string;
+  description: string;
+  importance?: number | null;
+  category?: string | null;
+  estimated_effort?: string | null;
+  expert_verified?: boolean | null;
+  task?: string | null;
+  best_practices?: string | null;
+  department?: string | null;
+  parent_id?: string | null;
+  is_subtask: boolean;
+  subtasks?: SimpleSubtask[];
+}
+
+interface SimpleSubtask {
+  id: string;
+  description: string;
+  is_subtask: true;
+}
+
 export const RegulationRequirementsTable = ({
   regulation,
 }: RegulationRequirementsTableProps) => {
-  const [requirementItems, setRequirementItems] = useState<ChecklistItemType[]>([]);
+  const [requirementItems, setRequirementItems] = useState<SimpleChecklistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   
@@ -62,8 +84,8 @@ export const RegulationRequirementsTable = ({
           console.log("Subtask items fetched:", subtaskItems);
           
           // Group subtasks by parent_id
-          const subtasksByParent: Record<string, RawChecklistItem[]> = {};
-          (subtaskItems || []).forEach((subtask: RawChecklistItem) => {
+          const subtasksByParent: Record<string, any[]> = {};
+          (subtaskItems || []).forEach((subtask: any) => {
             if (subtask.parent_id) {
               if (!subtasksByParent[subtask.parent_id]) {
                 subtasksByParent[subtask.parent_id] = [];
@@ -73,7 +95,7 @@ export const RegulationRequirementsTable = ({
           });
           
           // Map main items with their subtasks
-          const transformedData: ChecklistItemType[] = (mainItems || []).map((item: RawChecklistItem) => {
+          const transformedData: SimpleChecklistItem[] = (mainItems || []).map((item: any) => {
             const itemSubtasks = subtasksByParent[item.id] || [];
             
             // Transform subtasks into SimpleSubtask
