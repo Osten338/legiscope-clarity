@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders } from "../shared/cors.ts"
 import { ComplianceEvaluationEngine, EvaluationContext } from "./evaluationPrompts.ts"
@@ -106,29 +105,57 @@ serve(async (req) => {
       )
     }
 
-    // If document content is not provided, extract it from storage
-    let textContent = documentContent
-    if (!textContent) {
-      try {
-        const { data: fileData, error: downloadError } = await supabase.storage
-          .from('compliance_documents')
-          .download(document.file_path)
+    // Get document content - prioritize provided content, then stored description
+    let textContent = documentContent || document.description
 
-        if (downloadError) throw downloadError
+    // Validate content
+    if (!textContent || textContent.trim().length === 0) {
+      // Update evaluation as failed due to missing content
+      await supabase
+        .from('policy_evaluations')
+        .update({ 
+          status: 'failed',
+          summary: 'No document content available for analysis'
+        })
+        .eq('id', evaluation.id)
 
-        // Simple text extraction (for basic implementation)
-        textContent = await fileData.text()
-      } catch (error) {
-        console.error('Failed to extract document content:', error)
-        textContent = `Failed to extract content from ${document.file_name}`
-      }
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          evaluationId: evaluation.id,
+          error: 'No document content available for analysis'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    // Store the document content for display
-    await supabase
-      .from('compliance_documents')
-      .update({ description: textContent })
-      .eq('id', document_id)
+    // Validate content quality (check for binary/corrupted content)
+    if (!isContentValid(textContent)) {
+      await supabase
+        .from('policy_evaluations')
+        .update({ 
+          status: 'failed',
+          summary: 'Document content appears to be corrupted or in an unsupported format'
+        })
+        .eq('id', evaluation.id)
+
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          evaluationId: evaluation.id,
+          error: 'Document content appears to be corrupted'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // If document content wasn't stored, update it
+    if (!document.description && textContent) {
+      await supabase
+        .from('compliance_documents')
+        .update({ description: textContent })
+        .eq('id', document_id)
+    }
 
     // Process document in background
     processDocumentInBackground(supabase, evaluation.id, textContent, regulation)
@@ -150,6 +177,25 @@ serve(async (req) => {
     )
   }
 })
+
+function isContentValid(content: string): boolean {
+  // Check if content looks like binary/corrupted data
+  const binaryPattern = /[\x00-\x08\x0E-\x1F\x7F-\xFF]/g
+  const binaryCharCount = (content.match(binaryPattern) || []).length
+  const totalChars = content.length
+  
+  // If more than 20% of characters are binary, consider it corrupted
+  if (totalChars > 0 && (binaryCharCount / totalChars) > 0.2) {
+    return false
+  }
+  
+  // Check for minimum content length
+  if (content.trim().length < 50) {
+    return false
+  }
+  
+  return true
+}
 
 async function processDocumentInBackground(supabase: any, evaluationId: string, documentContent: string, regulation: any) {
   try {

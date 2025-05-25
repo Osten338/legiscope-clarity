@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -28,6 +27,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { DocumentExtractor } from "@/utils/documentExtractor";
+import { FileText, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface UploadDocumentDialogProps {
   open: boolean;
@@ -39,6 +41,8 @@ export const UploadDocumentDialog = ({
   onOpenChange,
 }: UploadDocumentDialogProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [extractionPreview, setExtractionPreview] = useState<string>("");
+  const [extractionError, setExtractionError] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const form = useForm({
@@ -61,6 +65,35 @@ export const UploadDocumentDialog = ({
     },
   });
 
+  const handleFileChange = async (file: File | null) => {
+    if (!file) {
+      setExtractionPreview("");
+      setExtractionError("");
+      return;
+    }
+
+    try {
+      const extracted = await DocumentExtractor.extractText(file);
+      
+      if (extracted.success) {
+        if (DocumentExtractor.validateExtractedContent(extracted.text)) {
+          setExtractionPreview(extracted.text.substring(0, 500) + (extracted.text.length > 500 ? "..." : ""));
+          setExtractionError("");
+          form.setValue("description", extracted.text);
+        } else {
+          setExtractionError("The extracted content appears to be corrupted. Please ensure the file is not password-protected or corrupted.");
+          setExtractionPreview("");
+        }
+      } else {
+        setExtractionError(extracted.error || "Failed to extract text from file");
+        setExtractionPreview("");
+      }
+    } catch (error) {
+      setExtractionError(`Error processing file: ${error.message}`);
+      setExtractionPreview("");
+    }
+  };
+
   const onSubmit = async (values: any) => {
     if (!values.file) {
       toast({
@@ -71,9 +104,17 @@ export const UploadDocumentDialog = ({
       return;
     }
 
+    if (extractionError) {
+      toast({
+        title: "Error",
+        description: "Please resolve the file extraction error before uploading",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
-      // First, get the current user
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -96,8 +137,8 @@ export const UploadDocumentDialog = ({
           file_path: filePath,
           document_type: values.documentType,
           regulation_id: values.regulationId || null,
-          description: values.description,
-          user_id: user.id // Add the user_id here
+          description: values.description || extractionPreview,
+          user_id: user.id
         });
 
       if (dbError) throw dbError;
@@ -105,10 +146,12 @@ export const UploadDocumentDialog = ({
       queryClient.invalidateQueries({ queryKey: ['compliance-documents'] });
       onOpenChange(false);
       form.reset();
+      setExtractionPreview("");
+      setExtractionError("");
 
       toast({
         title: "Success",
-        description: "Document uploaded successfully",
+        description: "Document uploaded and text extracted successfully",
       });
     } catch (error: any) {
       toast({
@@ -123,7 +166,7 @@ export const UploadDocumentDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Upload Document</DialogTitle>
         </DialogHeader>
@@ -138,7 +181,11 @@ export const UploadDocumentDialog = ({
                   <FormControl>
                     <Input
                       type="file"
-                      onChange={(e) => onChange(e.target.files?.[0])}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        onChange(file);
+                        handleFileChange(file);
+                      }}
                       accept=".pdf,.doc,.docx,.txt"
                     />
                   </FormControl>
@@ -146,6 +193,26 @@ export const UploadDocumentDialog = ({
                 </FormItem>
               )}
             />
+
+            {extractionError && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{extractionError}</AlertDescription>
+              </Alert>
+            )}
+
+            {extractionPreview && (
+              <Alert>
+                <FileText className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="font-medium mb-2">Text Preview (first 500 characters):</div>
+                  <div className="text-sm bg-gray-50 p-3 rounded border max-h-32 overflow-y-auto">
+                    {extractionPreview}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
             <FormField
               control={form.control}
               name="documentType"
@@ -199,10 +266,11 @@ export const UploadDocumentDialog = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>Extracted Text Content</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter a brief description of the document"
+                      placeholder="Text content will appear here after file selection"
+                      rows={6}
                       {...field}
                     />
                   </FormControl>
@@ -218,7 +286,7 @@ export const UploadDocumentDialog = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isUploading}>
+              <Button type="submit" disabled={isUploading || !!extractionError}>
                 {isUploading ? "Uploading..." : "Upload"}
               </Button>
             </div>

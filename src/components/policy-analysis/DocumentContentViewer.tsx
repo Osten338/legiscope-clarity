@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Download } from "lucide-react";
+import { ZoomIn, ZoomOut, Download, AlertTriangle, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DocumentExtractor } from "@/utils/documentExtractor";
 
 interface PolicyHighlight {
   id: string;
@@ -40,12 +42,23 @@ export const DocumentContentViewer = ({
 }: DocumentContentViewerProps) => {
   const [fontSize, setFontSize] = useState(14);
   const [selectedHighlight, setSelectedHighlight] = useState<PolicyHighlight | null>(null);
+  const [showContentError, setShowContentError] = useState(false);
 
-  const documentContent = documentProp.description || "Document content not available";
+  const documentContent = documentProp.description || "";
+  
+  // Check if content is corrupted or missing
+  const isContentValid = useMemo(() => {
+    if (!documentContent) return false;
+    return DocumentExtractor.validateExtractedContent(documentContent);
+  }, [documentContent]);
+
+  useEffect(() => {
+    setShowContentError(!isContentValid && documentContent.length > 0);
+  }, [isContentValid, documentContent]);
 
   // Create highlighted content with position-based highlighting
   const highlightedContent = useMemo(() => {
-    if (!highlights || highlights.length === 0) {
+    if (!isContentValid || !highlights || highlights.length === 0) {
       return [{ text: documentContent, type: 'normal' as const }];
     }
 
@@ -87,7 +100,7 @@ export const DocumentContentViewer = ({
     }
 
     return segments;
-  }, [documentContent, highlights]);
+  }, [documentContent, highlights, isContentValid]);
 
   const getHighlightStyle = (status: string) => {
     switch (status) {
@@ -117,6 +130,12 @@ export const DocumentContentViewer = ({
     a.download = `${documentProp.file_name}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleReprocess = () => {
+    // This would trigger a reprocessing of the document
+    // For now, we'll just refresh the page
+    window.location.reload();
   };
 
   return (
@@ -151,44 +170,70 @@ export const DocumentContentViewer = ({
               variant="outline"
               size="sm"
               onClick={downloadDocument}
+              disabled={!isContentValid}
             >
               <Download className="h-4 w-4" />
             </Button>
+            {showContentError && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReprocess}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
       
       <CardContent>
-        <ScrollArea className="h-[600px]">
-          <div 
-            className="prose max-w-none leading-relaxed"
-            style={{ fontSize: `${fontSize}px` }}
-          >
-            {highlightedContent.map((segment, index) => {
-              if (segment.type === 'normal') {
-                return (
-                  <span key={index} className="whitespace-pre-wrap">
-                    {segment.text}
-                  </span>
-                );
-              } else if (segment.highlight) {
-                return (
-                  <span
-                    key={index}
-                    className={`inline-block p-2 m-1 rounded cursor-pointer transition-all ${getHighlightStyle(segment.highlight.compliance_status)} ${
-                      selectedHighlight?.id === segment.highlight.id ? 'ring-2 ring-blue-500' : ''
-                    }`}
-                    onClick={() => handleHighlightClick(segment.highlight!)}
-                    title={`${segment.highlight.compliance_status.replace('_', ' ').toUpperCase()} - Click for details`}
-                  >
-                    {segment.text}
-                  </span>
-                );
-              }
-              return null;
-            })}
-          </div>
-        </ScrollArea>
+        {!documentContent ? (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              No document content available. The document may not have been processed yet or there was an error during upload.
+            </AlertDescription>
+          </Alert>
+        ) : showContentError ? (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              The document content appears to be corrupted or in an unsupported format. Please try re-uploading the document or use a different file format.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <ScrollArea className="h-[600px]">
+            <div 
+              className="prose max-w-none leading-relaxed"
+              style={{ fontSize: `${fontSize}px` }}
+            >
+              {highlightedContent.map((segment, index) => {
+                if (segment.type === 'normal') {
+                  return (
+                    <span key={index} className="whitespace-pre-wrap">
+                      {segment.text}
+                    </span>
+                  );
+                } else if (segment.highlight) {
+                  return (
+                    <span
+                      key={index}
+                      className={`inline-block p-2 m-1 rounded cursor-pointer transition-all ${getHighlightStyle(segment.highlight.compliance_status)} ${
+                        selectedHighlight?.id === segment.highlight.id ? 'ring-2 ring-blue-500' : ''
+                      }`}
+                      onClick={() => handleHighlightClick(segment.highlight!)}
+                      title={`${segment.highlight.compliance_status.replace('_', ' ').toUpperCase()} - Click for details`}
+                    >
+                      {segment.text}
+                    </span>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          </ScrollArea>
+        )}
       </CardContent>
     </Card>
   );
