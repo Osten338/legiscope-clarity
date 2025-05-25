@@ -70,131 +70,111 @@ export const useComplianceChecklist = () => {
           throw regulationsError;
         }
 
-        // Use Promise.all with map to process regulations in parallel
-        const regulationsWithItems = await Promise.all(
-          regulations.map(async (regulation) => {
-            // First, get all main checklist items (not subtasks) for this regulation
-            const { data: mainItems, error: mainItemsError } = await supabase
-              .from("checklist_items")
-              .select("*")
-              .eq("regulation_id", regulation.id)
-              .eq("is_subtask", false);
+        // Process regulations sequentially to avoid complex type mappings
+        const regulationsWithItems: RegulationType[] = [];
+        
+        for (const regulation of regulations) {
+          // First, get all main checklist items (not subtasks) for this regulation
+          const { data: mainItems, error: mainItemsError } = await supabase
+            .from("checklist_items")
+            .select("*")
+            .eq("regulation_id", regulation.id)
+            .eq("is_subtask", false);
 
-            if (mainItemsError) {
-              console.error(
-                `Error fetching main checklist items for regulation ${regulation.id}:`,
-                mainItemsError
-              );
-              return {
-                ...regulation,
-                checklist_items: [],
-              };
-            }
+          if (mainItemsError) {
+            console.error(`Error fetching main checklist items for regulation ${regulation.id}:`, mainItemsError);
+            continue;
+          }
 
-            // Get all subtasks for this regulation
-            const { data: subtasks, error: subtasksError } = await supabase
-              .from("checklist_items")
-              .select("*")
-              .eq("regulation_id", regulation.id)
-              .eq("is_subtask", true);
+          // Get all subtasks for this regulation
+          const { data: subtasks, error: subtasksError } = await supabase
+            .from("checklist_items")
+            .select("*")
+            .eq("regulation_id", regulation.id)
+            .eq("is_subtask", true);
 
-            if (subtasksError) {
-              console.error(
-                `Error fetching subtasks for regulation ${regulation.id}:`,
-                subtasksError
-              );
-            }
+          if (subtasksError) {
+            console.error(`Error fetching subtasks for regulation ${regulation.id}:`, subtasksError);
+          }
 
-            // Group subtasks by parent_id
-            const subtasksByParent: Record<string, RawChecklistItem[]> = {};
-            (subtasks || []).forEach((subtask: RawChecklistItem) => {
-              if (subtask.parent_id) {
-                if (!subtasksByParent[subtask.parent_id]) {
-                  subtasksByParent[subtask.parent_id] = [];
-                }
-                subtasksByParent[subtask.parent_id].push(subtask);
+          // Group subtasks by parent_id
+          const subtasksByParent: Record<string, RawChecklistItem[]> = {};
+          (subtasks || []).forEach((subtask: RawChecklistItem) => {
+            if (subtask.parent_id) {
+              if (!subtasksByParent[subtask.parent_id]) {
+                subtasksByParent[subtask.parent_id] = [];
               }
-            });
-
-            // Get user responses for these checklist items
-            const allItemIds = [
-              ...(mainItems || []).map(item => item.id),
-              ...(subtasks || []).map(subtask => subtask.id)
-            ];
-
-            const { data: responses, error: responsesError } = await supabase
-              .from("checklist_item_responses")
-              .select("*")
-              .eq("user_id", user.id)
-              .in("checklist_item_id", allItemIds);
-
-            if (responsesError) {
-              console.error(
-                `Error fetching responses for regulation ${regulation.id}:`,
-                responsesError
-              );
+              subtasksByParent[subtask.parent_id].push(subtask);
             }
+          });
 
-            // Map responses to checklist items
-            const itemsWithResponses: ChecklistItemType[] = (mainItems || []).map((item: RawChecklistItem) => {
-              const response = responses?.find(
-                (r) => r.checklist_item_id === item.id
-              );
-              
-              // Find subtasks for this main task
-              const itemSubtasks: SubtaskType[] = (subtasksByParent[item.id] || []).map(subtask => {
-                const subtaskResponse = responses?.find(
-                  (r) => r.checklist_item_id === subtask.id
-                );
-                
-                return {
-                  id: subtask.id,
-                  description: subtask.description,
-                  is_subtask: true,
-                  response: subtaskResponse
-                    ? {
-                        status: subtaskResponse.status as ResponseStatus,
-                        justification: subtaskResponse.justification,
-                      }
-                    : undefined,
-                } as SubtaskType;
-              });
+          // Get user responses for these checklist items
+          const allItemIds = [
+            ...(mainItems || []).map(item => item.id),
+            ...(subtasks || []).map(subtask => subtask.id)
+          ];
+
+          const { data: responses, error: responsesError } = await supabase
+            .from("checklist_item_responses")
+            .select("*")
+            .eq("user_id", user.id)
+            .in("checklist_item_id", allItemIds);
+
+          if (responsesError) {
+            console.error(`Error fetching responses for regulation ${regulation.id}:`, responsesError);
+          }
+
+          // Transform main items with their subtasks
+          const itemsWithResponses: ChecklistItemType[] = (mainItems || []).map((item: RawChecklistItem) => {
+            const response = responses?.find((r) => r.checklist_item_id === item.id);
+            
+            // Find subtasks for this main task
+            const itemSubtasks: SubtaskType[] = (subtasksByParent[item.id] || []).map(subtask => {
+              const subtaskResponse = responses?.find((r) => r.checklist_item_id === subtask.id);
               
               return {
-                id: item.id,
-                description: item.description,
-                importance: item.importance,
-                category: item.category,
-                estimated_effort: item.estimated_effort,
-                expert_verified: item.expert_verified,
-                task: item.task,
-                best_practices: item.best_practices,
-                department: item.department,
-                parent_id: item.parent_id,
-                is_subtask: false,
-                subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
-                response: response
-                  ? {
-                      status: response.status as ResponseStatus,
-                      justification: response.justification,
-                    }
-                  : undefined,
-              } as ChecklistItemType;
+                id: subtask.id,
+                description: subtask.description,
+                is_subtask: true,
+                response: subtaskResponse ? {
+                  status: subtaskResponse.status as ResponseStatus,
+                  justification: subtaskResponse.justification,
+                } : undefined,
+              };
             });
-
-            // Construct the regulation with its checklist items
-            const result: RegulationType = {
-              id: regulation.id,
-              name: regulation.name,
-              description: regulation.description,
-              motivation: regulation.motivation,
-              requirements: regulation.requirements,
-              checklist_items: itemsWithResponses || [],
+            
+            return {
+              id: item.id,
+              description: item.description,
+              importance: item.importance,
+              category: item.category,
+              estimated_effort: item.estimated_effort,
+              expert_verified: item.expert_verified,
+              task: item.task,
+              best_practices: item.best_practices,
+              department: item.department,
+              parent_id: item.parent_id,
+              is_subtask: false,
+              subtasks: itemSubtasks.length > 0 ? itemSubtasks : undefined,
+              response: response ? {
+                status: response.status as ResponseStatus,
+                justification: response.justification,
+              } : undefined,
             };
+          });
 
-            return result;
-          })
-        );
+          // Create the regulation object
+          const regulationWithItems: RegulationType = {
+            id: regulation.id,
+            name: regulation.name,
+            description: regulation.description,
+            motivation: regulation.motivation,
+            requirements: regulation.requirements,
+            checklist_items: itemsWithResponses,
+          };
+
+          regulationsWithItems.push(regulationWithItems);
+        }
 
         console.log("Fetched regulations with items:", regulationsWithItems);
         return regulationsWithItems;
