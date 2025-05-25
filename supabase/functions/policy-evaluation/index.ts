@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders } from "../shared/cors.ts"
 import { ComplianceEvaluationEngine, EvaluationContext } from "./evaluationPrompts.ts"
@@ -99,11 +100,14 @@ serve(async (req) => {
       .single()
 
     if (evalError) {
+      console.error('Failed to create evaluation record:', evalError)
       return new Response(
         JSON.stringify({ error: 'Failed to create evaluation record' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Created evaluation record:', evaluation.id)
 
     // Get document content - prioritize provided content, then stored description
     let textContent = documentContent || document.description
@@ -148,6 +152,8 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Document content length:', textContent.length)
 
     // If document content wasn't stored, update it
     if (!document.description && textContent) {
@@ -199,6 +205,8 @@ function isContentValid(content: string): boolean {
 
 async function processDocumentInBackground(supabase: any, evaluationId: string, documentContent: string, regulation: any) {
   try {
+    console.log('Starting background processing for evaluation:', evaluationId)
+    
     // Initialize AI engines
     const evaluationEngine = new ComplianceEvaluationEngine()
     const articleMapper = new ArticleReferenceMapper()
@@ -206,6 +214,7 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
 
     // Chunk the document into analyzable sections with precise positioning
     const chunks = chunkDocumentWithPrecisePositions(documentContent)
+    console.log('Created', chunks.length, 'chunks for analysis')
     
     let compliantSections = 0
     let nonCompliantSections = 0
@@ -214,7 +223,10 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
     const highlights: any[] = []
 
     // Process each chunk with enhanced AI evaluation
-    for (const chunk of chunks) {
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i]
+      console.log(`Processing chunk ${i + 1}/${chunks.length}:`, chunk.text.substring(0, 100) + '...')
+      
       try {
         const context: EvaluationContext = {
           regulation: {
@@ -231,6 +243,7 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
         }
 
         const evaluation = await evaluateChunkWithEnhancedAI(evaluationEngine, context)
+        console.log(`Chunk ${i + 1} evaluation result:`, evaluation.compliance_status)
         
         // Enhanced article reference mapping
         const enhancedReferences = articleMapper.enhanceReferences(
@@ -255,7 +268,7 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
         }
 
         // Create enhanced highlight record with precise positioning
-        highlights.push({
+        const highlight = {
           evaluation_id: evaluationId,
           section_text: chunk.text,
           section_start_position: chunk.startPosition,
@@ -269,9 +282,13 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
           ai_reasoning: evaluation.ai_reasoning,
           regulation_excerpt: evaluation.regulation_excerpt,
           priority_level: evaluation.priority_level
-        })
+        }
+        
+        highlights.push(highlight)
+        console.log('Created highlight for chunk', i + 1)
+        
       } catch (error) {
-        console.error('Failed to evaluate chunk:', error)
+        console.error(`Failed to evaluate chunk ${i + 1}:`, error)
         needsReviewSections++
         
         // Add fallback highlight
@@ -293,20 +310,33 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
       }
     }
 
+    console.log('Total highlights created:', highlights.length)
+
     // Insert all highlights in batches to avoid timeout
     if (highlights.length > 0) {
-      console.log(`Inserting ${highlights.length} highlights`)
-      const batchSize = 50
+      console.log(`Inserting ${highlights.length} highlights into database`)
+      const batchSize = 20
+      let insertedCount = 0
+      
       for (let i = 0; i < highlights.length; i += batchSize) {
         const batch = highlights.slice(i, i + batchSize)
-        const { error: insertError } = await supabase
+        console.log(`Inserting batch ${Math.floor(i/batchSize) + 1} with ${batch.length} highlights`)
+        
+        const { error: insertError, data: insertedData } = await supabase
           .from('policy_highlights')
           .insert(batch)
+          .select('id')
         
         if (insertError) {
           console.error('Error inserting highlight batch:', insertError)
+          throw insertError
+        } else {
+          insertedCount += insertedData?.length || 0
+          console.log(`Successfully inserted batch, total inserted: ${insertedCount}`)
         }
       }
+      
+      console.log(`Successfully inserted all ${insertedCount} highlights`)
     }
 
     // Calculate enhanced compliance metrics
@@ -330,8 +360,16 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
     const summary = assessor.generateComplianceSummary(metrics)
     const recommendations = assessor.generateDetailedRecommendations(highlights)
 
+    console.log('Calculated compliance score:', complianceScore)
+    console.log('Section counts:', {
+      compliant: compliantSections,
+      non_compliant: nonCompliantSections,
+      needs_review: needsReviewSections,
+      not_applicable: notApplicableSections
+    })
+
     // Update evaluation with enhanced results
-    await supabase
+    const { error: updateError } = await supabase
       .from('policy_evaluations')
       .update({
         status: 'completed',
@@ -345,19 +383,33 @@ async function processDocumentInBackground(supabase: any, evaluationId: string, 
         metadata: {
           risk_factors: riskFactors,
           priority_actions: priorityActions,
-          evaluation_engine_version: '3.1'
+          evaluation_engine_version: '3.2',
+          highlights_created: highlights.length,
+          processing_completed_at: new Date().toISOString()
         }
       })
       .eq('id', evaluationId)
 
-    console.log(`Policy evaluation completed for ${evaluationId}`)
+    if (updateError) {
+      console.error('Error updating evaluation:', updateError)
+      throw updateError
+    }
+
+    console.log(`Policy evaluation completed successfully for ${evaluationId}`)
 
   } catch (error) {
     console.error('Background processing error:', error)
     // Update evaluation status to failed
     await supabase
       .from('policy_evaluations')
-      .update({ status: 'failed' })
+      .update({ 
+        status: 'failed',
+        summary: `Processing failed: ${error.message}`,
+        metadata: {
+          error: error.message,
+          error_timestamp: new Date().toISOString()
+        }
+      })
       .eq('id', evaluationId)
   }
 }
@@ -366,27 +418,37 @@ function chunkDocumentWithPrecisePositions(content: string): EvaluationChunk[] {
   const chunks: EvaluationChunk[] = []
   
   // Enhanced chunking with precise character position tracking
-  const paragraphs = content.split(/\n\s*\n/).filter(section => section.trim().length > 30)
+  // Split by double newlines first to get paragraphs
+  const sections = content.split(/\n\s*\n/).filter(section => section.trim().length > 20)
   let currentPosition = 0
   
-  for (const paragraph of paragraphs) {
+  for (const section of sections) {
+    const trimmedSection = section.trim()
+    if (trimmedSection.length < 20) continue
+    
     // Find the exact start position in the original content
-    const startPosition = content.indexOf(paragraph.trim(), currentPosition)
-    const endPosition = startPosition + paragraph.trim().length
+    const startPosition = content.indexOf(trimmedSection, currentPosition)
+    if (startPosition === -1) {
+      // Fallback: use current position if exact match not found
+      currentPosition += trimmedSection.length + 2 // account for newlines
+      continue
+    }
+    
+    const endPosition = startPosition + trimmedSection.length
     
     // Determine section type based on content patterns
     let sectionType: EvaluationChunk['sectionType'] = 'paragraph'
     
-    if (/^\d+\.\s|\bChapter\s+\d+|\bSection\s+\d+/i.test(paragraph)) {
+    if (/^\d+\.\s|\bChapter\s+\d+|\bSection\s+\d+/i.test(trimmedSection)) {
       sectionType = 'section'
-    } else if (/^[A-Z][^.]*:|\b(ARTICLE|Article)\s+\d+/i.test(paragraph)) {
+    } else if (/^[A-Z][^.]*:|\b(ARTICLE|Article)\s+\d+/i.test(trimmedSection)) {
       sectionType = 'clause'
-    } else if (/\bchapter\b/i.test(paragraph)) {
+    } else if (/\bchapter\b/i.test(trimmedSection)) {
       sectionType = 'chapter'
     }
     
     chunks.push({
-      text: paragraph.trim(),
+      text: trimmedSection,
       startPosition: Math.max(0, startPosition),
       endPosition: Math.min(content.length, endPosition),
       sectionType
@@ -395,10 +457,38 @@ function chunkDocumentWithPrecisePositions(content: string): EvaluationChunk[] {
     currentPosition = endPosition
   }
   
+  // If no chunks were created (e.g., no double newlines), fall back to simple paragraph splitting
+  if (chunks.length === 0) {
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 50)
+    let position = 0
+    
+    for (const sentence of sentences) {
+      const trimmed = sentence.trim()
+      if (trimmed.length > 50) {
+        const start = content.indexOf(trimmed, position)
+        const end = start + trimmed.length
+        
+        chunks.push({
+          text: trimmed,
+          startPosition: Math.max(0, start),
+          endPosition: Math.min(content.length, end),
+          sectionType: 'paragraph'
+        })
+        
+        position = end
+      }
+    }
+  }
+  
+  console.log(`Created ${chunks.length} chunks from document of ${content.length} characters`)
   return chunks
 }
 
 async function evaluateChunkWithEnhancedAI(engine: ComplianceEvaluationEngine, context: EvaluationContext) {
+  if (!openAIApiKey) {
+    throw new Error('OpenAI API key not configured')
+  }
+
   const prompt = engine.generateEvaluationPrompt(context)
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -408,7 +498,7 @@ async function evaluateChunkWithEnhancedAI(engine: ComplianceEvaluationEngine, c
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.1,
       max_tokens: 2000
@@ -416,11 +506,17 @@ async function evaluateChunkWithEnhancedAI(engine: ComplianceEvaluationEngine, c
   })
 
   if (!response.ok) {
+    const errorText = await response.text()
+    console.error('OpenAI API error:', response.status, errorText)
     throw new Error(`OpenAI API error: ${response.statusText}`)
   }
 
   const data = await response.json()
   const content = data.choices[0]?.message?.content
+
+  if (!content) {
+    throw new Error('No content received from OpenAI')
+  }
 
   try {
     const parsedResponse = JSON.parse(content)
@@ -429,6 +525,7 @@ async function evaluateChunkWithEnhancedAI(engine: ComplianceEvaluationEngine, c
     if (validatedResponse) {
       return validatedResponse
     } else {
+      console.error('Invalid AI response format:', parsedResponse)
       return engine.generateFallbackEvaluation('Invalid AI response format')
     }
   } catch (error) {
