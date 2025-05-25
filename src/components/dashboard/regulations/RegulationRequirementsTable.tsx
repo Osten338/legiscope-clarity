@@ -74,12 +74,15 @@ export const RegulationRequirementsTable = ({
         if (regulation && regulation.regulations) {
           console.log("Fetching checklist items for regulation:", regulation.regulations.id);
           
-          // First fetch parent checklist items (not subtasks)
-          const { data: mainItems, error: mainError } = await supabase
+          // First fetch parent checklist items (not subtasks) - using explicit typing
+          const mainItemsQuery = await supabase
             .from("checklist_items")
             .select("id, description, importance, category, estimated_effort, expert_verified, task, best_practices, department, parent_id, is_subtask, regulation_id")
             .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", false) as { data: DbChecklistItem[] | null; error: any };
+            .eq("is_subtask", false);
+          
+          const mainItems: DbChecklistItem[] | null = mainItemsQuery.data;
+          const mainError = mainItemsQuery.error;
             
           if (mainError) {
             console.error("Error fetching main checklist items:", mainError);
@@ -88,12 +91,15 @@ export const RegulationRequirementsTable = ({
           
           console.log("Main items fetched:", mainItems);
           
-          // Fetch subtasks in a separate query
-          const { data: subtaskItems, error: subtaskError } = await supabase
+          // Fetch subtasks in a separate query - using explicit typing
+          const subtaskQuery = await supabase
             .from("checklist_items")
             .select("id, description, parent_id, is_subtask")
             .eq("regulation_id", regulation.regulations.id)
-            .eq("is_subtask", true) as { data: DbChecklistItem[] | null; error: any };
+            .eq("is_subtask", true);
+          
+          const subtaskItems: DbChecklistItem[] | null = subtaskQuery.data;
+          const subtaskError = subtaskQuery.error;
             
           if (subtaskError) {
             console.error("Error fetching subtasks:", subtaskError);
