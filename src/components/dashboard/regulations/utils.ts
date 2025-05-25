@@ -22,12 +22,9 @@ export const getImportanceBadge = (importance?: number | null) => {
     5: "High",
   };
   
-  return (
-    <Badge 
-      variant="outline" 
-      className={colors[importance as keyof typeof colors]}
-    >
-      {labels[importance as keyof typeof labels]}
-    </Badge>
-  );
+  return {
+    variant: "outline" as const,
+    className: colors[importance as keyof typeof colors],
+    label: labels[importance as keyof typeof labels]
+  };
 };

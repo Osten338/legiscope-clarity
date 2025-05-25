@@ -19,6 +19,8 @@ export const RequirementTableRow = ({
   isExpanded,
   onToggle,
 }: RequirementTableRowProps) => {
+  const importanceBadgeConfig = getImportanceBadge(item.importance);
+
   return (
     <>
       <TableRow 
@@ -35,7 +37,14 @@ export const RequirementTableRow = ({
         </TableCell>
         <TableCell className="font-medium">
           <div className="flex items-center gap-2">
-            {getImportanceBadge(item.importance)}
+            {importanceBadgeConfig && (
+              <Badge 
+                variant={importanceBadgeConfig.variant}
+                className={importanceBadgeConfig.className}
+              >
+                {importanceBadgeConfig.label}
+              </Badge>
+            )}
             {item.expert_verified && (
               <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
                 <Check className="h-3 w-3 mr-1" />
