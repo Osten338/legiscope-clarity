@@ -3,7 +3,7 @@ import { TopbarLayout } from "@/components/dashboard/new-ui";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChecklistTabs } from "@/components/compliance/ChecklistTabs";
-import { useComplianceChecklist } from "@/hooks/useComplianceChecklist";
+import { useComplianceChecklist } from "@/hooks/compliance";
 
 const ComplianceChecklist = () => {
   const {
