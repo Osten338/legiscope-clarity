@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Loader2 } from "lucide-react";
@@ -74,10 +73,11 @@ export const PolicyAnalysisContent = ({
   const renderDocumentViewer = () => {
     if (!selectedRegulation) {
       return (
-        <Card className="h-full flex items-center justify-center">
-          <CardContent className="text-center">
-            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Select a regulation to begin policy analysis</p>
+        <Card className="h-full flex items-center justify-center bg-white border-gray-200">
+          <CardContent className="text-center py-16">
+            <FileText className="h-16 w-16 text-gray-300 mx-auto mb-6" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Select a regulation to begin</h3>
+            <p className="text-gray-500">Choose a regulation from the dropdown above to start analyzing your policy document</p>
           </CardContent>
         </Card>
       );
@@ -85,12 +85,11 @@ export const PolicyAnalysisContent = ({
 
     if (evaluationLoading) {
       return (
-        <Card className="h-full flex items-center justify-center">
-          <CardContent>
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p>Loading analysis...</p>
-            </div>
+        <Card className="h-full flex items-center justify-center bg-white border-gray-200">
+          <CardContent className="text-center py-16">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-6 text-blue-600" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Analyzing document...</h3>
+            <p className="text-gray-500">This may take a few moments</p>
           </CardContent>
         </Card>
       );
@@ -98,15 +97,14 @@ export const PolicyAnalysisContent = ({
 
     if (!evaluationData) {
       return (
-        <Card className="h-full flex items-center justify-center">
-          <CardContent>
-            <div className="text-center">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">No analysis found for this regulation.</p>
-              <Button onClick={onStartAnalysis}>
-                Start Analysis
-              </Button>
-            </div>
+        <Card className="h-full flex items-center justify-center bg-white border-gray-200">
+          <CardContent className="text-center py-16">
+            <FileText className="h-16 w-16 text-gray-300 mx-auto mb-6" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No analysis found</h3>
+            <p className="text-gray-500 mb-6">No analysis exists for this regulation yet</p>
+            <Button onClick={onStartAnalysis} className="bg-blue-600 hover:bg-blue-700">
+              Start Analysis
+            </Button>
           </CardContent>
         </Card>
       );
@@ -133,7 +131,7 @@ export const PolicyAnalysisContent = ({
       )}
 
       {/* Document Viewer */}
-      <div className="h-[800px]">
+      <div className="h-[calc(100vh-200px)] min-h-[600px]">
         {renderDocumentViewer()}
       </div>
     </div>

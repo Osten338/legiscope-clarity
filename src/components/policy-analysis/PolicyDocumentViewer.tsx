@@ -46,7 +46,7 @@ export const PolicyDocumentViewer = ({
 
   const handleNavigateToHighlight = (highlight: PolicyHighlight) => {
     setSelectedHighlight(highlight);
-    // Scroll to highlight position (you could enhance this with smooth scrolling)
+    // Scroll to highlight position with smooth scrolling
     const element = window.document.querySelector(`[data-highlight-id="${highlight.id}"]`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -54,9 +54,9 @@ export const PolicyDocumentViewer = ({
   };
 
   return (
-    <div className="flex h-full gap-4">
+    <div className="flex h-full gap-6 bg-gray-50">
       {/* Document Content with Highlights */}
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <DocumentContentViewer
           document={documentProp}
           highlights={highlights}
@@ -67,7 +67,7 @@ export const PolicyDocumentViewer = ({
       </div>
 
       {/* Analysis Details Panel */}
-      <div className="w-96">
+      <div className="w-96 flex-shrink-0">
         <AnalysisDetailsPanel
           selectedHighlight={selectedHighlight}
           allHighlights={highlights}

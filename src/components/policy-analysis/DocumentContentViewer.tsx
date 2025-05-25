@@ -112,13 +112,13 @@ export const DocumentContentViewer = ({
   const getHighlightStyle = (status: string) => {
     switch (status) {
       case 'compliant':
-        return 'bg-green-200 border-l-4 border-green-500 hover:bg-green-300';
+        return 'bg-green-100 border-l-2 border-green-400 hover:bg-green-200 text-green-900';
       case 'non_compliant':
-        return 'bg-red-200 border-l-4 border-red-500 hover:bg-red-300';
+        return 'bg-red-100 border-l-2 border-red-400 hover:bg-red-200 text-red-900';
       case 'needs_review':
-        return 'bg-yellow-200 border-l-4 border-yellow-500 hover:bg-yellow-300';
+        return 'bg-yellow-100 border-l-2 border-yellow-400 hover:bg-yellow-200 text-yellow-900';
       case 'not_applicable':
-        return 'bg-gray-200 border-l-4 border-gray-500 hover:bg-gray-300';
+        return 'bg-gray-100 border-l-2 border-gray-400 hover:bg-gray-200 text-gray-900';
       default:
         return 'bg-gray-100';
     }
@@ -221,57 +221,68 @@ export const DocumentContentViewer = ({
   };
 
   return (
-    <Card className="h-full">
-      <CardHeader>
+    <div className="h-full bg-white border border-gray-200 rounded-lg shadow-sm">
+      {/* Document Header */}
+      <div className="border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <span>{documentProp.file_name}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <h3 className="text-lg font-semibold text-gray-900">{documentProp.file_name}</h3>
+            </div>
             {selectedRegulation && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                 vs {selectedRegulation.name}
               </Badge>
             )}
-          </CardTitle>
+          </div>
+          
+          {/* Document Controls */}
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setFontSize(Math.max(10, fontSize - 2))}
+              className="h-8 w-8 p-0"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
-            <span className="text-sm">{fontSize}px</span>
+            <span className="text-sm text-gray-600 min-w-[50px] text-center">{fontSize}px</span>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+              className="h-8 w-8 p-0"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
+            <div className="w-px h-6 bg-gray-200 mx-2"></div>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={downloadDocument}
               disabled={!isContentValid}
+              className="h-8 w-8 p-0"
             >
               <Download className="h-4 w-4" />
             </Button>
             {(showContentError || !isContentValid) && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={handleReprocess}
                 disabled={isReprocessing}
+                className="h-8 w-8 p-0"
               >
                 <RefreshCw className={`h-4 w-4 ${isReprocessing ? 'animate-spin' : ''}`} />
-                {isReprocessing ? 'Processing...' : 'Reprocess'}
               </Button>
             )}
           </div>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent>
+      {/* Document Content */}
+      <div className="flex-1 p-6">
         {!documentContent ? (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -299,30 +310,31 @@ export const DocumentContentViewer = ({
             </AlertDescription>
           </Alert>
         ) : (
-          <ScrollArea className="h-[600px]">
+          <ScrollArea className="h-[calc(100vh-280px)]">
             <div 
-              className="prose max-w-none leading-relaxed"
-              style={{ fontSize: `${fontSize}px` }}
+              className="prose prose-gray max-w-none leading-relaxed text-gray-800"
+              style={{ fontSize: `${fontSize}px`, lineHeight: '1.6' }}
             >
               {highlightedContent.map((segment, index) => {
                 if (segment.type === 'normal') {
                   return (
-                    <span key={index} className="whitespace-pre-wrap">
+                    <span key={index} className="whitespace-pre-wrap break-words">
                       {segment.text}
                     </span>
                   );
                 } else if (segment.highlight) {
                   return (
-                    <span
+                    <mark
                       key={index}
-                      className={`inline-block p-2 m-1 rounded cursor-pointer transition-all ${getHighlightStyle(segment.highlight.compliance_status)} ${
-                        selectedHighlight?.id === segment.highlight.id ? 'ring-2 ring-blue-500' : ''
+                      className={`inline-block px-2 py-1 mx-0.5 my-0.5 rounded cursor-pointer transition-all duration-200 break-words ${getHighlightStyle(segment.highlight.compliance_status)} ${
+                        selectedHighlight?.id === segment.highlight.id ? 'ring-2 ring-blue-400 shadow-sm' : ''
                       }`}
                       onClick={() => handleHighlightClick(segment.highlight!)}
                       title={`${segment.highlight.compliance_status.replace('_', ' ').toUpperCase()} - Click for details`}
+                      data-highlight-id={segment.highlight.id}
                     >
                       {segment.text}
-                    </span>
+                    </mark>
                   );
                 }
                 return null;
@@ -330,7 +342,7 @@ export const DocumentContentViewer = ({
             </div>
           </ScrollArea>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
