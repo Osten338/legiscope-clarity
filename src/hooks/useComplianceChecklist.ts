@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ChecklistItemType, RawChecklistItem, ResponseStatus, SimpleSubtask } from "@/components/dashboard/types";
+import { ChecklistItemType, ResponseStatus, SimpleSubtask } from "@/components/dashboard/types";
 
 // Define RegulationType separately to avoid circular references
 export interface RegulationType {
@@ -45,7 +45,7 @@ export const useComplianceChecklist = () => {
           throw new Error("User not authenticated");
         }
         
-        // Fetch saved regulations first
+        // Get saved regulations
         const { data: savedRegs, error: savedError } = await supabase
           .from("saved_regulations")
           .select("regulation_id")
@@ -60,10 +60,9 @@ export const useComplianceChecklist = () => {
           return [];
         }
         
-        // Fetch regulations data with simplified query
         const regulationIds = savedRegs.map(r => r.regulation_id);
         
-        // Get regulations first
+        // Get regulations basic info
         const { data: regulationsData, error: regulationsError } = await supabase
           .from("regulations")
           .select("id, name, description, motivation, requirements")
@@ -79,66 +78,55 @@ export const useComplianceChecklist = () => {
           return [];
         }
 
-        // Process each regulation separately to avoid complex joins
+        // Process each regulation with simplified data handling
         const result: RegulationType[] = [];
         
         for (const regulation of regulationsData) {
           try {
-            // Get checklist items for this regulation
-            const { data: checklistItems, error: checklistError } = await supabase
+            // Get main checklist items
+            const { data: items } = await supabase
               .from("checklist_items")
               .select("*")
               .eq("regulation_id", regulation.id)
               .eq("is_subtask", false);
 
-            if (checklistError) {
-              console.error(`Error fetching checklist items for regulation ${regulation.id}:`, checklistError);
-              continue;
-            }
-
-            // Get subtasks separately
-            const { data: subtasks, error: subtasksError } = await supabase
+            // Get subtasks
+            const { data: subtasks } = await supabase
               .from("checklist_items")
               .select("*")
               .eq("regulation_id", regulation.id)
               .eq("is_subtask", true);
 
-            if (subtasksError) {
-              console.error(`Error fetching subtasks for regulation ${regulation.id}:`, subtasksError);
-            }
-
-            // Get responses
+            // Get responses for all items
             const allItemIds = [
-              ...(checklistItems || []).map(item => item.id),
+              ...(items || []).map(item => item.id),
               ...(subtasks || []).map(subtask => subtask.id)
             ];
 
             let responses: any[] = [];
             if (allItemIds.length > 0) {
-              const { data: responsesData, error: responsesError } = await supabase
+              const { data: responsesData } = await supabase
                 .from("checklist_item_responses")
                 .select("checklist_item_id, status, justification")
                 .eq("user_id", user.id)
                 .in("checklist_item_id", allItemIds);
 
-              if (responsesError) {
-                console.error(`Error fetching responses for regulation ${regulation.id}:`, responsesError);
-              } else {
-                responses = responsesData || [];
-              }
+              responses = responsesData || [];
             }
 
-            // Transform data with simpler type operations
-            const processedItems: ChecklistItemType[] = (checklistItems || []).map((item: any) => {
-              const response = responses.find((r: any) => r.checklist_item_id === item.id);
+            // Build processed items with simpler operations
+            const processedItems: ChecklistItemType[] = [];
+            
+            for (const item of items || []) {
+              const response = responses.find(r => r.checklist_item_id === item.id);
               
               // Find subtasks for this item
-              const itemSubtasks: SimpleSubtask[] = (subtasks || [])
-                .filter((subtask: any) => subtask.parent_id === item.id)
-                .map((subtask: any) => {
-                  const subtaskResponse = responses.find((r: any) => r.checklist_item_id === subtask.id);
+              const itemSubtasks: SimpleSubtask[] = [];
+              for (const subtask of subtasks || []) {
+                if (subtask.parent_id === item.id) {
+                  const subtaskResponse = responses.find(r => r.checklist_item_id === subtask.id);
                   
-                  return {
+                  itemSubtasks.push({
                     id: subtask.id,
                     description: subtask.description,
                     is_subtask: true as const,
@@ -146,10 +134,11 @@ export const useComplianceChecklist = () => {
                       status: subtaskResponse.status as ResponseStatus,
                       justification: subtaskResponse.justification,
                     } : undefined,
-                  };
-                });
+                  });
+                }
+              }
               
-              return {
+              processedItems.push({
                 id: item.id,
                 description: item.description,
                 importance: item.importance,
@@ -166,10 +155,9 @@ export const useComplianceChecklist = () => {
                   status: response.status as ResponseStatus,
                   justification: response.justification,
                 } : undefined,
-              };
-            });
+              });
+            }
 
-            // Create regulation object
             result.push({
               id: regulation.id,
               name: regulation.name,
@@ -180,7 +168,6 @@ export const useComplianceChecklist = () => {
             });
           } catch (itemError) {
             console.error(`Error processing regulation ${regulation.id}:`, itemError);
-            // Continue with other regulations even if one fails
             continue;
           }
         }
@@ -202,12 +189,10 @@ export const useComplianceChecklist = () => {
     }
   }, [userId, refetch]);
 
-  // Debug tab changes
   useEffect(() => {
     console.log("ComplianceChecklist: Active tab changed to:", activeTab);
   }, [activeTab]);
 
-  // Use a stable reference with useCallback
   const handleTabChange = useCallback((value: string) => {
     console.log("ComplianceChecklist: Tab change handler called with value:", value);
     setActiveTab(value);
