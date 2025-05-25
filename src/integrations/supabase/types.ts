@@ -520,6 +520,140 @@ export type Database = {
           },
         ]
       }
+      policy_evaluations: {
+        Row: {
+          compliant_sections: number | null
+          created_at: string
+          document_id: string
+          id: string
+          metadata: Json | null
+          needs_review_sections: number | null
+          non_compliant_sections: number | null
+          overall_compliance_score: number | null
+          recommendations: string | null
+          regulation_id: string
+          status: string
+          summary: string | null
+          total_sections_analyzed: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          compliant_sections?: number | null
+          created_at?: string
+          document_id: string
+          id?: string
+          metadata?: Json | null
+          needs_review_sections?: number | null
+          non_compliant_sections?: number | null
+          overall_compliance_score?: number | null
+          recommendations?: string | null
+          regulation_id: string
+          status?: string
+          summary?: string | null
+          total_sections_analyzed?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          compliant_sections?: number | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          metadata?: Json | null
+          needs_review_sections?: number | null
+          non_compliant_sections?: number | null
+          overall_compliance_score?: number | null
+          recommendations?: string | null
+          regulation_id?: string
+          status?: string
+          summary?: string | null
+          total_sections_analyzed?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_evaluations_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "policy_evaluations_regulation_id_fkey"
+            columns: ["regulation_id"]
+            isOneToOne: false
+            referencedRelation: "regulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_highlights: {
+        Row: {
+          ai_reasoning: string | null
+          article_references: string[] | null
+          compliance_status: string
+          confidence_score: number | null
+          created_at: string
+          evaluation_id: string
+          gap_analysis: string | null
+          id: string
+          metadata: Json | null
+          priority_level: number | null
+          regulation_excerpt: string | null
+          section_end_position: number | null
+          section_start_position: number | null
+          section_text: string
+          section_type: string | null
+          suggested_fixes: string | null
+        }
+        Insert: {
+          ai_reasoning?: string | null
+          article_references?: string[] | null
+          compliance_status: string
+          confidence_score?: number | null
+          created_at?: string
+          evaluation_id: string
+          gap_analysis?: string | null
+          id?: string
+          metadata?: Json | null
+          priority_level?: number | null
+          regulation_excerpt?: string | null
+          section_end_position?: number | null
+          section_start_position?: number | null
+          section_text: string
+          section_type?: string | null
+          suggested_fixes?: string | null
+        }
+        Update: {
+          ai_reasoning?: string | null
+          article_references?: string[] | null
+          compliance_status?: string
+          confidence_score?: number | null
+          created_at?: string
+          evaluation_id?: string
+          gap_analysis?: string | null
+          id?: string
+          metadata?: Json | null
+          priority_level?: number | null
+          regulation_excerpt?: string | null
+          section_end_position?: number | null
+          section_start_position?: number | null
+          section_text?: string
+          section_type?: string | null
+          suggested_fixes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_highlights_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "policy_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

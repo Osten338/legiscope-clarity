@@ -1,8 +1,9 @@
 
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Eye, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { Download, Trash2, Bot, Shield } from "lucide-react";
+import { useState } from "react";
+import { PolicyEvaluationDialog } from "./PolicyEvaluationDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,63 +29,74 @@ export const DocumentTableRow = ({
   onReview,
   onDelete,
 }: DocumentTableRowProps) => {
+  const [policyEvaluationOpen, setPolicyEvaluationOpen] = useState(false);
+
   return (
-    <TableRow>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground" />
-          <span>{document.file_name}</span>
-        </div>
-      </TableCell>
-      <TableCell>{document.document_type}</TableCell>
-      <TableCell>
-        {document.regulations?.name || "Not specified"}
-      </TableCell>
-      <TableCell>
-        {format(new Date(document.uploaded_at), "MMM d, yyyy")}
-      </TableCell>
-      <TableCell>
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onDownload(document)}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onReview(document)}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete this document? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={() => onDelete(document)}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </TableCell>
-    </TableRow>
+    <>
+      <TableRow>
+        <TableCell className="font-medium">{document.file_name}</TableCell>
+        <TableCell>{document.document_type}</TableCell>
+        <TableCell>
+          {document.regulations ? document.regulations.name : "None"}
+        </TableCell>
+        <TableCell>
+          {new Date(document.uploaded_at).toLocaleDateString()}
+        </TableCell>
+        <TableCell>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPolicyEvaluationOpen(true)}
+            >
+              <Shield className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onReview(document)}
+            >
+              <Bot className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onDownload(document)}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this document? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => onDelete(document)}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </TableCell>
+      </TableRow>
+      <PolicyEvaluationDialog
+        open={policyEvaluationOpen}
+        onOpenChange={setPolicyEvaluationOpen}
+        document={document}
+      />
+    </>
   );
 };

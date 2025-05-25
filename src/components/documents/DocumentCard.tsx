@@ -1,5 +1,4 @@
-
-import { FileText, Download, Trash2, Bot } from "lucide-react";
+import { FileText, Download, Trash2, Bot, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ReviewDocumentDialog } from "./ReviewDocumentDialog";
+import { PolicyEvaluationDialog } from "./PolicyEvaluationDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +27,7 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [policyEvaluationOpen, setPolicyEvaluationOpen] = useState(false);
 
   const handleDownload = async () => {
     try {
@@ -120,6 +121,15 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
           <Button
             variant="outline"
             size="sm"
+            className="gap-2 bg-white hover:bg-blue-50"
+            onClick={() => setPolicyEvaluationOpen(true)}
+          >
+            <Shield className="h-4 w-4" />
+            Policy Evaluation
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             className="gap-2 bg-white hover:bg-slate-50"
             onClick={() => setReviewDialogOpen(true)}
           >
@@ -169,6 +179,11 @@ export const DocumentCard = ({ document }: DocumentCardProps) => {
       <ReviewDocumentDialog 
         open={reviewDialogOpen}
         onOpenChange={setReviewDialogOpen}
+        document={document}
+      />
+      <PolicyEvaluationDialog
+        open={policyEvaluationOpen}
+        onOpenChange={setPolicyEvaluationOpen}
         document={document}
       />
     </Card>
