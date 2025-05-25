@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,8 @@ interface PolicyEvaluationDialogProps {
     file_name: string;
     description?: string;
   };
+  regulationId?: string;
+  onEvaluationComplete?: () => void;
 }
 
 // Define types for our policy evaluation data
@@ -34,8 +35,10 @@ export function PolicyEvaluationDialog({
   open,
   onOpenChange,
   document,
+  regulationId,
+  onEvaluationComplete,
 }: PolicyEvaluationDialogProps) {
-  const [selectedRegulation, setSelectedRegulation] = useState<string>("");
+  const [selectedRegulation, setSelectedRegulation] = useState<string>(regulationId || "");
   const [isEvaluating, setIsEvaluating] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -124,6 +127,11 @@ export function PolicyEvaluationDialog({
 
       queryClient.invalidateQueries({ queryKey: ['policy-evaluations'] });
       setSelectedRegulation("");
+      
+      // Call the completion callback if provided
+      if (onEvaluationComplete) {
+        onEvaluationComplete();
+      }
     } catch (error: any) {
       toast({
         title: "Evaluation Failed",
