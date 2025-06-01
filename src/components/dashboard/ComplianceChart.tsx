@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
@@ -16,12 +15,12 @@ export function ComplianceChart({ completedRegulations, totalRegulations }: Comp
   
   const data = [
     { name: 'Compliant', value: completedRegulations, color: '#10B981' }, // green
-    { name: 'Non-compliant', value: incompleteRegulations, color: '#F87171' } // red
+    { name: 'Non-compliant', value: incompleteRegulations, color: '#EF4444' } // red
   ].filter(item => item.value > 0); // Only show segments with values > 0
   
   const COLORS = [
     "#10B981", // green for compliant
-    "#F87171"  // red for non-compliant
+    "#EF4444"  // red for non-compliant
   ];
   
   return (
