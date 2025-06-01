@@ -1,9 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertTriangle, CheckCircle, Clock, Info, FileText } from "lucide-react";
-
 interface ComplianceSummaryProps {
   evaluation: {
     id: string;
@@ -20,7 +18,6 @@ interface ComplianceSummaryProps {
     name: string;
   };
 }
-
 export const ComplianceSummaryCard = ({
   evaluation,
   regulation
@@ -30,13 +27,11 @@ export const ComplianceSummaryCard = ({
     if (score >= 60) return "text-yellow-600";
     return "text-red-600";
   };
-
   const getScoreBgColor = (score: number) => {
     if (score >= 80) return "bg-green-100";
     if (score >= 60) return "bg-yellow-100";
     return "bg-red-100";
   };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
@@ -49,9 +44,7 @@ export const ComplianceSummaryCard = ({
         return <Badge variant="outline">{status}</Badge>;
     }
   };
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -67,18 +60,7 @@ export const ComplianceSummaryCard = ({
       
       <CardContent className="space-y-6">
         {/* Overall Score */}
-        <div className={`p-4 rounded-lg ${getScoreBgColor(evaluation.overall_compliance_score)}`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-medium">Overall Compliance Score</span>
-            <span className={`text-2xl font-bold ${getScoreColor(evaluation.overall_compliance_score)}`}>
-              {evaluation.overall_compliance_score}%
-            </span>
-          </div>
-          <Progress 
-            value={evaluation.overall_compliance_score} 
-            className="h-2"
-          />
-        </div>
+        
 
         {/* Section Breakdown */}
         <div className="grid grid-cols-2 gap-4">
@@ -128,25 +110,20 @@ export const ComplianceSummaryCard = ({
         </div>
 
         {/* Summary */}
-        {evaluation.summary && (
-          <div>
+        {evaluation.summary && <div>
             <h4 className="font-medium mb-2">Summary</h4>
             <p className="text-sm text-gray-600 leading-relaxed">
               {evaluation.summary}
             </p>
-          </div>
-        )}
+          </div>}
 
         {/* Recommendations */}
-        {evaluation.recommendations && (
-          <div>
+        {evaluation.recommendations && <div>
             <h4 className="font-medium mb-2">Key Recommendations</h4>
             <p className="text-sm text-gray-600 leading-relaxed">
               {evaluation.recommendations}
             </p>
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
