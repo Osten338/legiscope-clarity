@@ -31,7 +31,7 @@ function SidebarLink({ to, icon: Icon, children, active, subItem }: SidebarLinkP
     <Link
       to={to}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative",
+        "flex items-center gap-3 rounded-md px-3 py-2 text-lg font-medium transition-colors relative",
         subItem ? "pl-10" : "pl-3",
         active 
           ? "bg-primary/10 text-primary" 
@@ -85,7 +85,7 @@ export function DashboardSidebar({ open, setOpen }: DashboardSidebarProps) {
               <button
                 onClick={() => setRepositoryOpen(!repositoryOpen)}
                 className={cn(
-                  "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "flex w-full items-center justify-between rounded-md px-3 py-2 text-lg font-medium transition-colors",
                   isActive("/repository") 
                     ? "bg-primary/10 text-primary" 
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"

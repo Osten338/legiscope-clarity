@@ -92,7 +92,7 @@ export function MainNavbar() {
       </div>
       <div className="flex-1 px-3 py-4">
         <div className="mb-4">
-          <h3 className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <h3 className="px-4 text-lg font-semibold text-muted-foreground uppercase tracking-wider">
             Main
           </h3>
           <nav className="flex flex-col gap-1 mt-2">
@@ -109,7 +109,7 @@ export function MainNavbar() {
         </div>
 
         <div>
-          <h3 className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <h3 className="px-4 text-lg font-semibold text-muted-foreground uppercase tracking-wider">
             Compliance Tools
           </h3>
           <nav className="flex flex-col gap-1 mt-2">
@@ -133,10 +133,10 @@ export function MainNavbar() {
               <Package className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium">
+              <p className="text-lg font-medium">
                 Compliance Hub
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-lg text-muted-foreground">
                 v1.2.0
               </p>
             </div>
